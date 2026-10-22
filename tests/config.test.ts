@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import {
 	HERO_SITE_ID,
 	heroOrigin,
+	hostConfig,
 	toCabnConfig,
 	validateConfig,
 } from "../scripts/lib/cabnAdapter.ts";
@@ -112,6 +113,35 @@ describe("toCabnConfig with showcase support (0.2.0)", () => {
 		);
 		expect(Object.keys(config.previews as object)).toEqual(["b.md", "c.md"]);
 		expect(warnings).toEqual([expect.stringContaining("a.md dropped")]);
+	});
+});
+
+describe("hostConfig (0.2.0 injection)", () => {
+	it("carries world info, the hero site and the complete allowlist, nothing from the repo", () => {
+		expect(hostConfig(project)).toEqual({
+			cabnConfigVersion: 1,
+			allowedEmbedOrigins: ["https://sebastianfrazier26.github.io"],
+			world: {
+				title: "skID case study",
+				description: "A case study.",
+				links: project.links,
+				order: 70,
+			},
+			sites: [
+				{
+					id: HERO_SITE_ID,
+					title: "skID case study — live site",
+					url: "https://sebastianfrazier26.github.io/skid-case-study/",
+					hero: true,
+				},
+			],
+		});
+	});
+
+	it("gives a project without a live hero an explicit empty allowlist", () => {
+		const config = hostConfig({ ...project, hero: null });
+		expect(config.allowedEmbedOrigins).toEqual([]);
+		expect(config.sites).toBeUndefined();
 	});
 });
 

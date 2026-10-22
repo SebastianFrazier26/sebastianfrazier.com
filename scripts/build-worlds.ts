@@ -19,8 +19,8 @@ import { parseArgs } from "node:util";
 import {
 	buildShelf,
 	buildWorld,
-	collectEmbedOrigins,
 	detectCapabilities,
+	worldEmbedOrigins,
 } from "./lib/cabnAdapter.ts";
 import { makeExcluder } from "./lib/excludes.ts";
 import { downloadAndExtract, resolveSha } from "./lib/github.ts";
@@ -121,8 +121,15 @@ async function main(): Promise<void> {
 	const offline = args.offline || args.fixture;
 	const caps = detectCapabilities();
 	console.log(
-		`cabn ${caps.cliVersion} (showcase: ${caps.showcase ? "yes" : "no — world info and hero sites skipped"})`,
+		caps.injection
+			? `cabn ${caps.cliVersion}: config injection, world info and hero sites`
+			: caps.showcase
+				? `cabn ${caps.cliVersion}: schema has showcase fields but no injection API — rebuild the linked engine`
+				: `cabn ${caps.cliVersion}: legacy path, world info and hero sites skipped`,
 	);
+	if (caps.showcase && !caps.injection) {
+		throw new Error("half-upgraded engine: refusing to build");
+	}
 
 	const tempRoot = await realpath(await mkdtemp(join(tmpdir(), "sf-worlds-")));
 	const outRoot = join(tempRoot, "out");
@@ -166,8 +173,8 @@ async function main(): Promise<void> {
 			generatedAt: new Date().toISOString(),
 			fixture: args.fixture,
 			siteSha: await siteSha(),
-			engine: { cliVersion: caps.cliVersion, showcase: caps.showcase },
-			embedOrigins: collectEmbedOrigins(origins),
+			engine: { cliVersion: caps.cliVersion, showcase: caps.injection },
+			embedOrigins: await worldEmbedOrigins(worldDirs, origins, caps),
 			projects: deployed,
 		};
 		await writeFile(

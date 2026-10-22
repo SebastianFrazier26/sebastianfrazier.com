@@ -1,5 +1,18 @@
 # Changelog
 
+## 2026-10-22 (cabn 0.2.0 API)
+
+- With cabn 0.2.0 the site no longer writes into the extract: the host
+  config (world info, hero site, the complete embed allowlist) goes in
+  through `runBuild({ config })`, the repo's own `cabn.json` stays untouched,
+  and the engine's injection warnings are printed. A repo url preview
+  outside the allowlist fails that world and with it the whole deploy (the
+  live site stays as it was). The CSP `frame-src` comes from the engine's
+  `collectWorldEmbedOrigins` over the built worlds. 0.1.0 keeps the
+  previous path; a half-upgraded linked engine refuses to build.
+- Linking a local engine dedupes React, and the docs say how to keep pnpm
+  from silently undoing the link before every script.
+
 ## 2026-10-22 (security review)
 
 - Deploys run only from `main`. Project repos trigger instant updates with

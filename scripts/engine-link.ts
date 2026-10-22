@@ -39,7 +39,13 @@ if (mode === "link") {
 		copyFileSync("pnpm-lock.yaml.unlinked", "pnpm-lock.yaml");
 		rmSync("pnpm-lock.yaml.unlinked");
 	}
-	console.log(`linked @cabn/* to ${dir}; \`pnpm engine:unlink\` to undo`);
+	// pnpm re-syncs node_modules to the lockfile before running any script,
+	// which silently undoes the link; scripts must skip that check meanwhile.
+	console.log(
+		`linked @cabn/* to ${dir}; \`pnpm engine:unlink\` to undo.\n` +
+			"While linked, run scripts as `pnpm --config.verify-deps-before-run=false <script>` " +
+			"(or export npm_config_verify_deps_before_run=false), or pnpm will quietly relink npm's 0.1.0.",
+	);
 } else if (mode === "unlink") {
 	const env = { ...process.env };
 	delete env.CABN_ENGINE_DIR;

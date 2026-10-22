@@ -13,7 +13,7 @@ directly via type stripping), pnpm, TypeScript strict, Biome, Vitest, zod.
 - `pnpm build` — copies engine sprites, renders the résumé, typechecks, `vite build`, then `scripts/check-dist.ts`. Needs `public/worlds/manifest.json` (the CSP reads it)
 - `pnpm preview -- --port <free port>` — serve `dist/`
 - `pnpm upstream-changed` — scheduled-deploy decision (`DEPLOYED_MANIFEST_URL`, `GITHUB_TOKEN` env)
-- `pnpm engine:link [dir]` / `pnpm engine:unlink` — local cabn checkout via `.pnpmfile.cjs`; never leaves `link:` in the lockfile
+- `pnpm engine:link [dir]` / `pnpm engine:unlink` — local cabn checkout via `.pnpmfile.cjs`; never leaves `link:` in the lockfile. While linked, every pnpm script needs `--config.verify-deps-before-run=false` or pnpm silently relinks npm 0.1.0
 - Full check before a commit: `pnpm lint && pnpm typecheck && pnpm test && pnpm build:fixture && pnpm build`
 
 ## Layout

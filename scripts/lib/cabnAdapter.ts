@@ -1,9 +1,10 @@
 // The only module that talks to @cabn/cli and @cabn/world-schema. Everything
-// version-dependent about the engine lives here, so moving from 0.1.0 to the
-// 0.2.0 API (world info, site portals, shelf metadata, --name) is an edit to
-// this file and nothing else.
+// version-dependent about the engine lives here: 0.2.0's config injection,
+// world info, site portals and shelf metadata, with a 0.1.0 fallback that
+// can be deleted once 0.1.0 is no longer worth supporting.
 import { readFile, writeFile } from "node:fs/promises";
 import { join } from "node:path";
+import * as cli from "@cabn/cli";
 import { runBuild, runShelf } from "@cabn/cli";
 import * as worldSchema from "@cabn/world-schema";
 import { installedCliVersion } from "./cabnVersion.ts";
@@ -12,6 +13,8 @@ import type { Project } from "./projects.ts";
 export interface CabnCapabilities {
 	/** cabn.json accepts `world` and `sites` (0.2.0+): title/description/links/order and web-portal heroes. */
 	showcase: boolean;
+	/** runBuild({ config }) injection and collectWorldEmbedOrigins (0.2.0+). */
+	injection: boolean;
 	/** The installed @cabn/cli version, for the deploy manifest. */
 	cliVersion: string;
 }
@@ -25,7 +28,17 @@ export function detectCapabilities(): CabnCapabilities {
 		world: { title: "probe" },
 		sites: [],
 	});
-	return { showcase: probe.success, cliVersion: installedCliVersion() };
+	// collectWorldEmbedOrigins shipped together with config injection; its
+	// presence is the probe for the build API, as the schema is for config.
+	const injection =
+		probe.success &&
+		typeof (cli as Record<string, unknown>).collectWorldEmbedOrigins ===
+			"function";
+	return {
+		showcase: probe.success,
+		injection,
+		cliVersion: installedCliVersion(),
+	};
 }
 
 export const HERO_SITE_ID = "live-site";
@@ -162,56 +175,94 @@ export interface BuiltWorld {
 }
 
 /**
- * Injects the config by overwriting cabn.json in the extract (a temp dir this
- * build owns). TODO(cabn 0.2.0): pass it as runBuild({ config }) instead once
- * that API is final; the effect is the same since the merge happened above.
+ * The host config for cabn 0.2.0's injection (runBuild({ config })): world
+ * info, the hero site and the COMPLETE embed allowlist. Under injection the
+ * engine ignores a repo cabn.json's own allowedEmbedOrigins/world/sites
+ * (warning about them) and merges the rest underneath; a repo url preview
+ * outside this list fails that world's build, and with it the deploy.
+ */
+export function hostConfig(project: Project): RepoConfig {
+	return toCabnConfig(project, null, { showcase: true }).config;
+}
+
+/**
+ * Two paths, chosen by detectCapabilities():
+ * - injection (0.2.0+): the repo's cabn.json is left untouched and the host
+ *   config is passed in. Fail closed: any engine error (e.g. a repo url
+ *   preview whose origin isn't allowed) rejects, naming the project.
+ * - legacy (0.1.0): no injection API, so a sanitized cabn.json is written
+ *   over the repo's in the extract (a temp dir this build owns), dropping
+ *   off-list url previews with a warning — on 0.1.0 nothing at all can be
+ *   allowed, so failing instead would make any url preview unbuildable.
  */
 export async function buildWorld(input: BuildWorldInput): Promise<BuiltWorld> {
 	const { project, sourceDir, outDir, caps } = input;
-	let repoConfig: RepoConfig | null = null;
-	try {
-		repoConfig = await readRepoConfig(sourceDir);
-	} catch (err) {
-		console.warn(
-			`[${project.id}] repo cabn.json unreadable, ignored: ${(err as Error).message}`,
+	let config: RepoConfig;
+	const warnings: string[] = [];
+	if (caps.injection) {
+		config = hostConfig(project);
+	} else {
+		let repoConfig: RepoConfig | null = null;
+		try {
+			repoConfig = await readRepoConfig(sourceDir);
+		} catch (err) {
+			warnings.push(
+				`repo cabn.json unreadable, ignored: ${(err as Error).message}`,
+			);
+		}
+		const injected = toCabnConfig(project, repoConfig, caps);
+		warnings.push(...injected.warnings);
+		config = injected.config;
+		try {
+			validateConfig(config);
+		} catch (err) {
+			// The repo's remaining settings are what failed (ours are
+			// schema-shaped by construction); build with ours alone.
+			warnings.push(
+				`repo cabn.json settings dropped: ${(err as Error).message.split("\n")[0]}`,
+			);
+			({ config } = toCabnConfig(project, null, caps));
+			validateConfig(config);
+		}
+		await writeFile(
+			join(sourceDir, "cabn.json"),
+			`${JSON.stringify(config, null, 2)}\n`,
 		);
 	}
-	const injected = toCabnConfig(project, repoConfig, caps);
-	const warnings = injected.warnings;
-	let config = injected.config;
-	try {
-		validateConfig(config);
-	} catch (err) {
-		// The repo's remaining settings are what failed (ours are schema-shaped
-		// by construction); build with the portfolio's config alone.
-		warnings.push(
-			`repo cabn.json settings dropped: ${(err as Error).message.split("\n")[0]}`,
-		);
-		({ config } = toCabnConfig(project, null, caps));
-		validateConfig(config);
-	}
-	for (const w of warnings) console.warn(`[${project.id}] ${w}`);
-	await writeFile(
-		join(sourceDir, "cabn.json"),
-		`${JSON.stringify(config, null, 2)}\n`,
-	);
 
-	const options: Parameters<typeof runBuild>[1] & { name?: string } = {
+	// Built untyped and cast once: `config` is absent from 0.1.0's
+	// BuildOptions and typed as the engine's own config input in 0.2.0, and
+	// this file has to typecheck against both.
+	const options: Record<string, unknown> = {
 		outDir,
 		history: false,
 		offline: input.offline,
-		// 0.2.0's --name; 0.1.0 ignores it and normalizeManifest covers it.
-		...(caps.showcase ? { name: project.name } : {}),
+		...(caps.injection ? { config } : {}),
 	};
-	const summary = await runBuild(sourceDir, options);
-	const allowedEmbedOrigins = await normalizeManifest(outDir, {
-		name: project.name,
-		// A private repo's name stays out of anything published.
-		source:
-			project.visibility === "public"
-				? `github:${project.repo}@${input.sha}`
-				: `project:${project.id}@${input.sha}`,
-	});
+	let summary: Awaited<ReturnType<typeof runBuild>>;
+	try {
+		summary = await runBuild(
+			sourceDir,
+			options as Parameters<typeof runBuild>[1],
+		);
+	} catch (err) {
+		throw new Error(`cabn build failed: ${(err as Error).message}`);
+	}
+	warnings.push(...summary.warnings.map((w) => `engine: ${w}`));
+	for (const w of warnings) console.warn(`[${project.id}] ${w}`);
+
+	// 0.2.0 already names the world from world.title and writes a path-free
+	// meta.source; 0.1.0 needs both rewritten.
+	const allowedEmbedOrigins = caps.injection
+		? await readAllowedOrigins(outDir)
+		: await normalizeManifest(outDir, {
+				name: project.name,
+				// A private repo's name stays out of anything published.
+				source:
+					project.visibility === "public"
+						? `github:${project.repo}@${input.sha}`
+						: `project:${project.id}@${input.sha}`,
+			});
 
 	let showcaseWritten = false;
 	try {
@@ -220,9 +271,9 @@ export async function buildWorld(input: BuildWorldInput): Promise<BuiltWorld> {
 	} catch {
 		showcaseWritten = false;
 	}
-	if (caps.showcase && config.sites && !showcaseWritten) {
-		console.warn(
-			`[${project.id}] engine schema accepts sites but the build wrote no showcase.json — is the linked converter built?`,
+	if (caps.injection && config.sites && !showcaseWritten) {
+		throw new Error(
+			"host config has sites but the build wrote no showcase.json",
 		);
 	}
 	return {
@@ -235,6 +286,37 @@ export async function buildWorld(input: BuildWorldInput): Promise<BuiltWorld> {
 			monsters: summary.monsters,
 		},
 	};
+}
+
+async function readAllowedOrigins(outDir: string): Promise<string[]> {
+	const manifest = worldSchema.validateManifest(
+		JSON.parse(await readFile(join(outDir, "world.json"), "utf8")),
+	) as { allowedEmbedOrigins?: string[] };
+	return manifest.allowedEmbedOrigins ?? [];
+}
+
+/** The site's own origin never belongs in frame-src (frame-ancestors 'none' anyway). */
+export const SITE_ORIGIN = "https://sebastianfrazier.com";
+
+/**
+ * The CSP frame-src: on 0.2.0 the engine's own collectWorldEmbedOrigins over
+ * the built bundles (it throws on a malformed entry, which fails the build —
+ * intended); on 0.1.0 the union of what buildWorld returned.
+ */
+export async function worldEmbedOrigins(
+	worldDirs: string[],
+	legacyOrigins: { allowedEmbedOrigins: string[] }[],
+	caps: CabnCapabilities,
+): Promise<string[]> {
+	if (caps.injection) {
+		const collect = (cli as Record<string, unknown>)
+			.collectWorldEmbedOrigins as (
+			dirs: readonly string[],
+			opts: { excludeOrigin?: string },
+		) => Promise<string[]>;
+		return collect(worldDirs, { excludeOrigin: SITE_ORIGIN });
+	}
+	return collectEmbedOrigins(legacyOrigins).filter((o) => o !== SITE_ORIGIN);
 }
 
 /**

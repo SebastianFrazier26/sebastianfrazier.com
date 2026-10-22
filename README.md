@@ -128,7 +128,11 @@ To try an unreleased engine locally: build it (`pnpm -r build` in the cabn
 checkout), then `pnpm engine:link ~/Developer/cabn-m9`. That points
 `node_modules/@cabn/*` at the checkout through `.pnpmfile.cjs`, driven by the
 `CABN_ENGINE_DIR` env var; `package.json` and `pnpm-lock.yaml` are left
-untouched. `pnpm engine:unlink` goes back to npm.
+untouched. While linked, run scripts with
+`pnpm --config.verify-deps-before-run=false <script>` (or export
+`npm_config_verify_deps_before_run=false`): otherwise pnpm re-syncs
+`node_modules` to the lockfile before the script and silently drops the
+link. `pnpm engine:unlink` goes back to npm.
 
 ## Owner setup (not done by any script)
 
