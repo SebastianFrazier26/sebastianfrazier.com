@@ -8,14 +8,32 @@ const LinkSchema = z.strictObject({
 	url: HttpsUrl,
 });
 
-// Globs are matched against repo-relative POSIX paths, so anything that could
-// climb out of the extract (or is absolute) is a config error, not a no-op.
+// gitignore-style patterns over repo-relative POSIX paths (see excludes.ts):
+// a leading "/" anchors to the repo root. Anything that could climb out of
+// the extract is a config error, not a no-op.
 const ExcludeGlob = z
 	.string()
 	.min(1)
-	.refine((g) => !g.startsWith("/") && !g.split("/").includes(".."), {
-		message: "must be repo-relative, without '..'",
-	});
+	.refine(
+		(g) => g !== "/" && !g.startsWith("//") && !g.split("/").includes(".."),
+		{
+			message: "must be a repo-relative pattern, without '..'",
+		},
+	);
+
+// Branch names only: a tag or SHA would never move, so the scheduled
+// upstream check (refs/heads/<ref>) could not see it change.
+const BranchName = z
+	.string()
+	.regex(/^[A-Za-z0-9._-]+(\/[A-Za-z0-9._-]+)*$/, "must be a branch name")
+	.refine(
+		(r) =>
+			!r.startsWith("refs/") &&
+			!r.includes("..") &&
+			!r.endsWith(".lock") &&
+			!/^[0-9a-f]{40}$/.test(r),
+		"must be a branch name, not a ref path, tag-like or SHA",
+	);
 
 export const HeroSchema = z.strictObject({
 	url: HttpsUrl,
@@ -33,7 +51,7 @@ export const ProjectSchema = z
 			.max(200)
 			.refine((n) => !/[/\\]/.test(n), "no path separators"),
 		repo: z.string().regex(/^[A-Za-z0-9-]+\/[A-Za-z0-9._-]+$/),
-		ref: z.string().regex(/^[A-Za-z0-9._/-]+$/),
+		ref: BranchName,
 		visibility: z.enum(["public", "private"]),
 		enabled: z.boolean(),
 		description: z.string().min(1).max(500),

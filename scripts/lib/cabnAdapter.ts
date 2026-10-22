@@ -2,11 +2,11 @@
 // version-dependent about the engine lives here, so moving from 0.1.0 to the
 // 0.2.0 API (world info, site portals, shelf metadata, --name) is an edit to
 // this file and nothing else.
-import { readFileSync } from "node:fs";
 import { readFile, writeFile } from "node:fs/promises";
 import { join } from "node:path";
 import { runBuild, runShelf } from "@cabn/cli";
 import * as worldSchema from "@cabn/world-schema";
+import { installedCliVersion } from "./cabnVersion.ts";
 import type { Project } from "./projects.ts";
 
 export interface CabnCapabilities {
@@ -25,14 +25,7 @@ export function detectCapabilities(): CabnCapabilities {
 		world: { title: "probe" },
 		sites: [],
 	});
-	return { showcase: probe.success, cliVersion: cliVersion() };
-}
-
-function cliVersion(): string {
-	// The package exports only its entry point, so package.json is found beside dist/.
-	const pkgUrl = new URL("../package.json", import.meta.resolve("@cabn/cli"));
-	return (JSON.parse(readFileSync(pkgUrl, "utf8")) as { version: string })
-		.version;
+	return { showcase: probe.success, cliVersion: installedCliVersion() };
 }
 
 export const HERO_SITE_ID = "live-site";
@@ -45,32 +38,72 @@ export function heroOrigin(project: Project): string | null {
 
 type RepoConfig = Record<string, unknown>;
 
+/** Fields the portfolio owns outright: a repo's own values are discarded, so an upstream repo can never widen what the site frames. Same policy cabn 0.2.0 applies to an injected config. */
+const OWNED_FIELDS = ["allowedEmbedOrigins", "world", "sites"] as const;
+
+export interface InjectedConfig {
+	config: RepoConfig;
+	warnings: string[];
+}
+
 /**
- * The cabn.json the build actually uses: the repo's own (if it has one) plus
- * what the portfolio injects. Pure, so the injected shape is unit-tested.
- * Without showcase support, `world`/`sites` are left out entirely — a 0.1.0
- * converter's strict schema would reject the whole world over them.
+ * The cabn.json the build actually uses. Pure, so it is unit-tested.
+ * - allowedEmbedOrigins, world and sites come only from projects.json;
+ * - the repo's other settings (guide, media caps, non-url previews...) stay;
+ * - a repo url preview whose origin the portfolio doesn't allow is dropped
+ *   with a warning rather than failing the build, so an upstream commit
+ *   can't take the whole site down.
+ * Without showcase support (0.1.0) there are no site portals, so no origin
+ * is allowed at all and `world`/`sites` are left out: 0.1.0's strict schema
+ * would reject the whole world over them.
  */
 export function toCabnConfig(
 	project: Project,
 	repoConfig: RepoConfig | null,
 	caps: Pick<CabnCapabilities, "showcase">,
-): RepoConfig {
+): InjectedConfig {
+	const warnings: string[] = [];
 	const base: RepoConfig = { ...(repoConfig ?? {}) };
-	const repoOrigins = Array.isArray(base.allowedEmbedOrigins)
-		? (base.allowedEmbedOrigins as string[])
-		: [];
-	// Without site portals nothing would frame the hero, so its origin would
-	// only widen the CSP.
+	for (const field of OWNED_FIELDS) {
+		if (field in base) {
+			warnings.push(
+				`repo cabn.json \`${field}\` ignored (owned by projects.json)`,
+			);
+			delete base[field];
+		}
+	}
 	const origin = caps.showcase ? heroOrigin(project) : null;
+	const allowed = origin ? [origin] : [];
+
+	if (base.previews && typeof base.previews === "object") {
+		const kept: Record<string, unknown> = {};
+		for (const [path, preview] of Object.entries(base.previews)) {
+			const p = preview as { kind?: unknown; url?: unknown };
+			if (p?.kind === "url") {
+				let previewOrigin: string | null = null;
+				try {
+					previewOrigin = new URL(String(p.url)).origin;
+				} catch {
+					previewOrigin = null;
+				}
+				if (!previewOrigin || !allowed.includes(previewOrigin)) {
+					warnings.push(
+						`url preview for ${path} dropped: ${String(p.url)} is not an allowed origin`,
+					);
+					continue;
+				}
+			}
+			kept[path] = preview;
+		}
+		base.previews = kept;
+	}
+
 	const config: RepoConfig = {
 		...base,
 		cabnConfigVersion: 1,
-		allowedEmbedOrigins: [
-			...new Set([...repoOrigins, ...(origin ? [origin] : [])]),
-		].sort(),
+		allowedEmbedOrigins: allowed,
 	};
-	if (!caps.showcase) return config;
+	if (!caps.showcase) return { config, warnings };
 
 	config.world = {
 		title: project.name,
@@ -78,9 +111,6 @@ export function toCabnConfig(
 		links: project.links,
 		order: project.order,
 	};
-	const repoSites = Array.isArray(base.sites)
-		? (base.sites as { id: string; hero?: boolean }[])
-		: [];
 	if (project.hero && origin) {
 		config.sites = [
 			{
@@ -89,15 +119,9 @@ export function toCabnConfig(
 				url: project.hero.url,
 				hero: true,
 			},
-			// The portfolio's hero wins; a repo's own sites stay, demoted.
-			...repoSites
-				.filter((s) => s.id !== HERO_SITE_ID)
-				.map(({ hero: _hero, ...rest }) => rest),
 		];
-	} else if (repoSites.length > 0) {
-		config.sites = repoSites;
 	}
-	return config;
+	return { config, warnings };
 }
 
 /** Validated at the boundary with the installed engine's own schema, so a bad merge fails here with a clear message rather than mid-conversion. */
@@ -138,15 +162,35 @@ export interface BuiltWorld {
 }
 
 /**
- * Injects the config by writing cabn.json into the extract (a temp dir this
- * build owns) rather than through 0.2.0's ConvertOptions.config: identical
- * effect on both engine versions, and no dependence on how the new option
- * merges with a repo's own file — that merge already happened above.
+ * Injects the config by overwriting cabn.json in the extract (a temp dir this
+ * build owns). TODO(cabn 0.2.0): pass it as runBuild({ config }) instead once
+ * that API is final; the effect is the same since the merge happened above.
  */
 export async function buildWorld(input: BuildWorldInput): Promise<BuiltWorld> {
 	const { project, sourceDir, outDir, caps } = input;
-	const config = toCabnConfig(project, await readRepoConfig(sourceDir), caps);
-	validateConfig(config);
+	let repoConfig: RepoConfig | null = null;
+	try {
+		repoConfig = await readRepoConfig(sourceDir);
+	} catch (err) {
+		console.warn(
+			`[${project.id}] repo cabn.json unreadable, ignored: ${(err as Error).message}`,
+		);
+	}
+	const injected = toCabnConfig(project, repoConfig, caps);
+	const warnings = injected.warnings;
+	let config = injected.config;
+	try {
+		validateConfig(config);
+	} catch (err) {
+		// The repo's remaining settings are what failed (ours are schema-shaped
+		// by construction); build with the portfolio's config alone.
+		warnings.push(
+			`repo cabn.json settings dropped: ${(err as Error).message.split("\n")[0]}`,
+		);
+		({ config } = toCabnConfig(project, null, caps));
+		validateConfig(config);
+	}
+	for (const w of warnings) console.warn(`[${project.id}] ${w}`);
 	await writeFile(
 		join(sourceDir, "cabn.json"),
 		`${JSON.stringify(config, null, 2)}\n`,
@@ -162,7 +206,11 @@ export async function buildWorld(input: BuildWorldInput): Promise<BuiltWorld> {
 	const summary = await runBuild(sourceDir, options);
 	const allowedEmbedOrigins = await normalizeManifest(outDir, {
 		name: project.name,
-		source: `github:${project.repo}@${input.sha}`,
+		// A private repo's name stays out of anything published.
+		source:
+			project.visibility === "public"
+				? `github:${project.repo}@${input.sha}`
+				: `project:${project.id}@${input.sha}`,
 	});
 
 	let showcaseWritten = false;

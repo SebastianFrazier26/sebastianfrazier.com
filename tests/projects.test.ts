@@ -72,7 +72,10 @@ describe("projects.json", () => {
 		["history: true", { history: true }],
 		["a non-https hero", { hero: { url: "http://x.dev/", status: "live" } }],
 		["an exclude that climbs out", { excludes: ["../etc"] }],
-		["an absolute exclude", { excludes: ["/etc/passwd"] }],
+		["a bare-slash exclude", { excludes: ["/"] }],
+		["a tag-like ref path", { ref: "refs/tags/v1" }],
+		["a SHA as ref", { ref: "a".repeat(40) }],
+		["a ref with ..", { ref: "a..b" }],
 		["a bad id", { id: "Has Spaces" }],
 		["a path in the name", { name: "a/b" }],
 		["an unknown field", { extra: 1 }],
@@ -80,6 +83,14 @@ describe("projects.json", () => {
 		expect(() => parseProjects(file([{ ...base, ...patch }]))).toThrow(
 			/Invalid projects.json/,
 		);
+	});
+
+	it("accepts a root-anchored exclude and a nested branch name", () => {
+		expect(() =>
+			parseProjects(
+				file([{ ...base, excludes: ["/build"], ref: "release/v2" }]),
+			),
+		).not.toThrow();
 	});
 
 	it("rejects duplicate ids", () => {

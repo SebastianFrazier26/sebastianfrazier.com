@@ -6,7 +6,8 @@
 # `railway up --no-gitignore`; .railwayignore keeps the rest out).
 #   docker build -t sebastianfrazier-com .
 
-FROM node:22-slim AS base
+# Pinned by digest like the Caddy stage; bump both deliberately.
+FROM node:22-slim@sha256:de170b39439eb0e5a3444ad7d60b015614a381e10fecae2e30ec9e735122f38d AS base
 RUN corepack enable
 WORKDIR /site
 
