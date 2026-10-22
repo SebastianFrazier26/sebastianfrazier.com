@@ -1,0 +1,85 @@
+name: Deploy
+
+# push/workflow_dispatch/repository_dispatch always rebuild; the schedule
+# rebuilds only when a project's upstream main moved past what the live
+# site's /worlds/manifest.json says it was built from. Everything no-ops
+# until the RAILWAY_TOKEN secret exists (README: "Owner setup").
+on:
+  push:
+    branches: [main]
+  workflow_dispatch: {}
+  repository_dispatch:
+    types: [project-updated]
+  schedule:
+    - cron: "*/30 * * * *"
+
+permissions:
+  contents: read
+
+# One deploy at a time; a queued run picks up whatever changed meanwhile.
+concurrency:
+  group: deploy
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      # Through env, not interpolated: an expression is pasted into the
+      # script text before the shell parses it.
+      - name: Check for RAILWAY_TOKEN
+        id: check
+        env:
+          RAILWAY_TOKEN: ${{ secrets.RAILWAY_TOKEN }}
+        run: |
+          if [ -z "$RAILWAY_TOKEN" ]; then
+            echo "RAILWAY_TOKEN is not set — skipping deploy. See README's 'Owner setup'."
+            echo "configured=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "configured=true" >> "$GITHUB_OUTPUT"
+          fi
+
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        if: steps.check.outputs.configured == 'true'
+      - uses: pnpm/action-setup@b906affcce14559ad1aafd4ab0e942779e9f58b1 # v4
+        if: steps.check.outputs.configured == 'true'
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+        if: steps.check.outputs.configured == 'true'
+        with:
+          node-version: 22
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+        if: steps.check.outputs.configured == 'true'
+
+      - name: Did any upstream change?
+        id: upstream
+        if: steps.check.outputs.configured == 'true'
+        env:
+          EVENT: ${{ github.event_name }}
+          GITHUB_TOKEN: ${{ secrets.PROJECTS_READ_TOKEN }}
+        run: |
+          if [ "$EVENT" = "schedule" ]; then
+            pnpm upstream-changed
+          else
+            echo "changed=true" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Build worlds from upstream
+        if: steps.upstream.outputs.changed == 'true'
+        env:
+          # A fine-grained, read-only token for private projects; the
+          # workflow's own token covers public repos (and the rate limit).
+          GITHUB_TOKEN: ${{ secrets.PROJECTS_READ_TOKEN || github.token }}
+        run: pnpm build:worlds
+      - name: Verify the site builds
+        if: steps.upstream.outputs.changed == 'true'
+        run: pnpm test && pnpm build
+      - name: Install Railway CLI
+        if: steps.upstream.outputs.changed == 'true'
+        run: npm install -g @railway/cli@5.63.1
+      - name: Deploy to Railway
+        if: steps.upstream.outputs.changed == 'true'
+        env:
+          RAILWAY_TOKEN: ${{ secrets.RAILWAY_TOKEN }}
+        # --no-gitignore: public/worlds/ is gitignored but is the payload.
+        run: railway up --ci --service portfolio --no-gitignore

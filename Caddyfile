@@ -1,0 +1,46 @@
+# Template for sebastianfrazier.com's static server (Dockerfile).
+# scripts/render-caddyfile.ts fills the Content-Security-Policy value from
+# csp-policy.ts at image build time, so the policy has one source.
+{
+	admin off
+	auto_https off
+	persist_config off
+}
+
+:{$PORT:8080} {
+	root * /srv
+	encode zstd gzip
+
+	header {
+		Content-Security-Policy "__SF_CSP__"
+		X-Content-Type-Options "nosniff"
+		X-Frame-Options "DENY"
+		Referrer-Policy "no-referrer"
+		Permissions-Policy "camera=(), microphone=(), geolocation=(), payment=(), usb=(), serial=(), hid=(), bluetooth=(), midi=()"
+		Strict-Transport-Security "max-age=31536000"
+		-Server
+	}
+
+	# Vite's content-hashed chunks sit directly in /assets/; the engine's
+	# sprites live in its subdirectories under fixed names and revalidate.
+	# worlds/ changes on every rebuild from upstream (every 30 minutes at
+	# most), so it gets a short shared cache instead of no-cache: a visitor
+	# walking a world fetches dozens of chunks.
+	@hashed path_regexp ^/assets/[^/]+-[A-Za-z0-9_-]{8}\.(?:js|mjs|css)$
+	@worlds path /worlds/*
+	@other {
+		not path_regexp ^/assets/[^/]+-[A-Za-z0-9_-]{8}\.(?:js|mjs|css)$
+		not path /worlds/*
+	}
+	header @hashed Cache-Control "public, max-age=31536000, immutable"
+	header @worlds Cache-Control "public, max-age=300, must-revalidate"
+	header @other Cache-Control "no-cache"
+
+	redir /resume /resume/ 308
+
+	# /play is a client-side route of the SPA; everything else is a file.
+	@spa path /play /play/
+	rewrite @spa /index.html
+
+	file_server
+}

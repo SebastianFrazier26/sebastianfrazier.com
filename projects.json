@@ -1,0 +1,158 @@
+{
+	"$comment": "The worlds on sebastianfrazier.com. Validated by scripts/lib/projects.ts; read by build-worlds, upstream-changed and the resume page.",
+	"shelfName": "Sebastian Frazier",
+	"defaultExcludes": [
+		"**/uv.lock",
+		"**/package-lock.json",
+		"**/pnpm-lock.yaml"
+	],
+	"projects": [
+		{
+			"id": "savimae",
+			"name": "SaViMAE",
+			"repo": "SebastianFrazier26/SaViMAE",
+			"ref": "main",
+			"visibility": "public",
+			"enabled": true,
+			"description": "Salient Object Detection for Video Masked Auto-Encoders.",
+			"links": [
+				{
+					"label": "Source on GitHub",
+					"url": "https://github.com/SebastianFrazier26/SaViMAE"
+				},
+				{
+					"label": "VideoMAE paper (arXiv)",
+					"url": "https://arxiv.org/abs/2203.12602"
+				}
+			],
+			"excludes": ["pretrain_list*.txt"],
+			"history": false,
+			"hero": {
+				"url": "https://sebastianfrazier26.github.io/SaViMAE/",
+				"status": "pending"
+			},
+			"order": 10
+		},
+		{
+			"id": "fansent",
+			"name": "MLB Fan Sentiment",
+			"repo": "SebastianFrazier26/mlb-fan-sentiment",
+			"ref": "main",
+			"visibility": "public",
+			"enabled": true,
+			"description": "Does fan sentiment predict next-week MLB player performance? Hierarchical Bayesian analysis of Reddit and news sentiment.",
+			"links": [
+				{
+					"label": "Source on GitHub",
+					"url": "https://github.com/SebastianFrazier26/mlb-fan-sentiment"
+				}
+			],
+			"excludes": ["data/"],
+			"history": false,
+			"hero": {
+				"url": "https://sebastianfrazier26.github.io/mlb-fan-sentiment/",
+				"status": "pending"
+			},
+			"order": 20
+		},
+		{
+			"id": "cabn",
+			"name": "cabn",
+			"repo": "SebastianFrazier26/cabn",
+			"ref": "main",
+			"visibility": "public",
+			"enabled": true,
+			"description": "Digital File Cabinet: turns a folder or repository into a walkable pixel-art world. This site runs on it.",
+			"links": [
+				{
+					"label": "Source on GitHub",
+					"url": "https://github.com/SebastianFrazier26/cabn"
+				}
+			],
+			"excludes": ["assets/generated/", "assets/source/"],
+			"history": false,
+			"hero": null,
+			"order": 30
+		},
+		{
+			"id": "loosy-goose",
+			"name": "loosy-goose",
+			"repo": "SebastianFrazier26/loosy-goose",
+			"ref": "main",
+			"visibility": "public",
+			"enabled": true,
+			"description": "Lossy text compression for LLM context compaction via eigen-dimension mapped semantic spaces.",
+			"links": [
+				{
+					"label": "Source on GitHub",
+					"url": "https://github.com/SebastianFrazier26/loosy-goose"
+				}
+			],
+			"excludes": ["data/", "experiments/output/"],
+			"history": false,
+			"hero": {
+				"url": "https://sebastianfrazier26.github.io/loosy-goose/",
+				"status": "pending"
+			},
+			"order": 40
+		},
+		{
+			"id": "safeascent",
+			"name": "SafeAscent",
+			"repo": "SebastianFrazier26/SafeAscent",
+			"ref": "main",
+			"visibility": "public",
+			"enabled": true,
+			"description": "Predictive analytics and safety computing for rock and ice climbing routes based on past accident reports and weather maps.",
+			"links": [
+				{
+					"label": "Source on GitHub",
+					"url": "https://github.com/SebastianFrazier26/SafeAscent"
+				}
+			],
+			"excludes": ["docs/superpowers/plans/"],
+			"history": false,
+			"hero": {
+				"url": "https://sebastianfrazier26.github.io/SafeAscent/",
+				"status": "pending"
+			},
+			"order": 50
+		},
+		{
+			"id": "famgo",
+			"name": "famgo",
+			"repo": "SebastianFrazier26/famgo",
+			"ref": "main",
+			"visibility": "private",
+			"enabled": false,
+			"description": "Family bingo app to stay in touch over long distances, with add/delete features, permission controls and daily board updates.",
+			"links": [],
+			"excludes": ["public/images/", "src/seed.js"],
+			"history": false,
+			"hero": null,
+			"order": 60
+		},
+		{
+			"id": "skid",
+			"name": "skID case study",
+			"repo": "SebastianFrazier26/skid-case-study",
+			"ref": "main",
+			"visibility": "public",
+			"enabled": true,
+			"description": "skID: a sketch-based authentication case study.",
+			"links": [
+				{
+					"label": "Source on GitHub",
+					"url": "https://github.com/SebastianFrazier26/skid-case-study"
+				}
+			],
+			"excludes": [],
+			"history": false,
+			"hero": {
+				"url": "https://sebastianfrazier26.github.io/skid-case-study/",
+				"status": "live"
+			},
+			"order": 70
+		}
+	]
+}

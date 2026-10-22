@@ -1,0 +1,17 @@
+# The deploy runs `railway up --no-gitignore` so the CI-built public/worlds/
+# (gitignored) is uploaded; everything else .gitignore would drop is listed
+# here instead.
+node_modules/
+dist/
+.git/
+.env
+.env.*
+!.env.example
+public/assets/
+public/resume/
+Caddyfile.rendered
+pnpm-lock.yaml.unlinked
+test-results/
+playwright-report/
+.DS_Store
+.claude/

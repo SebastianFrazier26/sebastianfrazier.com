@@ -1,0 +1,18 @@
+node_modules/
+dist/
+.env
+.env.*
+!.env.example
+*.tsbuildinfo
+.DS_Store
+.claude/
+
+# Generated at build time (scripts/build-worlds.ts, build-resume.ts,
+# copy-engine-assets.ts); never committed.
+public/worlds/
+public/resume/
+public/assets/
+Caddyfile.rendered
+pnpm-lock.yaml.unlinked
+test-results/
+playwright-report/

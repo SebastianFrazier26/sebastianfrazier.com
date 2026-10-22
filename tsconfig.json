@@ -1,0 +1,27 @@
+{
+	"compilerOptions": {
+		"target": "ES2023",
+		"lib": ["ES2023", "DOM", "DOM.Iterable"],
+		"module": "ESNext",
+		"moduleResolution": "bundler",
+		"types": ["node", "vite/client"],
+		"jsx": "react-jsx",
+		"strict": true,
+		"noUncheckedIndexedAccess": true,
+		"verbatimModuleSyntax": true,
+		"isolatedModules": true,
+		"erasableSyntaxOnly": true,
+		"allowImportingTsExtensions": true,
+		"noEmit": true,
+		"skipLibCheck": true,
+		"forceConsistentCasingInFileNames": true
+	},
+	"include": [
+		"src",
+		"scripts",
+		"tests",
+		"csp-policy.ts",
+		"vite.config.ts",
+		"vitest.config.ts"
+	]
+}
