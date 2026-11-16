@@ -1,5 +1,11 @@
 # Changelog
 
+## 2026-11-16
+
+- cabn's world now previews the hosted demo
+  (`https://cabn-demo-production.up.railway.app/`), which allows framing by
+  sebastianfrazier.com since cabn #20. `frame-src` gains that origin.
+
 ## 2026-10-22 (cabn 0.2.0 API)
 
 - With cabn 0.2.0 the site no longer writes into the extract: the host

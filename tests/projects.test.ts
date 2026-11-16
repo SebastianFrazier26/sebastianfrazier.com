@@ -52,9 +52,12 @@ describe("projects.json", () => {
 		).not.toContain("famgo");
 	});
 
-	it("gives cabn no hero: its demo refuses framing", async () => {
+	it("previews cabn through its hosted demo, which allows this site to frame it", async () => {
 		const cabn = (await loadProjects()).projects.find((p) => p.id === "cabn");
-		expect(cabn?.hero).toBeNull();
+		expect(cabn?.hero).toEqual({
+			url: "https://cabn-demo-production.up.railway.app/",
+			status: "live",
+		});
 	});
 
 	it("orders enabled projects by `order`", () => {
