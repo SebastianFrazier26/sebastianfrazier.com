@@ -210,8 +210,8 @@ importers:
   .:
     dependencies:
       "@cabn/engine":
-        specifier: 0.1.0
-        version: 0.1.0(@types/react@19.3.0)(react-dom@19.3.1(react@19.3.1))(react@19.3.1)
+        specifier: 0.2.0
+        version: 0.2.0(@types/react@19.3.0)(react-dom@19.3.1(react@19.3.1))(react@19.3.1)
       pdfjs-dist:
         specifier: 6.3.289
         version: 6.3.289
@@ -226,11 +226,11 @@ importers:
         specifier: ^2.5.14
         version: 2.6.2
       "@cabn/cli":
-        specifier: 0.1.0
-        version: 0.1.0(@types/react@19.3.0)
+        specifier: 0.2.0
+        version: 0.2.0(@types/react@19.3.0)
       "@cabn/world-schema":
-        specifier: 0.1.0
-        version: 0.1.0
+        specifier: 0.2.0
+        version: 0.2.0
       "@types/node":
         specifier: ^22.20.4
         version: 22.20.5
@@ -368,37 +368,37 @@ packages:
     cpu: [x64]
     os: [win32]
 
-  "@cabn/cli@0.1.0":
+  "@cabn/cli@0.2.0":
     resolution:
       {
-        integrity: sha512-YOFkEMdVEUZUTegHryTgdTjX6dr7SAuC9um12jBrE1uwlnieiNaYkBn3lCJtGkIGUVQnFLsyizZEBPH9UscD4g==,
+        integrity: sha512-NzdkGudY3zsDAahXedZ2V89RPQcJhCSkHq8BynPNaFT71czdTPWUWia+56LCEeiSRjCPg+FVy5IxTO+Usy3BTw==,
       }
     hasBin: true
     peerDependencies:
-      "@cabn/shadow-art": ^0.1.0
+      "@cabn/shadow-art": ^0.2.0
     peerDependenciesMeta:
       "@cabn/shadow-art":
         optional: true
 
-  "@cabn/converter@0.1.0":
+  "@cabn/converter@0.2.0":
     resolution:
       {
-        integrity: sha512-G9JrW7WE1kPcevw5hAxtKNcOMM0QT7bWlxT2TNV/jyWLsMpDWyVmac0uvcn2qUqbA0u/weJhCsKht6eoeG07mA==,
+        integrity: sha512-l4FdrsuWWl4ox580+twcTXwuSBVsJ95mpLS2Q+N+hQUpvI4sRQI+vy5X1rs8c9zGUD2PSPh4xjrsTzIU8Q+T+w==,
       }
 
-  "@cabn/engine@0.1.0":
+  "@cabn/engine@0.2.0":
     resolution:
       {
-        integrity: sha512-kHHFoDKLgAX5i8qIPf06Uw/kvQRG4OEmFu0mw+UUsiewCBBOPnRaBamG25EyNEhroZdd4huoVV82PtXVQXWu8Q==,
+        integrity: sha512-hR0Q5tFwCZDB5649Vhs/+A6LHNYTkEhHq6Y703d6qSLgGuFD1vdLNtDuG+SNNbfP+kSg9XsnDufwjZB7AMHtAA==,
       }
     peerDependencies:
       react: ">=18"
       react-dom: ">=18"
 
-  "@cabn/world-schema@0.1.0":
+  "@cabn/world-schema@0.2.0":
     resolution:
       {
-        integrity: sha512-e0/C10szBIOa/lEhtS8Ob32S4Vg7x/CkF3HQ+VJUk2irRJ+xDahy2Z19PSXaZvMM6bjRzQ5qXQxyNiD+WUgJ4A==,
+        integrity: sha512-oYI3z33Obr7wIBcQYskI4ZueqF8jfoE58j36vp6QX3iEtHXgrVX3fZoT/n6EWWm8HUZe5kuVda0nQ4JmsUTGGg==,
       }
 
   "@codemirror/autocomplete@6.20.4":
@@ -2184,11 +2184,11 @@ snapshots:
   "@biomejs/cli-win32-x64@2.6.2":
     optional: true
 
-  "@cabn/cli@0.1.0(@types/react@19.3.0)":
+  "@cabn/cli@0.2.0(@types/react@19.3.0)":
     dependencies:
-      "@cabn/converter": 0.1.0
-      "@cabn/engine": 0.1.0(@types/react@19.3.0)(react-dom@19.3.1(react@19.3.1))(react@19.3.1)
-      "@cabn/world-schema": 0.1.0
+      "@cabn/converter": 0.2.0
+      "@cabn/engine": 0.2.0(@types/react@19.3.0)(react-dom@19.3.1(react@19.3.1))(react@19.3.1)
+      "@cabn/world-schema": 0.2.0
       esbuild: 0.27.7
       isomorphic-git: 1.42.2
       react: 19.3.1
@@ -2199,9 +2199,9 @@ snapshots:
       - immer
       - use-sync-external-store
 
-  "@cabn/converter@0.1.0":
+  "@cabn/converter@0.2.0":
     dependencies:
-      "@cabn/world-schema": 0.1.0
+      "@cabn/world-schema": 0.2.0
       "@lezer/common": 1.5.2
       "@lezer/css": 1.3.8
       "@lezer/html": 1.3.13
@@ -2213,10 +2213,10 @@ snapshots:
       minisearch: 7.2.0
       zod: 4.6.7
 
-  "@cabn/engine@0.1.0(@types/react@19.3.0)(react-dom@19.3.1(react@19.3.1))(react@19.3.1)":
+  "@cabn/engine@0.2.0(@types/react@19.3.0)(react-dom@19.3.1(react@19.3.1))(react@19.3.1)":
     dependencies:
-      "@cabn/converter": 0.1.0
-      "@cabn/world-schema": 0.1.0
+      "@cabn/converter": 0.2.0
+      "@cabn/world-schema": 0.2.0
       "@codemirror/commands": 6.11.1
       "@codemirror/lang-css": 6.3.1
       "@codemirror/lang-html": 6.4.12
@@ -2244,7 +2244,7 @@ snapshots:
       - immer
       - use-sync-external-store
 
-  "@cabn/world-schema@0.1.0":
+  "@cabn/world-schema@0.2.0":
     dependencies:
       zod: 4.6.7
 
@@ -2321,7 +2321,7 @@ snapshots:
       "@codemirror/streamparser": 6.0.0
       "@codemirror/view": 6.43.15
       "@lezer/common": 1.5.3
-      "@lezer/highlight": 1.2.3
+      "@lezer/highlight": 1.2.5
       "@lezer/lr": 1.4.11
       style-mod: 4.1.4
 
@@ -2447,14 +2447,14 @@ snapshots:
 
   "@lezer/css@1.3.8":
     dependencies:
-      "@lezer/common": 1.5.2
+      "@lezer/common": 1.5.3
       "@lezer/highlight": 1.2.5
-      "@lezer/lr": 1.4.10
+      "@lezer/lr": 1.4.11
 
   "@lezer/css@1.3.9":
     dependencies:
       "@lezer/common": 1.5.3
-      "@lezer/highlight": 1.2.3
+      "@lezer/highlight": 1.2.5
       "@lezer/lr": 1.4.11
 
   "@lezer/highlight@1.2.3":
@@ -2463,35 +2463,35 @@ snapshots:
 
   "@lezer/highlight@1.2.5":
     dependencies:
-      "@lezer/common": 1.5.2
+      "@lezer/common": 1.5.3
 
   "@lezer/html@1.3.13":
     dependencies:
-      "@lezer/common": 1.5.2
+      "@lezer/common": 1.5.3
       "@lezer/highlight": 1.2.5
-      "@lezer/lr": 1.4.10
+      "@lezer/lr": 1.4.11
 
   "@lezer/javascript@1.5.5":
     dependencies:
-      "@lezer/common": 1.5.2
+      "@lezer/common": 1.5.3
       "@lezer/highlight": 1.2.5
-      "@lezer/lr": 1.4.10
+      "@lezer/lr": 1.4.11
 
   "@lezer/javascript@1.5.6":
     dependencies:
       "@lezer/common": 1.5.3
-      "@lezer/highlight": 1.2.3
+      "@lezer/highlight": 1.2.5
       "@lezer/lr": 1.4.11
 
   "@lezer/json@1.0.3":
     dependencies:
       "@lezer/common": 1.5.3
-      "@lezer/highlight": 1.2.3
+      "@lezer/highlight": 1.2.5
       "@lezer/lr": 1.4.11
 
   "@lezer/lr@1.4.10":
     dependencies:
-      "@lezer/common": 1.5.2
+      "@lezer/common": 1.5.3
 
   "@lezer/lr@1.4.11":
     dependencies:
@@ -2500,13 +2500,13 @@ snapshots:
   "@lezer/markdown@1.8.1":
     dependencies:
       "@lezer/common": 1.5.3
-      "@lezer/highlight": 1.2.3
+      "@lezer/highlight": 1.2.5
 
   "@lezer/python@1.1.19":
     dependencies:
-      "@lezer/common": 1.5.2
+      "@lezer/common": 1.5.3
       "@lezer/highlight": 1.2.5
-      "@lezer/lr": 1.4.10
+      "@lezer/lr": 1.4.11
 
   "@marijn/find-cluster-break@1.0.4": {}
 
