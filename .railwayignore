@@ -8,7 +8,6 @@ dist/
 .env.*
 !.env.example
 public/assets/
-public/resume/
 Caddyfile.rendered
 pnpm-lock.yaml.unlinked
 test-results/

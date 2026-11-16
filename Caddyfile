@@ -36,8 +36,6 @@
 	header @worlds Cache-Control "public, max-age=300, must-revalidate"
 	header @other Cache-Control "no-cache"
 
-	redir /resume /resume/ 308
-
 	# /play is a client-side route of the SPA; everything else is a file.
 	@spa path /play /play/
 	rewrite @spa /index.html

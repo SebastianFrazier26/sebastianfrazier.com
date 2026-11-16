@@ -3,8 +3,9 @@
 Sebastian Frazier's portfolio site. Every project is a walkable pixel-art
 world, built straight from its GitHub repository by
 [cabn](https://github.com/SebastianFrazier26/cabn) — the same engine, used as
-a hosted instance. Visitors pick one of two doors: walk the worlds, or read a
-plain, JavaScript-free résumé at `/resume/`.
+a hosted instance. The front page is a pixel-art map of the base world with a
+marker per project; visitors enter the shelf or jump straight into one
+project's world (`/play?world=<project id>`).
 
 ## How it works
 
@@ -153,8 +154,6 @@ link. `pnpm engine:unlink` goes back to npm.
    loosy-goose and SafeAscent, then set each hero's `status` to `"live"` in
    `projects.json`. Only live heroes become portals (and only with cabn
    0.2.0+). skid-case-study is already live.
-7. **Résumé**: replace every `TODO(owner)` in `content/resume.json`; they
-   render highlighted until you do.
 
 ## License
 

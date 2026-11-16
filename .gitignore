@@ -7,10 +7,9 @@ dist/
 .DS_Store
 .claude/
 
-# Generated at build time (scripts/build-worlds.ts, build-resume.ts,
+# Generated at build time (scripts/build-worlds.ts,
 # copy-engine-assets.ts); never committed.
 public/worlds/
-public/resume/
 public/assets/
 Caddyfile.rendered
 pnpm-lock.yaml.unlinked
