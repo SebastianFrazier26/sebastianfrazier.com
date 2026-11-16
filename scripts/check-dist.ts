@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 // Postbuild gate over dist/ (pnpm build runs it): the CSP meta tag is the
-// one csp-policy.ts computes and precedes every script, the resume page is
-// script-free, and no world data was dropped from the copy.
+// one csp-policy.ts computes and precedes every script, the retired résumé
+// is not shipped, and no world data was dropped from the copy.
 import { readFile, stat } from "node:fs/promises";
 import { loadEmbedOrigins, metaCsp } from "../csp-policy.ts";
 
@@ -18,9 +18,10 @@ if (cspAt === -1) errors.push("dist/index.html: CSP meta missing or different");
 else if (firstScript !== -1 && firstScript < cspAt)
 	errors.push("dist/index.html: a script precedes the CSP meta");
 
-const resume = await readFile(new URL("resume/index.html", dist), "utf8");
-if (/<script|\son[a-z]+\s*=|javascript:/i.test(resume))
-	errors.push("dist/resume/index.html: contains script");
+await stat(new URL("resume", dist)).then(
+	() => errors.push("dist/resume exists; the résumé is retired"),
+	() => {},
+);
 
 for (const path of [
 	"worlds/shelf.json",

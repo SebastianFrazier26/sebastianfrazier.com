@@ -1,5 +1,5 @@
 {
-	"$comment": "The worlds on sebastianfrazier.com. Validated by scripts/lib/projects.ts; read by build-worlds, upstream-changed and the resume page.",
+	"$comment": "The worlds on sebastianfrazier.com. Validated by scripts/lib/projects.ts; read by build-worlds and upstream-changed.",
 	"shelfName": "Sebastian Frazier",
 	"defaultExcludes": [
 		"**/uv.lock",

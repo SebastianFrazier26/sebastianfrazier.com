@@ -25,8 +25,8 @@ export function cspDirectives(
 		"default-src": ["'self'"],
 		"script-src": ["'self'"],
 		// The engine injects <style> elements at runtime and a bundled
-		// viewport helper sets a style attribute; the resume page's styles are
-		// inline too. Nonces would need a per-response server.
+		// viewport helper sets a style attribute. Nonces would need a
+		// per-response server.
 		"style-src": ["'self'", "'unsafe-inline'"],
 		// data: for Phaser's base64 textures, blob: for textures and media the
 		// engine loads through object URLs.

@@ -1,3 +1,9 @@
+@font-face {
+	font-family: "SfDotGothic16";
+	src: url("/assets/fonts/DotGothic16-Latin.woff2") format("woff2");
+	font-display: swap;
+}
+
 :root {
 	--ink: #edeee4;
 	--muted: #b9b49f;
@@ -5,7 +11,7 @@
 	--ember: #8c461f;
 	--glow: #f2b880;
 	--moss: #1f2a17;
-	font-family: "Courier New", monospace;
+	font-family: "SfDotGothic16", "Courier New", monospace;
 	color: var(--ink);
 	background: var(--moss);
 }
@@ -14,61 +20,229 @@ a {
 	color: var(--glow);
 }
 
-.landing {
+.map-page {
 	min-height: 100%;
-	max-width: 56rem;
+	max-width: 70rem;
 	margin: 0 auto;
-	padding: 3rem 1rem;
+	padding: 1.5rem 0.75rem 2rem;
 	box-sizing: border-box;
 }
-.landing h1 {
-	margin: 0;
-	font-size: 2rem;
-}
-.lede {
-	color: var(--muted);
-	margin: 0.5rem 0 2rem;
-}
 
-.doors {
-	display: grid;
-	grid-template-columns: repeat(auto-fit, minmax(16rem, 1fr));
-	gap: 1.5rem;
-}
-.door {
+.map-head {
 	display: flex;
 	flex-direction: column;
-	gap: 0.75rem;
-	min-height: 14rem;
-	padding: 1.5rem;
-	text-decoration: none;
-	color: var(--ink);
-	background: var(--wood);
-	border: 3px solid var(--ember);
-	border-radius: 0.75rem 0.75rem 0.25rem 0.25rem;
-	box-shadow: 0 6px 0 #140d07;
-	transition:
-		transform 120ms ease,
-		box-shadow 120ms ease;
+	align-items: center;
+	gap: 0.6rem;
+	text-align: center;
+	margin-bottom: 1.25rem;
 }
-.door:hover,
-.door:focus-visible {
-	transform: translateY(-3px);
-	box-shadow: 0 9px 0 #140d07;
-	outline: none;
-	border-color: var(--glow);
-}
-.door-title {
-	font-size: 1.3rem;
-	font-weight: bold;
+.map-head h1 {
+	margin: 0;
+	font-size: clamp(2rem, 7vw, 3.25rem);
+	letter-spacing: 0.04em;
 	color: var(--glow);
+	text-shadow:
+		0 3px 0 #140d07,
+		0 0 18px rgba(242, 184, 128, 0.35);
 }
-.door-body {
+.map-head p {
+	margin: 0;
+	max-width: 34rem;
+	color: var(--muted);
 	line-height: 1.5;
 }
-footer {
-	margin-top: 2.5rem;
+
+.map-enter {
+	margin-top: 0.4rem;
+	padding: 0.7rem 1.8rem;
+	font-size: 1.35rem;
+	text-decoration: none;
+	color: #1d2a12;
+	background: #f2c14e;
+	border: 4px solid #140d07;
+	box-shadow:
+		inset 0 -5px 0 #c58a20,
+		inset 0 4px 0 #ffe38f,
+		0 6px 0 #140d07;
+	transition: transform 100ms steps(2);
+}
+.map-enter:hover,
+.map-enter:focus-visible {
+	transform: translateY(-3px);
+	outline: 3px solid var(--ink);
+	outline-offset: 3px;
+}
+.map-enter:active {
+	transform: translateY(3px);
+	box-shadow:
+		inset 0 -5px 0 #c58a20,
+		inset 0 4px 0 #ffe38f,
+		0 1px 0 #140d07;
+}
+
+.map-frame {
+	padding: 6px;
+	background: var(--wood);
+	border: 4px solid #140d07;
+	box-shadow:
+		inset 0 0 0 3px var(--ember),
+		0 8px 0 #140d07;
+}
+.map-note {
+	margin: 0;
+	padding: 4rem 1rem;
+	text-align: center;
 	color: var(--muted);
+}
+
+.map-world {
+	position: relative;
+	container-type: inline-size;
+	overflow: hidden;
+	background-color: #6cbd47;
+	background-image: radial-gradient(#5aa63c 1.2px, transparent 1.4px);
+	background-size: 14px 14px;
+}
+.map-sky {
+	position: absolute;
+	inset: 0 0 auto;
+	background: url("/assets/placeholders/sky_day.png") 0 0 / 100% 100% no-repeat;
+}
+.map-hills {
+	position: absolute;
+	inset: auto 0 0;
+	height: 4.5cqw;
+	min-height: 28px;
+	background:
+		url("/assets/placeholders/skyline_hill_day_soft.png") repeat-x bottom / auto
+		100%;
+}
+.map-trail {
+	position: absolute;
+	inset: 0;
+	width: 100%;
+	height: 100%;
+}
+.map-trail path {
+	fill: none;
+	stroke-linecap: round;
+	stroke-linejoin: round;
+	vector-effect: non-scaling-stroke;
+}
+.map-trail-edge {
+	stroke: #8a5a2b;
+	stroke-width: 20px;
+}
+.map-trail-bed {
+	stroke: #d9b878;
+	stroke-width: 13px;
+	stroke-dasharray: 18px 0;
+}
+.map-scenery {
+	position: absolute;
+	height: auto;
+	transform: translate(-50%, -100%);
+	pointer-events: none;
+}
+
+.map-markers {
+	list-style: none;
+	margin: 0;
+	padding: 0;
+}
+.map-markers li {
+	position: absolute;
+	width: max-content;
+	transform: translate(-50%, -50%);
+}
+.map-marker {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	gap: 0.25rem;
+	text-decoration: none;
+	color: var(--ink);
+	outline: none;
+}
+.map-cabin {
+	width: 13cqw;
+	min-width: 84px;
+	height: auto;
+	filter: drop-shadow(0 5px 0 rgba(20, 13, 7, 0.45));
+	transition: transform 120ms steps(3);
+}
+.map-plate {
+	display: flex;
+	flex-direction: column;
+	gap: 0.2rem;
+	width: 24cqw;
+	min-width: 150px;
+	max-width: 17rem;
+	padding: 0.4rem 0.5rem 0.5rem;
+	text-align: center;
+	background: #4a3019;
+	border: 3px solid #140d07;
+	box-shadow:
+		inset 0 0 0 2px #8c5a2e,
+		0 4px 0 #140d07;
+}
+.map-plate-name {
+	font-size: 0.95rem;
+	color: var(--glow);
+}
+.map-plate-desc {
+	font-size: 0.72rem;
+	line-height: 1.35;
+	color: #e3d8bb;
+	display: -webkit-box;
+	-webkit-line-clamp: 3;
+	-webkit-box-orient: vertical;
+	overflow: hidden;
+}
+.map-tall .map-plate {
+	width: 58cqw;
+	max-width: none;
+}
+.map-tall .map-plate-desc {
+	font-size: 0.75rem;
+	-webkit-line-clamp: 5;
+}
+.map-tall .map-cabin {
+	width: 26cqw;
+}
+.map-tall .map-trail-edge {
+	stroke-width: 16px;
+}
+.map-tall .map-trail-bed {
+	stroke-width: 10px;
+}
+
+.map-marker:hover .map-cabin,
+.map-marker:focus-visible .map-cabin {
+	transform: translateY(-6px);
+}
+.map-marker:hover .map-plate,
+.map-marker:focus-visible .map-plate {
+	background: #5d3d20;
+	box-shadow:
+		inset 0 0 0 2px var(--glow),
+		0 4px 0 #140d07;
+}
+.map-marker:focus-visible .map-plate {
+	outline: 3px solid var(--ink);
+	outline-offset: 3px;
+}
+.map-foot {
+	margin-top: 1.75rem;
+	text-align: center;
+	color: var(--muted);
+}
+
+@media (prefers-reduced-motion: reduce) {
+	.map-cabin,
+	.map-enter {
+		transition: none;
+	}
 }
 
 .game {

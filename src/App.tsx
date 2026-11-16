@@ -1,72 +1,81 @@
 import { lazy, Suspense, useEffect, useState } from "react";
+import { MapLanding } from "./MapLanding.tsx";
+import { resolveWorld } from "./mapData.ts";
+import { useShelf } from "./useShelf.ts";
 
 const CabnWorld = lazy(() => import("./CabnWorld.tsx"));
 
-const PLAY_PATH = "/play";
+interface Route {
+	playing: boolean;
+	/** Raw `?world=` value; validated against the shelf once it has loaded. */
+	world: string | null;
+}
 
-function onPlayPath(): boolean {
-	return window.location.pathname.replace(/\/$/, "") === PLAY_PATH;
+function readRoute(): Route {
+	const { pathname, search } = window.location;
+	return {
+		playing: pathname.replace(/\/$/, "") === "/play",
+		world: new URLSearchParams(search).get("world"),
+	};
 }
 
 export function App(): React.ReactElement {
-	const [playing, setPlaying] = useState(onPlayPath);
+	const [route, setRoute] = useState(readRoute);
+	const shelf = useShelf();
 
 	useEffect(() => {
-		const sync = (): void => setPlaying(onPlayPath());
+		const sync = (): void => setRoute(readRoute());
 		window.addEventListener("popstate", sync);
 		return () => window.removeEventListener("popstate", sync);
 	}, []);
 
-	const enter = (event: React.MouseEvent<HTMLAnchorElement>): void => {
-		if (event.metaKey || event.ctrlKey || event.shiftKey || event.button !== 0)
-			return;
-		event.preventDefault();
-		window.history.pushState(null, "", PLAY_PATH);
-		setPlaying(true);
+	const navigate = (path: string): void => {
+		window.history.pushState(null, "", path);
+		setRoute(readRoute());
+		window.scrollTo(0, 0);
 	};
 
-	if (playing) {
-		return (
-			<div className="game">
-				<header className="game-bar">
-					<a href="/">Sebastian Frazier</a>
-					<span>
-						WASD/arrows or click to move · Enter to go in or out · Esc to leave
-						a file
-					</span>
-					<a href="/resume/">résumé</a>
-				</header>
-				<div className="game-stage">
-					<Suspense fallback={<p className="loading">Lighting the bonfire…</p>}>
-						<CabnWorld />
-					</Suspense>
-				</div>
-			</div>
-		);
-	}
+	if (!route.playing) return <MapLanding shelf={shelf} onNavigate={navigate} />;
+
+	// A deep link waits for the shelf so an unknown id can be told from a slow
+	// load; the plain base world does not.
+	const waiting = route.world !== null && shelf.status === "loading";
+	const project =
+		route.world !== null && shelf.status === "ready"
+			? resolveWorld(route.world, shelf.projects)
+			: null;
 
 	return (
-		<main className="landing">
-			<h1>Sebastian Frazier</h1>
-			<p className="lede">Two ways in.</p>
-			<div className="doors">
-				<a className="door door-world" href={PLAY_PATH} onClick={enter}>
-					<span className="door-title">Walk the worlds</span>
-					<span className="door-body">
-						Each project is a pixel-art world built from its repository by cabn.
-						Walk in, open files, step through portals to live demos.
-					</span>
+		<div className="game">
+			<header className="game-bar">
+				<a
+					href="/"
+					onClick={(event) => {
+						if (event.metaKey || event.ctrlKey || event.shiftKey) return;
+						event.preventDefault();
+						navigate("/");
+					}}
+				>
+					← Map
 				</a>
-				<a className="door door-resume" href="/resume/">
-					<span className="door-title">Read the résumé</span>
-					<span className="door-body">
-						One plain page. No JavaScript, prints cleanly.
-					</span>
-				</a>
+				<span>
+					WASD/arrows or click to move · Enter to go in or out · Esc to leave a
+					file, or the shelf for the map
+				</span>
+			</header>
+			<div className="game-stage">
+				{waiting ? (
+					<p className="loading">Lighting the bonfire…</p>
+				) : (
+					<Suspense fallback={<p className="loading">Lighting the bonfire…</p>}>
+						<CabnWorld
+							key={project?.slug ?? "shelf"}
+							project={project}
+							onLeave={() => navigate("/")}
+						/>
+					</Suspense>
+				)}
 			</div>
-			<footer>
-				<a href="https://github.com/SebastianFrazier26">GitHub</a>
-			</footer>
-		</main>
+		</div>
 	);
 }

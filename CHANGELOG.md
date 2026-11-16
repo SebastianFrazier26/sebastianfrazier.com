@@ -1,5 +1,20 @@
 # Changelog
 
+## 2026-11-16 (map landing, no résumé)
+
+- The front page is now a pixel-art map of the base world: one cabin per
+  enabled project (name and description from the public `shelf.json`, in
+  shelf order) on a trail, drawn with the engine's own sprites and its
+  DotGothic16 pixel font. "Enter the worlds" goes to the shelf at `/play`;
+  each cabin goes straight into that project's world at
+  `/play?world=<project id>` (an unknown id lands on the shelf). Esc on the
+  shelf, or the "Map" link, returns to the map.
+- The résumé is gone: `/resume/` page generation, `content/resume.json`,
+  `pnpm build:resume`, the Caddy redirect and the landing door are removed,
+  and `check-dist.ts` now fails if `dist/resume` ever appears.
+- `copy-engine-assets.ts` also writes the engine's DotGothic16 (with its OFL
+  license) to `public/assets/fonts/`.
+
 ## 2026-11-16
 
 - cabn's world now previews the hosted demo
