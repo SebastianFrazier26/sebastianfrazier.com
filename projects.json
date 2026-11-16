@@ -71,7 +71,10 @@
 			],
 			"excludes": ["assets/generated/", "assets/source/"],
 			"history": false,
-			"hero": null,
+			"hero": {
+				"url": "https://cabn-demo-production.up.railway.app/",
+				"status": "live"
+			},
 			"order": 30
 		},
 		{
