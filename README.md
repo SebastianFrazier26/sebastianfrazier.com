@@ -115,14 +115,12 @@ schedule picks changes up anyway.
 
 ## cabn version
 
-`package.json` pins `@cabn/*` **0.1.0**, the released version. The 0.2.0 API
-(world title/description/links, hero site portals, shelf metadata, `--name`,
-`pets`) is not on npm yet, and depending on `^0.2.0` would break
-`pnpm install --frozen-lockfile` in CI until it is. Instead,
-`scripts/lib/cabnAdapter.ts` (the only module that touches the engine at
-build time) probes the installed schema: on 0.1.0 it skips world info and
-hero sites and the site still builds and deploys; on 0.2.0 it uses them. When
-0.2.0 is published, bump the three `@cabn/*` versions — nothing else changes.
+`package.json` pins `@cabn/*` **0.2.0** (exact). `scripts/lib/cabnAdapter.ts`
+(the only module that touches the engine at build time) probes the installed
+schema: on 0.2.0 it passes the host config to `runBuild({ config })` and
+collects the CSP `frame-src` with `collectWorldEmbedOrigins`; a 0.1.0
+fallback (no world info or hero sites) remains for linked older engines and
+can be deleted when no longer wanted.
 
 To try an unreleased engine locally: build it (`pnpm -r build` in the cabn
 checkout), then `pnpm engine:link ~/Developer/cabn-m9`. That points
