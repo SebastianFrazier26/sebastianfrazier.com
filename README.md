@@ -1,6 +1,6 @@
 # sebastianfrazier.com
 
-Sebastian Frazier's portfolio site. Every project is a walkable pixel-art
+My portfolio site. Every project is a walkable pixel-art
 world, built straight from its GitHub repository by
 [cabn](https://github.com/SebastianFrazier26/cabn) — the same engine, used as
 a hosted instance. The front page is a pixel-art map of the base world with a
