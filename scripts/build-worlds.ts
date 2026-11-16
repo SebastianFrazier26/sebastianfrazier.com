@@ -19,8 +19,8 @@ import { parseArgs } from "node:util";
 import {
 	buildShelf,
 	buildWorld,
-	collectEmbedOrigins,
 	detectCapabilities,
+	worldEmbedOrigins,
 } from "./lib/cabnAdapter.ts";
 import { makeExcluder } from "./lib/excludes.ts";
 import { downloadAndExtract, resolveSha } from "./lib/github.ts";
@@ -36,6 +36,8 @@ import {
 	type Project,
 	parseProjects,
 } from "./lib/projects.ts";
+import { scanTree } from "./lib/secrets.ts";
+import { siteSha } from "./lib/siteSha.ts";
 
 const siteRoot = fileURLToPath(new URL("..", import.meta.url));
 const publicWorlds = join(siteRoot, "public", "worlds");
@@ -119,8 +121,15 @@ async function main(): Promise<void> {
 	const offline = args.offline || args.fixture;
 	const caps = detectCapabilities();
 	console.log(
-		`cabn ${caps.cliVersion} (showcase: ${caps.showcase ? "yes" : "no — world info and hero sites skipped"})`,
+		caps.injection
+			? `cabn ${caps.cliVersion}: config injection, world info and hero sites`
+			: caps.showcase
+				? `cabn ${caps.cliVersion}: schema has showcase fields but no injection API — rebuild the linked engine`
+				: `cabn ${caps.cliVersion}: legacy path, world info and hero sites skipped`,
 	);
+	if (caps.showcase && !caps.injection) {
+		throw new Error("half-upgraded engine: refusing to build");
+	}
 
 	const tempRoot = await realpath(await mkdtemp(join(tmpdir(), "sf-worlds-")));
 	const outRoot = join(tempRoot, "out");
@@ -163,8 +172,9 @@ async function main(): Promise<void> {
 			manifestVersion: DEPLOY_MANIFEST_VERSION,
 			generatedAt: new Date().toISOString(),
 			fixture: args.fixture,
-			engine: { cliVersion: caps.cliVersion, showcase: caps.showcase },
-			embedOrigins: collectEmbedOrigins(origins),
+			siteSha: await siteSha(),
+			engine: { cliVersion: caps.cliVersion, showcase: caps.injection },
+			embedOrigins: await worldEmbedOrigins(worldDirs, origins, caps),
 			projects: deployed,
 		};
 		await writeFile(
@@ -224,7 +234,24 @@ async function buildOne(
 			);
 			excluded = extract.excluded;
 			console.log(
-				`[${project.id}] ${project.repo}@${sha.slice(0, 7)}: ${extract.files} files, ${excluded.length} excluded, ${extract.skippedLinks.length} links skipped`,
+				`[${project.id}] @${sha.slice(0, 7)}: ${extract.files} files, ${excluded.length} excluded, ${extract.skippedLinks.length} links skipped`,
+			);
+		}
+		const secrets = await scanTree(sourceDir);
+		if (secrets.length) {
+			const lines = secrets
+				.slice(0, 20)
+				.map((h) => `${h.file}:${h.line} ${h.rule}`);
+			// Private repos were never reviewed for publication, so any hit
+			// blocks them; public ones are already out there, so it's a nudge.
+			if (project.visibility === "private") {
+				console.error(
+					`[${project.id}] secret scan: ${secrets.length} hit(s) in a private repo — not publishing:\n  ${lines.join("\n  ")}`,
+				);
+				return null;
+			}
+			console.warn(
+				`[${project.id}] secret scan: ${secrets.length} possible secret(s):\n  ${lines.join("\n  ")}`,
 			);
 		}
 		const built = await buildWorld({
@@ -254,7 +281,8 @@ async function buildOne(
 		return {
 			deployed: {
 				id: project.id,
-				repo: project.repo,
+				// manifest.json is public: a private repo's name stays out of it.
+				repo: project.visibility === "public" ? project.repo : null,
 				ref: project.ref,
 				sha,
 				worldDir: `worlds/${project.id}`,

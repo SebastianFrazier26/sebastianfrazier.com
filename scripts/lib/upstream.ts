@@ -8,44 +8,87 @@ export type ChangeReason =
 	| { id: string; kind: "updated"; from: string; to: string }
 	| { id: string; kind: "removed" };
 
+/** What fetching the live manifest produced. */
+export type DeployedState =
+	| { kind: "ok"; manifest: DeployManifest }
+	/** HTTP 404: nothing deployed yet. */
+	| { kind: "missing" }
+	/** Network error, 5xx, or a body that doesn't parse. */
+	| { kind: "unreadable"; reason: string };
+
+export interface CurrentState {
+	projects: ReadonlyMap<string, string>;
+	/** This site repo's commit; "unknown" skips the comparison. */
+	siteSha: string;
+	cliVersion: string;
+}
+
 export interface UpstreamDiff {
 	changed: boolean;
-	/** Why a rebuild is needed even with no per-project reason. */
+	/** Why a rebuild is needed (or skipped) with no per-project reason. */
 	global: string | null;
+	/** Set when the decision is "don't deploy" only because the live site couldn't be read. */
+	warning: string | null;
 	reasons: ChangeReason[];
 }
 
 /**
- * Pure: should the site be rebuilt? `deployed` is null when the live
- * manifest couldn't be fetched (first deploy, site down) — rebuilding is
- * the safe answer then. A fixture deploy always counts as stale.
+ * Pure: should the scheduled run rebuild? Only a missing (404) or fixture
+ * manifest forces it; an unreadable one skips with a warning, so a blip at
+ * the host doesn't turn every 30-minute run into a full rebuild. A site
+ * commit or engine version that differs from what's live also counts: a
+ * push deploy that never finished must not read as "up to date".
  */
 export function diffUpstream(
-	current: ReadonlyMap<string, string>,
-	deployed: DeployManifest | null,
+	current: CurrentState,
+	deployed: DeployedState,
 ): UpstreamDiff {
-	if (!deployed) {
-		return { changed: true, global: "no deployed manifest", reasons: [] };
+	const none = { warning: null, reasons: [] };
+	if (deployed.kind === "missing") {
+		return { changed: true, global: "nothing deployed yet", ...none };
 	}
-	if (deployed.fixture) {
+	if (deployed.kind === "unreadable") {
 		return {
-			changed: true,
-			global: "deployed site is a fixture build",
+			changed: false,
+			global: null,
+			warning: `live manifest unreadable (${deployed.reason}); skipping this run`,
 			reasons: [],
 		};
 	}
+	const live = deployed.manifest;
+	if (live.fixture) {
+		return {
+			changed: true,
+			global: "deployed site is a fixture build",
+			...none,
+		};
+	}
+	if (current.siteSha !== "unknown" && live.siteSha !== current.siteSha) {
+		return {
+			changed: true,
+			global: `site ${live.siteSha.slice(0, 7)} is live, main is ${current.siteSha.slice(0, 7)}`,
+			...none,
+		};
+	}
+	if (live.engine.cliVersion !== current.cliVersion) {
+		return {
+			changed: true,
+			global: `cabn ${live.engine.cliVersion} is live, ${current.cliVersion} is installed`,
+			...none,
+		};
+	}
 	const reasons: ChangeReason[] = [];
-	const before = new Map(deployed.projects.map((p) => [p.id, p.sha]));
-	for (const [id, sha] of current) {
+	const before = new Map(live.projects.map((p) => [p.id, p.sha]));
+	for (const [id, sha] of current.projects) {
 		const old = before.get(id);
 		if (old === undefined) reasons.push({ id, kind: "new", sha });
 		else if (old !== sha)
 			reasons.push({ id, kind: "updated", from: old, to: sha });
 	}
 	for (const id of before.keys()) {
-		if (!current.has(id)) reasons.push({ id, kind: "removed" });
+		if (!current.projects.has(id)) reasons.push({ id, kind: "removed" });
 	}
-	return { changed: reasons.length > 0, global: null, reasons };
+	return { changed: reasons.length > 0, global: null, warning: null, reasons };
 }
 
 const execFileP = promisify(execFile);
@@ -67,20 +110,29 @@ export async function lsRemoteSha(
 		env.GIT_CONFIG_VALUE_0 = `Authorization: Basic ${basic}`;
 	}
 	const ref = `refs/heads/${project.ref}`;
-	const { stdout } = await execFileP(
-		"git",
-		["ls-remote", `https://github.com/${project.repo}.git`, ref],
-		{ env, timeout: 60_000 },
-	);
+	let stdout: string;
+	try {
+		({ stdout } = await execFileP(
+			"git",
+			["ls-remote", `https://github.com/${project.repo}.git`, ref],
+			{ env, timeout: 60_000 },
+		));
+	} catch (err) {
+		// execFile's message embeds the command line, i.e. the repo URL; a
+		// private repo's name must not reach a public CI log.
+		const code = (err as { code?: unknown }).code;
+		throw new Error(`[${project.id}] git ls-remote failed (${String(code)})`);
+	}
 	const line = stdout.split("\n").find((l) => l.endsWith(`\t${ref}`));
 	const sha = line?.split("\t")[0];
 	if (!sha || !/^[0-9a-f]{40}$/.test(sha)) {
-		throw new Error(`[${project.id}] ${ref} not found on ${project.repo}`);
+		throw new Error(`[${project.id}] ${ref} not found upstream`);
 	}
 	return sha;
 }
 
 export function describe(diff: UpstreamDiff): string {
+	if (diff.warning) return diff.warning;
 	if (diff.global) return `rebuild: ${diff.global}`;
 	if (!diff.changed) return "up to date";
 	return diff.reasons

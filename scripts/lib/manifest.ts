@@ -4,7 +4,8 @@ export const DEPLOY_MANIFEST_VERSION = 1;
 
 export const DeployedProjectSchema = z.strictObject({
 	id: z.string(),
-	repo: z.string(),
+	/** null for a private project: this file is served publicly. */
+	repo: z.string().nullable(),
 	ref: z.string(),
 	sha: z.string().regex(/^[0-9a-f]{40}$/),
 	worldDir: z.string(),
@@ -16,6 +17,8 @@ export const DeployManifestSchema = z.strictObject({
 	manifestVersion: z.literal(DEPLOY_MANIFEST_VERSION),
 	generatedAt: z.iso.datetime(),
 	fixture: z.boolean(),
+	/** The site repo commit this deploy was built from (see siteSha.ts). */
+	siteSha: z.union([z.string().regex(/^[0-9a-f]{40}$/), z.literal("unknown")]),
 	engine: z.strictObject({ cliVersion: z.string(), showcase: z.boolean() }),
 	/** Union of every world's allowedEmbedOrigins: the CSP frame-src. */
 	embedOrigins: z.array(z.url({ protocol: /^https$/ })),

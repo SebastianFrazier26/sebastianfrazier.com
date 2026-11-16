@@ -36,6 +36,9 @@ export default defineConfig({
 		// reference to the flag statically false rather than false by default.
 		__CABN_ALLOW_LOCAL_EXEC__: false,
 	},
+	// A linked engine checkout (pnpm engine:link) resolves React from its
+	// own node_modules; two Reacts break hooks, so one copy is forced.
+	resolve: { dedupe: ["react", "react-dom"] },
 	// The lazily loaded engine chunk is Phaser plus CodeMirror (~2.4 MB); it
 	// only downloads once a visitor opens the world door.
 	build: { chunkSizeWarningLimit: 3000 },
