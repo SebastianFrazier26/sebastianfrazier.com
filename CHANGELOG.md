@@ -1,5 +1,16 @@
 # Changelog
 
+## 2026-11-18 (cabn 0.3.0)
+
+- Worlds run on `@cabn/engine` 0.3.0 and `@cabn/cli` 0.2.1:
+  - walking speed no longer depends on frame rate;
+  - trees are drawn whole across scenery chunk edges;
+  - clearings sit much closer together in the larger worlds;
+  - hotbar tools are labelled everywhere, with a description card in the top-right;
+  - no more multi-second stalls near big clearings, and world entry is faster;
+  - a cabin's live-site preview waits for the world to load and doesn't reload when you brush past it.
+- `minimumReleaseAgeExclude` lists the four new cabn versions for a day; remove them once they age past pnpm's window.
+
 ## 2026-11-16 (map landing, no résumé)
 
 - The front page is now a pixel-art map of the base world: one cabin per
