@@ -1,5 +1,12 @@
 # Changelog
 
+## 2026-11-21 (cabn 0.3.1)
+
+- Worlds run on `@cabn/engine` 0.3.1 and `@cabn/cli` 0.2.2:
+  - walking no longer hitches on streamed ground chunks or at night, where ground and light draws are batched;
+  - world entry is faster on spread-out worlds (path ribbon planning no longer stalls the first frames).
+- `minimumReleaseAgeExclude` lists the three new cabn versions for a day; remove them once they age past pnpm's window. The 0.3.0 entries are gone.
+
 ## 2026-11-18 (cabn 0.3.0)
 
 - Worlds run on `@cabn/engine` 0.3.0 and `@cabn/cli` 0.2.1:
