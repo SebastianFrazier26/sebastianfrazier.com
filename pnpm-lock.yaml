@@ -210,8 +210,8 @@ importers:
   .:
     dependencies:
       "@cabn/engine":
-        specifier: 0.3.0
-        version: 0.3.0(@types/react@19.3.0)(react-dom@19.3.1(react@19.3.1))(react@19.3.1)
+        specifier: 0.3.1
+        version: 0.3.1(@types/react@19.3.0)(react-dom@19.3.1(react@19.3.1))(react@19.3.1)
       pdfjs-dist:
         specifier: 6.3.289
         version: 6.3.289
@@ -226,8 +226,8 @@ importers:
         specifier: ^2.5.14
         version: 2.6.2
       "@cabn/cli":
-        specifier: 0.2.1
-        version: 0.2.1(@types/react@19.3.0)
+        specifier: 0.2.2
+        version: 0.2.2(@types/react@19.3.0)
       "@cabn/world-schema":
         specifier: 0.2.0
         version: 0.2.0
@@ -368,14 +368,14 @@ packages:
     cpu: [x64]
     os: [win32]
 
-  "@cabn/cli@0.2.1":
+  "@cabn/cli@0.2.2":
     resolution:
       {
-        integrity: sha512-dTAIk/Pxd64vkvbknmHwSbZoJAFZLEB62SVQIHJamCuARYFjfZkPsDnKVg3a9CQo4EOPKUqYwgvunxwPCs16aw==,
+        integrity: sha512-BX8EDr35aJhiiX2w1rtL+mG4NgPepr4FWPffQrwFhrqI/Y+fogXlCgaqYnUpRo98dtSlH/5uaoOEG6msnitFtQ==,
       }
     hasBin: true
     peerDependencies:
-      "@cabn/shadow-art": ^0.2.1
+      "@cabn/shadow-art": ^0.2.2
     peerDependenciesMeta:
       "@cabn/shadow-art":
         optional: true
@@ -386,10 +386,10 @@ packages:
         integrity: sha512-A4wmNAvwj1fON0hwXnNf4+2W1r0tQH2u1/ZbQhCvRCPXDfyU4lpG0rSi2Mu7fYI1eTGFNPcrgVzpt62Uq4oiPg==,
       }
 
-  "@cabn/engine@0.3.0":
+  "@cabn/engine@0.3.1":
     resolution:
       {
-        integrity: sha512-bOhULruVVkPwN6P+U2dmtqPnrBAgUW4FMBq6jKrxcVZwQUaiUbe8HVT7FsDDIo/tuRWJ748QPpo/744dJuzvJg==,
+        integrity: sha512-4B0zTlQeGCTIWNxZ+CBeLIwWLdP/trjQBr0/V8hJNpvkxyEVny6Ly1F4RtF+Oja/lTg3PbUhUmSZep/52tuXtw==,
       }
     peerDependencies:
       react: ">=18"
@@ -2184,10 +2184,10 @@ snapshots:
   "@biomejs/cli-win32-x64@2.6.2":
     optional: true
 
-  "@cabn/cli@0.2.1(@types/react@19.3.0)":
+  "@cabn/cli@0.2.2(@types/react@19.3.0)":
     dependencies:
       "@cabn/converter": 0.3.0
-      "@cabn/engine": 0.3.0(@types/react@19.3.0)(react-dom@19.3.1(react@19.3.1))(react@19.3.1)
+      "@cabn/engine": 0.3.1(@types/react@19.3.0)(react-dom@19.3.1(react@19.3.1))(react@19.3.1)
       "@cabn/world-schema": 0.2.0
       esbuild: 0.27.7
       isomorphic-git: 1.42.2
@@ -2213,7 +2213,7 @@ snapshots:
       minisearch: 7.2.0
       zod: 4.6.7
 
-  "@cabn/engine@0.3.0(@types/react@19.3.0)(react-dom@19.3.1(react@19.3.1))(react@19.3.1)":
+  "@cabn/engine@0.3.1(@types/react@19.3.0)(react-dom@19.3.1(react@19.3.1))(react@19.3.1)":
     dependencies:
       "@cabn/converter": 0.3.0
       "@cabn/world-schema": 0.2.0

@@ -1,12 +1,11 @@
 allowBuilds:
   esbuild: true
-# 2026-11-18: cabn 0.3.0 was published today; pnpm's default release-age window would
+# 2026-11-21: cabn 0.3.1 was published today; pnpm's default release-age window would
 # refuse it for a day. Drop these entries once they're older than that.
 minimumReleaseAgeExclude:
-  - "@cabn/engine@0.3.0"
-  - "@cabn/converter@0.3.0"
-  - "@cabn/cli@0.2.1"
-  - "@cabn/shadow-art@0.2.1"
+  - "@cabn/engine@0.3.1"
+  - "@cabn/cli@0.2.2"
+  - "@cabn/shadow-art@0.2.2"
 ignoredOptionalDependencies:
   - "@napi-rs/canvas"
 
