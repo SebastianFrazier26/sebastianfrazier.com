@@ -1,5 +1,14 @@
 # Changelog
 
+## 2026-11-21 (blog world)
+
+- New world: the blog, built from the public `SebastianFrazier26/blog` repo
+  like any other project (`projects.json` id `blog`, no hero site). Each post
+  is a markdown file you walk up to and read in the file view; the repo's
+  README, `CLAUDE.md` and `LICENSE` are excluded, so only posts appear. The
+  map has a "Blog" cabin linking to `/play?world=blog`. cabn has no include
+  filter, so the excludes do that job.
+
 ## 2026-11-21 (cabn 0.3.1)
 
 - Worlds run on `@cabn/engine` 0.3.1 and `@cabn/cli` 0.2.2:
