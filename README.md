@@ -7,6 +7,12 @@ a hosted instance. The front page is a pixel-art map of the base world with a
 marker per project; visitors enter the shelf or jump straight into one
 project's world (`/play?world=<project id>`).
 
+The blog is one of those worlds: posts are markdown files in
+[SebastianFrazier26/blog](https://github.com/SebastianFrazier26/blog), built
+like any project (id `blog`, at `/play?world=blog`). Its `excludes` drop the
+README, `CLAUDE.md` and `LICENSE`, so only posts appear; a push there goes live
+on the next scheduled deploy.
+
 ## How it works
 
 - `projects.json` lists the projects (zod-validated by
