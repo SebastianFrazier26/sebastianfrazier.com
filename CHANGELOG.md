@@ -34,6 +34,8 @@
   `copy.ts`, marked as a draft for the owner.
 - Fonts: Bungee and Barlow Condensed, self-hosted under the SIL Open Font License (licence files
   beside them). GSAP is under Webflow's no-charge standard licence.
+- Optional fuller drawing of the players (shaped torso, shoes, face, tapered bat, mitt) behind
+  `FIGURE_STYLE` in `kit/Figures.tsx`; the default stays "simple". `dev/figures.html` shows both.
 - A dev-only page (`dev/fan-sentiment.html`, not a build input) mounts the post for previews.
   This branch does not touch `App.tsx`, the router or the Caddyfile.
 - The fansent world no longer has a hero site: its GitHub Pages page is being retired, and

@@ -188,6 +188,51 @@
 .post-fan-sentiment .fk-glove {
 	fill: var(--fs-leather);
 }
+.post-fan-sentiment .fk-shoe {
+	fill: var(--fs-deep);
+}
+.post-fan-sentiment .fk-torso-clay {
+	fill: var(--fs-clay);
+}
+.post-fan-sentiment .fk-torso-chalk {
+	fill: var(--fs-chalk);
+}
+.post-fan-sentiment .fk-belt {
+	stroke: var(--fs-deep);
+	stroke-width: 3.5;
+}
+.post-fan-sentiment .fk-stripe {
+	stroke: var(--fs-clay);
+	stroke-width: 2;
+}
+.post-fan-sentiment .fk-eye {
+	fill: var(--fs-deep);
+}
+.post-fan-sentiment .fk-smile,
+.post-fan-sentiment .fk-glove-web {
+	fill: none;
+	stroke: var(--fs-deep);
+	stroke-width: 1.5;
+	stroke-linecap: round;
+}
+.post-fan-sentiment .fk-glove-web {
+	stroke: rgb(0 0 0 / 0.35);
+}
+.post-fan-sentiment .fk-sleeve {
+	stroke-width: 10;
+}
+.post-fan-sentiment .fk-sleeve-clay {
+	stroke: var(--fs-clay);
+}
+.post-fan-sentiment .fk-sleeve-chalk {
+	stroke: var(--fs-chalk);
+}
+.post-fan-sentiment .fk-bat-handle {
+	stroke-width: 4.5;
+}
+.post-fan-sentiment .fk-bat-barrel {
+	stroke-width: 8.5;
+}
 .post-fan-sentiment .fk-ball-skin {
 	fill: #fffdf5;
 	stroke: rgb(21 63 42 / 0.35);
