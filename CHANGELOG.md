@@ -1,5 +1,16 @@
 # Changelog
 
+## 2026-11-23 (error responses)
+
+- 404s and other error responses now carry the same security headers as
+  every other response (CSP, HSTS, X-Frame-Options, Referrer-Policy,
+  Permissions-Policy, nosniff) and no longer send `Server: Caddy`. Before,
+  Caddy dropped the whole header block on errors, on the live site too.
+- An unknown blog URL such as `/blog/no-such-post/` returns a real 404 while
+  still showing the blog's not-found page, instead of a 200 that search
+  engines could index.
+- `pnpm check:caddy` asserts both, and now runs in the `browser-smoke` CI job.
+
 ## 2026-11-22 (blog is a page, not a world)
 
 - The blog moves from a cabn world to `/blog/`, built on the new `@cabn/blog`

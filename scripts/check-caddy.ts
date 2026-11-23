@@ -4,7 +4,7 @@
 // and a finished `pnpm build`. Usage: pnpm check:caddy
 // The rest of the suite never runs Caddy, so this is the only check of the
 // Caddyfile's own logic: SPA rewrites, the blog's file-or-shell fallback,
-// the security headers and the cache classes.
+// the security headers and the cache classes, on error responses as well.
 import { spawnSync } from "node:child_process";
 import {
 	mkdtempSync,
@@ -60,6 +60,7 @@ const CACHE: Record<Cache, string> = {
 	worlds: "public, max-age=300, must-revalidate",
 };
 
+let referencePermissions: string | null | undefined;
 async function expectPage(
 	path: string,
 	want: {
@@ -67,7 +68,6 @@ async function expectPage(
 		contains?: string[];
 		lacks?: string[];
 		cache?: Cache;
-		headers?: boolean;
 	},
 ): Promise<void> {
 	const response = await fetch(`http://127.0.0.1:${port}${path}`, {
@@ -86,7 +86,6 @@ async function expectPage(
 	for (const text of want.lacks ?? []) {
 		check(`${path} lacks ${text}`, !body.includes(text));
 	}
-	if (want.headers === false) return;
 	const headers: [string, string | null][] = [
 		["content-security-policy", csp],
 		["x-content-type-options", "nosniff"],
@@ -100,9 +99,19 @@ async function expectPage(
 		const got = response.headers.get(name);
 		check(`${path} ${name}`, got === value, `${JSON.stringify(got)}`);
 	}
+	const permissions = response.headers.get("permissions-policy");
 	check(
 		`${path} permissions-policy`,
-		(response.headers.get("permissions-policy") ?? "").includes("camera=()"),
+		(permissions ?? "").includes("camera=()"),
+		JSON.stringify(permissions),
+	);
+	// Error responses come from handle_errors, not the site block: the same
+	// Permissions-Policy as the home page shows they import the same set.
+	referencePermissions ??= permissions;
+	check(
+		`${path} permissions-policy matches /`,
+		permissions === referencePermissions,
+		JSON.stringify(permissions),
 	);
 }
 
@@ -172,13 +181,15 @@ try {
 			});
 		}
 	}
-	// No file for it: the shell, so the app can render the blog's not-found view.
+	// No file for it: a real 404 whose body is still the shell, so the app
+	// renders the blog's not-found view and crawlers do not index the URL.
 	for (const path of [
 		`${base}/no-such-post/`,
 		`${base}/no-such-post`,
 		`${base}/a/b/c`,
 	]) {
 		await expectPage(path, {
+			status: 404,
 			contains: [SHELL_TITLE, 'id="root"'],
 			lacks: ['rel="canonical"'],
 		});
@@ -197,12 +208,12 @@ try {
 	if (!hashed) throw new Error("dist/assets has no hashed index chunk");
 	await expectPage(`/assets/${hashed}`, { cache: "immutable" });
 
-	// Outside the SPA routes and the blog, a missing file is a real 404.
-	// Status only: as of 2026-11-23 Caddy's own error responses carry none of
-	// the header block above (an empty body, so little is exposed). Whether
-	// to add them through handle_errors is an open owner decision.
-	await expectPage("/resume", { status: 404, headers: false });
-	await expectPage("/no-such-file.js", { status: 404, headers: false });
+	// Outside the SPA routes and the blog, a missing file is a bare 404. Error
+	// responses go through handle_errors, which must repeat the header set.
+	await expectPage("/resume", { status: 404, lacks: ["<html"] });
+	await expectPage("/no-such-file.js", { status: 404, lacks: ["<html"] });
+	await expectPage("/assets/nope-AAAAAAAA.js", { status: 404 });
+	await expectPage("/worlds/nope/world.json", { status: 404 });
 } finally {
 	spawnSync("docker", ["stop", container], { encoding: "utf8" });
 	rmSync(work, { recursive: true, force: true });

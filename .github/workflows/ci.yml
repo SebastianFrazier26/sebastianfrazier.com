@@ -35,8 +35,10 @@ jobs:
 
   browser-smoke:
     # What unit tests cannot show: the blog runs under the real CSP, and its
-    # pages never download the game engine. One spec, against `vite preview`
-    # of the production build.
+    # pages never download the game engine (one spec, against `vite preview`
+    # of the production build); and the real Caddyfile, under the image's
+    # pinned Caddy, routes and sets headers as intended (Docker is on the
+    # runner).
     runs-on: ubuntu-latest
     needs: ci
     timeout-minutes: 15
@@ -52,6 +54,7 @@ jobs:
       - run: pnpm install --frozen-lockfile
       - run: pnpm build:fixture
       - run: pnpm build
+      - run: pnpm check:caddy
       - name: Cache Playwright browsers
         uses: actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830 # v4
         with:
