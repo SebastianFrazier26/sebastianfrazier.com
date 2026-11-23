@@ -1,5 +1,12 @@
 # Changelog
 
+## 2026-11-22 (dependency policy cleanup)
+
+- `minimumReleaseAgeExclude` is gone: the cabn 0.3.1 packages are past pnpm's
+  release-age window, so they install under the default policy.
+- The audit no longer ignores GHSA-fc5q-39xc-vjpf (picomatch). GitHub withdrew
+  the advisory on 2026-11-18 and `pnpm audit --audit-level=high` passes without it.
+
 ## 2026-11-21 (blog world)
 
 - New world: the blog, built from the public `SebastianFrazier26/blog` repo

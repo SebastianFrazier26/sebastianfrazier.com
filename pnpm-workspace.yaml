@@ -1,16 +1,4 @@
 allowBuilds:
   esbuild: true
-# 2026-11-21: cabn 0.3.1 was published today; pnpm's default release-age window would
-# refuse it for a day. Drop these entries once they're older than that.
-minimumReleaseAgeExclude:
-  - "@cabn/engine@0.3.1"
-  - "@cabn/cli@0.2.2"
-  - "@cabn/shadow-art@0.2.2"
 ignoredOptionalDependencies:
   - "@napi-rs/canvas"
-
-# 2026-11-17: GHSA-fc5q-39xc-vjpf (picomatch ReDoS) has no patched release yet
-# and only reaches us through dev tooling (vite/vitest). Drop once picomatch ships a fix.
-auditConfig:
-  ignoreGhsas:
-    - GHSA-fc5q-39xc-vjpf
