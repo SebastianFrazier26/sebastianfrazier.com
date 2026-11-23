@@ -3,8 +3,9 @@ import { useRef } from "react";
 import { COPY } from "../copy.ts";
 import { signed } from "../format.ts";
 import { Ground } from "../kit/Ground.tsx";
-import { gsap, useReveal } from "../kit/motion.ts";
+import { countUp, gsap, useReveal } from "../kit/motion.ts";
 import { DataTable, Stat } from "../kit/Scorebug.tsx";
+import { SectionHead } from "../kit/SectionHead.tsx";
 import { type LeagueData, METRIC_NAMES } from "../snapshot.ts";
 import { useWidth } from "../useWidth.ts";
 import "../theme.css";
@@ -39,34 +40,45 @@ export function League({ data }: { data: LeagueData }): React.ReactElement {
 
 	useReveal(
 		root,
-		() =>
-			gsap
-				.timeline({ defaults: { ease: "power2.out" } })
-				.from(".lg-cell", {
-					y: -(H + 20),
-					opacity: 0,
-					duration: 0.6,
-					ease: "power1.in",
-					stagger: { each: 0.006, from: "random" },
-				})
-				.from(".lg-pooled", {
-					scaleX: 0,
-					transformOrigin: "50% 50%",
-					duration: 0.5,
-					stagger: 0.06,
-				})
-				.from(".fk-stat", { opacity: 0, y: 10, stagger: 0.12, duration: 0.3 }),
+		(scope) =>
+			countUp(
+				gsap
+					.timeline({ defaults: { ease: "power2.out" } })
+					.from(".lg-cell", {
+						y: -(H + 20),
+						opacity: 0,
+						duration: 0.9,
+						ease: "bounce.out",
+						stagger: { each: 0.005, from: "random" },
+					})
+					.from(
+						".lg-pooled",
+						{
+							scaleX: 0,
+							transformOrigin: "50% 50%",
+							duration: 0.6,
+							stagger: 0.06,
+						},
+						">-0.3",
+					),
+				scope,
+			),
 		width,
 	);
 
 	return (
 		<section className="fk-section lg" ref={root} aria-labelledby="lg-title">
 			<div className="fk-wrap">
-				<p className="fk-inning">{COPY.league.inning}</p>
-				<h2 id="lg-title" className="fk-title">
-					{COPY.league.title}
-				</h2>
-				<p className="fk-copy">{COPY.league.body}</p>
+				<SectionHead
+					id="lg-title"
+					numeral="8"
+					inning={COPY.league.inning}
+					title={COPY.league.title}
+				>
+					<p className="fk-copy">{COPY.league.body}</p>
+				</SectionHead>
+			</div>
+			<div className="fk-bleed">
 				<div className="fk-scene" ref={box}>
 					<svg
 						width={width}
@@ -127,10 +139,15 @@ export function League({ data }: { data: LeagueData }): React.ReactElement {
 					</svg>
 				</div>
 				<div className="fk-stats">
-					<Stat label="Fanbase tests" value={String(data.cells.length)} />
+					<Stat
+						label="Fanbase tests"
+						value={String(data.cells.length)}
+						count={{ to: data.cells.length }}
+					/>
 					<Stat
 						label={`Clearing q < ${data.threshold}`}
 						value={String(data.clearing)}
+						count={{ to: data.clearing }}
 					/>
 					<Stat
 						label="League-wide stats that clear"
@@ -139,6 +156,8 @@ export function League({ data }: { data: LeagueData }): React.ReactElement {
 						} of ${data.pooled.length}`}
 					/>
 				</div>
+			</div>
+			<div className="fk-wrap">
 				<DataTable
 					summary="League-wide numbers for each stat"
 					head={["Stat", "Effect", "95% interval", "q"]}

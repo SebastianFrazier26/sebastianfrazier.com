@@ -1,5 +1,21 @@
 # Changelog
 
+## 2026-11-23 (fan-sentiment post: arcade players and motion pass)
+
+- Players are now original arcade-style pixel sprites (`FIGURE_STYLE = "arcade"`, the new
+  default): big-headed batter in a helmet, fielder in a cap, inked outlines, team colours from the
+  post's palette. The swing plays four drawn frames (stance, load, whip, contact) and the fielder
+  switches from a waiting glove to a reach for the catch. Same pivot, contact point and glove
+  pocket as before; "simple" and "full" remain and `dev/figures.html` shows all three.
+- Motion pass: balls fly with a trail, a ground shadow that shrinks with height, and squash and
+  stretch on contact and landing. The pre-registered test scene pins and scrubs with the scroll
+  on roomy screens (plays once on phones). Scorebugs are one dark strip whose numerals count up
+  and pop in. Reduced motion still shows the finished picture.
+- Layout: section heads set the title and copy side by side on wide screens, with a hollow
+  inning numeral drifting behind (parallax); scenes sit on a full-width turf band; the opener is
+  a full-screen ballpark (crowd, light towers, outfield wall, parallax) with a two-hop grounder;
+  the last two innings fade to night. Data tables stay behind their toggles.
+
 ## 2026-11-22 (fan-sentiment post)
 
 - New post in `src/blog/fan-sentiment/`, in the shape the blog module (`@cabn/blog`, on

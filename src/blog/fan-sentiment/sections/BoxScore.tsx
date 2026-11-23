@@ -1,7 +1,8 @@
 import { useRef } from "react";
 import { COPY } from "../copy.ts";
-import { gsap, useReveal } from "../kit/motion.ts";
+import { countUp, gsap, useReveal } from "../kit/motion.ts";
 import { Stat } from "../kit/Scorebug.tsx";
+import { SectionHead } from "../kit/SectionHead.tsx";
 import type { LeagueData, Snapshot } from "../snapshot.ts";
 import "../theme.css";
 
@@ -18,20 +19,24 @@ export function BoxScore({
 	const root = useRef<HTMLElement>(null);
 	useReveal(
 		root,
-		() =>
-			gsap
-				.timeline({ defaults: { ease: "power2.out" } })
-				.from(".fk-stat", { opacity: 0, y: 12, stagger: 0.14, duration: 0.35 }),
+		(scope) =>
+			countUp(gsap.timeline({ defaults: { ease: "power2.out" } }), scope).from(
+				".bx-limits li",
+				{ opacity: 0, x: -12, stagger: 0.1, duration: 0.4 },
+			),
 		"static",
 	);
 	return (
 		<section className="fk-section bx" ref={root} aria-labelledby="bx-title">
 			<div className="fk-wrap">
-				<p className="fk-inning">{COPY.boxScore.inning}</p>
-				<h2 id="bx-title" className="fk-title">
-					{COPY.boxScore.title}
-				</h2>
-				<p className="fk-copy">{COPY.boxScore.body}</p>
+				<SectionHead
+					id="bx-title"
+					numeral="F"
+					inning={COPY.boxScore.inning}
+					title={COPY.boxScore.title}
+				>
+					<p className="fk-copy">{COPY.boxScore.body}</p>
+				</SectionHead>
 				<div className="fk-stats">
 					<Stat
 						className="fk-verdict"

@@ -1,7 +1,16 @@
-// The post's cast, drawn from a few rounded strokes each. Every figure's
-// origin is the ground between its feet, so a scene places one with a single
-// translate. Parts that move carry a class; scenes turn them by writing a
-// `rotate(angle cx cy)` attribute in the figure's own coordinates.
+// The post's cast. Every figure's origin is the ground between its feet, so a
+// scene places one with a single translate. Scenes never touch a figure's
+// parts directly: they call swingTo and poseFielder, which turn the vector
+// drawings' parts and flip the arcade sprites' frames.
+
+import {
+	BATTER_SPRITE,
+	type CatchPose,
+	FIELDER_SPRITE,
+	PAINT_ORDER,
+	SWING_POSES,
+	swingFrame,
+} from "./sprites.ts";
 
 export const BATTER = {
 	/** Shoulder the arms and bat swing around. */
@@ -17,20 +26,69 @@ export const FIELDER = {
 	glove: [-17, -92] as const,
 };
 
-export type FigureStyle = "simple" | "full";
+export type FigureStyle = "arcade" | "simple" | "full";
 
 /**
- * Which drawing of the players the post uses. "simple" is a handful of
- * rounded strokes; "full" adds a shaped torso, shoes, a face and a proper
- * mitt. Both share the same pivot, contact point and glove pocket, so scenes
- * do not change with the style.
+ * Which drawing of the players the post uses. "arcade" is a pixel sprite with
+ * a few drawn frames per swing and catch; "simple" is a handful of rounded
+ * strokes; "full" adds a shaped torso, shoes, a face and a proper mitt. All
+ * share the same pivot, contact point and glove pocket, so scenes do not
+ * change with the style.
  */
-export const FIGURE_STYLE: FigureStyle = "simple";
+export const FIGURE_STYLE: FigureStyle = "arcade";
+
+function Pixels({
+	paths,
+}: {
+	paths: Record<string, string>;
+}): React.ReactElement {
+	return (
+		<>
+			{PAINT_ORDER.filter((k) => paths[k]).map((k) => (
+				<path key={k} className={`fk-px fk-px-${k}`} d={paths[k]} />
+			))}
+		</>
+	);
+}
+
+/** Sets a batter's swing: an angle from BATTER.cocked to 0 (contact). */
+export function swingTo(batter: Element | null, angle: number): void {
+	if (!batter) return;
+	const frames = batter.querySelectorAll("[data-swing]");
+	if (frames.length === 0) {
+		batter
+			.querySelector(".fk-swing")
+			?.setAttribute(
+				"transform",
+				`rotate(${angle} ${BATTER.pivot[0]} ${BATTER.pivot[1]})`,
+			);
+		return;
+	}
+	const shown = String(swingFrame(angle));
+	for (const f of frames) {
+		f.setAttribute(
+			"visibility",
+			f.getAttribute("data-swing") === shown ? "visible" : "hidden",
+		);
+	}
+}
+
+/** Shows a fielder waiting with the glove low or reaching for the catch. */
+export function poseFielder(fielder: Element | null, pose: CatchPose): void {
+	for (const f of fielder?.querySelectorAll("[data-pose]") ?? []) {
+		f.setAttribute(
+			"visibility",
+			f.getAttribute("data-pose") === pose ? "visible" : "hidden",
+		);
+	}
+}
 
 interface Placed {
 	x: number;
 	y: number;
 	scale?: number;
+	/** The arcade fielder's pose in the finished picture. */
+	pose?: CatchPose;
 	/** Overrides FIGURE_STYLE; the dev comparison page uses it. */
 	variant?: FigureStyle;
 }
@@ -59,18 +117,76 @@ export function Ball({
 	);
 }
 
+/**
+ * A ball in flight, drawn at rest at `to` with its ground shadow; the ghosts
+ * of its trail are invisible until flightDrawer moves them.
+ */
+export function Flight({
+	to,
+	ground,
+	r = 7,
+	className = "",
+}: {
+	to: readonly [number, number];
+	ground: number;
+	r?: number;
+	className?: string;
+}): React.ReactElement {
+	return (
+		<g className={`fk-flight ${className}`}>
+			<ellipse
+				className="fk-shadow"
+				rx={r * 1.4}
+				ry={r * 0.4}
+				transform={`translate(${to[0]} ${ground})`}
+				opacity={0.45}
+			/>
+			{[0, 1, 2, 3].map((i) => (
+				<circle
+					key={i}
+					className="fk-ghost"
+					r={r * (0.86 - i * 0.14)}
+					transform={`translate(${to[0]} ${to[1]})`}
+					opacity={0}
+				/>
+			))}
+			<g className="fk-flight-ball" transform={`translate(${to[0]} ${to[1]})`}>
+				<g className="fk-squash">
+					<Ball x={0} y={0} r={r} />
+				</g>
+			</g>
+		</g>
+	);
+}
+
 export function Batter({
 	x,
 	y,
 	scale = 1,
 	variant = FIGURE_STYLE,
 }: Placed): React.ReactElement {
+	const place = `translate(${x} ${y}) scale(${scale})`;
+	if (variant === "arcade") {
+		const last = SWING_POSES.length - 1;
+		return (
+			<g className="fk-figure fk-batter fk-arcade" transform={place}>
+				<Pixels paths={BATTER_SPRITE.body} />
+				{BATTER_SPRITE.frames.map((paths, i) => (
+					<g
+						// biome-ignore lint/suspicious/noArrayIndexKey: frames are fixed and positional.
+						key={i}
+						data-swing={i}
+						visibility={i === last ? "visible" : "hidden"}
+					>
+						<Pixels paths={paths} />
+					</g>
+				))}
+			</g>
+		);
+	}
 	const full = variant === "full";
 	return (
-		<g
-			className="fk-figure fk-batter"
-			transform={`translate(${x} ${y}) scale(${scale})`}
-		>
+		<g className="fk-figure fk-batter" transform={place}>
 			{full && (
 				<>
 					<ellipse className="fk-shoe" cx={-10} cy={-2.5} rx={8} ry={4} />
@@ -158,14 +274,31 @@ export function Fielder({
 	x,
 	y,
 	scale = 1,
+	pose: shown = "catch",
 	variant = FIGURE_STYLE,
 }: Placed): React.ReactElement {
+	const place = `translate(${x} ${y}) scale(${scale})`;
+	if (variant === "arcade") {
+		return (
+			<g className="fk-figure fk-fielder fk-arcade" transform={place}>
+				<g className="fk-hop">
+					<Pixels paths={FIELDER_SPRITE.body} />
+					{(["ready", "catch"] as const).map((pose) => (
+						<g
+							key={pose}
+							data-pose={pose}
+							visibility={pose === shown ? "visible" : "hidden"}
+						>
+							<Pixels paths={FIELDER_SPRITE.frames[pose]} />
+						</g>
+					))}
+				</g>
+			</g>
+		);
+	}
 	const full = variant === "full";
 	return (
-		<g
-			className="fk-figure fk-fielder"
-			transform={`translate(${x} ${y}) scale(${scale})`}
-		>
+		<g className="fk-figure fk-fielder" transform={place}>
 			<g className="fk-hop">
 				{full && (
 					<>

@@ -1,17 +1,33 @@
-/** One matte stat chip: a small label over a scoreboard numeral. */
+/** How a numeral counts up to its value when the scorebug pops in. */
+export interface Count {
+	to: number;
+	digits?: number;
+	signed?: boolean;
+}
+
+/** One segment of a scorebug: a small label over a scoreboard numeral. */
 export function Stat({
 	label,
 	value,
+	count,
 	className = "",
 }: {
 	label: string;
 	value: string;
+	count?: Count;
 	className?: string;
 }): React.ReactElement {
 	return (
 		<p className={`fk-stat ${className}`}>
 			<span className="fk-stat-label">{label}</span>
-			<span className="fk-stat-value">{value}</span>
+			<span
+				className="fk-stat-value"
+				data-count={count?.to}
+				data-digits={count?.digits}
+				data-signed={count?.signed}
+			>
+				{value}
+			</span>
 		</p>
 	);
 }

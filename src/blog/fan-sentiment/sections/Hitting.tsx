@@ -2,10 +2,10 @@ import { scaleLinear } from "d3-scale";
 import { useRef } from "react";
 import { COPY } from "../copy.ts";
 import { signed } from "../format.ts";
-import { BATTER, Ball, Batter } from "../kit/Figures.tsx";
+import { BATTER, Batter, Flight, swingTo } from "../kit/Figures.tsx";
 import { Ground } from "../kit/Ground.tsx";
 import {
-	bezier,
+	flightDrawer,
 	flyControl,
 	flyPath,
 	gsap,
@@ -13,6 +13,7 @@ import {
 	useReveal,
 } from "../kit/motion.ts";
 import { DataTable } from "../kit/Scorebug.tsx";
+import { SectionHead } from "../kit/SectionHead.tsx";
 import { METRIC_NAMES as NAMES, type SnapshotRow } from "../snapshot.ts";
 import { useWidth } from "../useWidth.ts";
 import "../theme.css";
@@ -45,7 +46,6 @@ export function Hitting({ rows }: { rows: SnapshotRow[] }): React.ReactElement {
 		const to: Point = [x(r.mu_mean), G - 8 * s];
 		return { r, to, control: flyControl(from, to, 96 + i * 18) };
 	});
-	const pivot = `${BATTER.pivot[0]} ${BATTER.pivot[1]}`;
 
 	useReveal(
 		root,
@@ -54,13 +54,17 @@ export function Hitting({ rows }: { rows: SnapshotRow[] }): React.ReactElement {
 			scope.querySelectorAll<SVGSVGElement>(".ht-lane").forEach((lane, i) => {
 				const spec = lanes[i];
 				if (!spec) return;
-				const swing = lane.querySelector(".fk-swing");
-				const ball = lane.querySelector(".ht-ball");
+				const batter = lane.querySelector(".fk-batter");
+				const fly = flightDrawer(lane.querySelector(".ht-flight"), {
+					from,
+					control: spec.control,
+					to: spec.to,
+					ground: G,
+				});
 				const state = { angle: BATTER.cocked, t: 0 };
 				const draw = (): void => {
-					swing?.setAttribute("transform", `rotate(${state.angle} ${pivot})`);
-					const [bx, by] = bezier(state.t, from, spec.control, spec.to);
-					ball?.setAttribute("transform", `translate(${bx} ${by})`);
+					swingTo(batter, state.angle);
+					fly(state.t);
 				};
 				draw();
 				const q = gsap.utils.selector(lane);
@@ -72,15 +76,31 @@ export function Hitting({ rows }: { rows: SnapshotRow[] }): React.ReactElement {
 				})
 					.to(
 						state,
-						{ t: 1, duration: 1.2, ease: "none", onUpdate: draw },
+						{ t: 1, duration: 1.2, ease: "power1.in", onUpdate: draw },
 						">-0.05",
 					)
 					.from(
 						q(".fk-trace"),
-						{ attr: { "stroke-dashoffset": 1 }, duration: 1.2, ease: "none" },
+						{
+							attr: { "stroke-dashoffset": 1 },
+							duration: 1.2,
+							ease: "power1.in",
+						},
 						"<",
 					)
-					.from(q(".ht-interval"), { opacity: 0, duration: 0.3 })
+					.to(q(".fk-squash"), {
+						scaleX: 1.4,
+						scaleY: 0.66,
+						transformOrigin: "50% 100%",
+						duration: 0.08,
+						yoyo: true,
+						repeat: 1,
+					})
+					.from(q(".ht-interval"), {
+						scaleX: 0,
+						transformOrigin: "50% 50%",
+						duration: 0.45,
+					})
 					.from(q(".ht-label"), { opacity: 0, y: 8, duration: 0.3 }, "<");
 			});
 			return tl;
@@ -91,12 +111,16 @@ export function Hitting({ rows }: { rows: SnapshotRow[] }): React.ReactElement {
 	return (
 		<section className="fk-section ht" ref={root} aria-labelledby="ht-title">
 			<div className="fk-wrap">
-				<p className="fk-inning">{COPY.hitting.inning}</p>
-				<h2 id="ht-title" className="fk-title">
-					{COPY.hitting.title}
-				</h2>
-				<p className="fk-copy">{COPY.hitting.body}</p>
-
+				<SectionHead
+					id="ht-title"
+					numeral="7"
+					inning={COPY.hitting.inning}
+					title={COPY.hitting.title}
+				>
+					<p className="fk-copy">{COPY.hitting.body}</p>
+				</SectionHead>
+			</div>
+			<div className="fk-bleed">
 				<div className="fk-scene" ref={box}>
 					{lanes.map(({ r, to, control }, i) => (
 						<svg
@@ -160,11 +184,12 @@ export function Hitting({ rows }: { rows: SnapshotRow[] }): React.ReactElement {
 								strokeDashoffset={0}
 							/>
 							<Batter x={batterX} y={G} scale={s} />
-							<Ball className="fk-ball ht-ball" x={to[0]} y={to[1]} r={7 * s} />
+							<Flight className="ht-flight" to={to} ground={G} r={7 * s} />
 						</svg>
 					))}
 				</div>
-
+			</div>
+			<div className="fk-wrap">
 				<DataTable
 					summary="The numbers in these at-bats"
 					head={["Metric", "Effect", "95% interval", "q"]}

@@ -4,6 +4,7 @@ import { COPY } from "../copy.ts";
 import { signed } from "../format.ts";
 import { Ground } from "../kit/Ground.tsx";
 import { gsap, useReveal } from "../kit/motion.ts";
+import { SectionHead } from "../kit/SectionHead.tsx";
 import { useWidth } from "../useWidth.ts";
 import "../theme.css";
 
@@ -38,19 +39,43 @@ export function Review({
 			gsap
 				.timeline({ defaults: { ease: "power2.inOut" } })
 				.from(".rv-ghost", { opacity: 0, duration: 0.4 })
-				.from(".rv-zone", { x: shift, duration: 1.1 }, ">0.3")
-				.from(".rv-after", { opacity: 0, duration: 0.3 }),
+				.from(
+					".rv-zone",
+					{ x: shift, duration: 1.2, ease: "power4.inOut" },
+					">0.3",
+				)
+				.from(
+					".rv-zone",
+					{ skewX: shift > 0 ? 8 : -8, duration: 1.2, ease: "power2.out" },
+					"<0.3",
+				)
+				.from(
+					".rv-plate",
+					{
+						scale: 1.4,
+						transformOrigin: "50% 50%",
+						duration: 0.5,
+						ease: "back.out(3)",
+					},
+					">-0.25",
+				)
+				.from(".rv-after", { opacity: 0, x: -10, duration: 0.3 }, "<"),
 		width,
 	);
 
 	return (
 		<section className="fk-section rv" ref={root} aria-labelledby="rv-title">
 			<div className="fk-wrap">
-				<p className="fk-inning">{COPY.review.inning}</p>
-				<h2 id="rv-title" className="fk-title">
-					{COPY.review.title}
-				</h2>
-				<p className="fk-copy">{COPY.review.body}</p>
+				<SectionHead
+					id="rv-title"
+					numeral="R"
+					inning={COPY.review.inning}
+					title={COPY.review.title}
+				>
+					<p className="fk-copy">{COPY.review.body}</p>
+				</SectionHead>
+			</div>
+			<div className="fk-bleed">
 				<div className="fk-scene" ref={box}>
 					<svg
 						width={width}
@@ -73,8 +98,9 @@ export function Review({
 							/>
 							<text
 								className="fk-note"
-								x={x(before) + zoneW / 2 + 10}
-								y={G - 86}
+								x={narrow ? x(before) + zoneW / 2 : x(before) + zoneW / 2 + 10}
+								y={narrow ? G - 114 : G - 86}
+								textAnchor={narrow ? "end" : "start"}
 							>
 								{COPY.review.before} · about {signed(before, 2)}
 							</text>
@@ -104,11 +130,9 @@ export function Review({
 							to={width - 8}
 							ticks={narrow ? [0, 0.03] : [-0.03, 0, 0.03, 0.06]}
 						/>
-						<path
-							className="rv-plate"
-							transform={`translate(${x(0)} ${G - 16})`}
-							d="M-13 0 H13 V8 L0 18 L-13 8 Z"
-						/>
+						<g transform={`translate(${x(0)} ${G - 16})`}>
+							<path className="rv-plate" d="M-13 0 H13 V8 L0 18 L-13 8 Z" />
+						</g>
 					</svg>
 				</div>
 			</div>

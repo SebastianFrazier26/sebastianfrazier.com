@@ -1,4 +1,4 @@
-// Dev-only page: the two drawings of the players side by side, so the owner
+// Dev-only page: the drawings of the players side by side, so the owner
 // can pick FIGURE_STYLE in kit/Figures.tsx. Not a build input.
 import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
@@ -37,6 +37,7 @@ createRoot(container).render(
 	<StrictMode>
 		<div className="post-fan-sentiment">
 			<div className="fk-section">
+				<Pair variant="arcade" />
 				<Pair variant="simple" />
 				<Pair variant="full" />
 			</div>
