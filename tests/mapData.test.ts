@@ -3,6 +3,7 @@ import {
 	decorSlots,
 	layoutMarkers,
 	type MapProject,
+	mapMarkers,
 	parseShelfProjects,
 	playPath,
 	resolveWorld,
@@ -131,5 +132,45 @@ describe("decorSlots", () => {
 		const slots = decorSlots(6, "wide");
 		expect(slots).toHaveLength(8);
 		for (const slot of slots) expect(slot.y).toBeLessThan(100);
+	});
+});
+
+describe("mapMarkers", () => {
+	const project = (slug: string): MapProject => ({
+		slug,
+		name: slug.toUpperCase(),
+		description: `${slug} world`,
+		order: 1,
+		worldUrl: `/worlds/${slug}/world.json`,
+		shelfIndex: 0,
+	});
+
+	it("links each project to its world and puts the blog last", () => {
+		expect(mapMarkers([project("a"), project("b")])).toEqual([
+			{
+				key: "world:a",
+				name: "A",
+				description: "a world",
+				href: "/play?world=a",
+			},
+			{
+				key: "world:b",
+				name: "B",
+				description: "b world",
+				href: "/play?world=b",
+			},
+			{
+				key: "blog",
+				name: "Blog",
+				description: expect.any(String),
+				href: "/blog/",
+			},
+		]);
+	});
+
+	// The blog is a page, not a world: it stays on the map even when the
+	// shelf lists nothing.
+	it("still shows the blog with no projects", () => {
+		expect(mapMarkers([]).map((marker) => marker.key)).toEqual(["blog"]);
 	});
 });

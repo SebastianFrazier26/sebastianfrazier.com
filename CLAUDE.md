@@ -14,6 +14,7 @@ directly via type stripping), pnpm, TypeScript strict, Biome, Vitest, zod.
 - `pnpm preview -- --port <free port>` — serve `dist/`
 - `pnpm upstream-changed` — scheduled-deploy decision (`DEPLOYED_MANIFEST_URL`, `GITHUB_TOKEN` env)
 - `pnpm engine:link [dir]` / `pnpm engine:unlink` — local cabn checkout via `.pnpmfile.cjs`; never leaves `link:` in the lockfile. While linked, every pnpm script needs `--config.verify-deps-before-run=false` or pnpm silently relinks npm 0.1.0
+- `node scripts/build-blog.ts` — runs inside `pnpm build`, after `vite build`: writes `dist/blog/index.html`, `dist/blog/<slug>/index.html` (copies of the shell with each page's title and link-preview tags), `feed.xml` and `sitemap.xml`
 - Full check before a commit: `pnpm lint && pnpm typecheck && pnpm test && pnpm build:fixture && pnpm build`
 
 ## Layout
@@ -25,6 +26,7 @@ directly via type stripping), pnpm, TypeScript strict, Biome, Vitest, zod.
 - `scripts/lib/upstream.ts` — pure diff of upstream SHAs, site commit and cabn version vs the deployed manifest
 - `scripts/lib/secrets.ts` — pattern secret scan of each extract (fails private projects); `scripts/lib/excludes.ts` — gitignore-style excludes
 - `src/App.tsx` (routes `/` map, `/play?world=<project id>`), `src/MapLanding.tsx` + `src/mapData.ts` (map markers and `?world=` validation, derived from the public `shelf.json`), `src/CabnWorld.tsx` (deep-link wrapper). There is no résumé page; `check-dist.ts` fails if `dist/resume` appears
+- `src/route.ts` (pure route parser), `src/BlogPage.tsx` (lazy chunk: `@cabn/blog`'s `<Blog>` and its stylesheet) and `src/blog/posts.ts` (the post list). `posts.ts` is also imported in Node by `scripts/build-blog.ts` and `scripts/check-dist.ts`, so it may contain only lazy `() => import(...)` loaders (`tests/blog.test.ts` enforces it). A post lives in `src/blog/<slug>/`; its stylesheets must scope every selector under `.post-<slug>` (same test). The blog is a page, not a world: nothing about it is in `projects.json`
 - `csp-policy.ts` — one CSP for the meta tag and the Caddy header; `public/zod-jitless.js` keeps zod's eval probe from tripping it
 - `Dockerfile`, `Caddyfile`, `scripts/render-caddyfile.ts` — the hosted image. Worlds are built in CI, not in Docker
 - Generated, gitignored: `public/worlds/`, `public/assets/`, `dist/`

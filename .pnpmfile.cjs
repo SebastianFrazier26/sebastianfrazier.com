@@ -2,7 +2,12 @@
 // the site's @cabn/* dependencies resolve to that cabn checkout's packages
 // instead of npm. Unset — always, in CI and in the committed lockfile — this
 // hook changes nothing.
-const LINKED = ["@cabn/engine", "@cabn/cli", "@cabn/world-schema"];
+const LINKED = [
+	"@cabn/engine",
+	"@cabn/cli",
+	"@cabn/world-schema",
+	"@cabn/blog",
+];
 
 function readPackage(pkg) {
 	const dir = process.env.CABN_ENGINE_DIR;

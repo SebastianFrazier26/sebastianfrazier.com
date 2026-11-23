@@ -13,7 +13,7 @@
 		"build:worlds": "node scripts/build-worlds.ts",
 		"build:fixture": "node scripts/build-worlds.ts --fixture",
 		"build:assets": "node scripts/copy-engine-assets.ts",
-		"build": "pnpm build:assets && tsc --noEmit -p tsconfig.json && vite build",
+		"build": "pnpm build:assets && tsc --noEmit -p tsconfig.json && vite build && node scripts/build-blog.ts",
 		"preview": "vite preview",
 		"upstream-changed": "node scripts/upstream-changed.ts",
 		"render-caddyfile": "node scripts/render-caddyfile.ts Caddyfile Caddyfile.rendered",
@@ -26,6 +26,7 @@
 		"postbuild": "node scripts/check-dist.ts"
 	},
 	"dependencies": {
+		"@cabn/blog": "0.1.0",
 		"@cabn/engine": "0.3.1",
 		"pdfjs-dist": "6.3.289",
 		"react": "^19.3.0",

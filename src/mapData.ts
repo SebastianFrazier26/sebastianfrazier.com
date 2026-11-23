@@ -69,6 +69,35 @@ export function playPath(slug?: string): string {
 	return slug ? `/play?world=${encodeURIComponent(slug)}` : "/play";
 }
 
+export interface MapMarker {
+	key: string;
+	name: string;
+	description: string;
+	href: string;
+}
+
+// Matches @cabn/blog's index href for the default base path. Written out
+// rather than imported so the map's chunk does not pull the blog package in.
+export const BLOG_PATH = "/blog/";
+
+/** The map's cabins: one per world on the shelf, then the blog, which is a page and not a world. */
+export function mapMarkers(projects: readonly MapProject[]): MapMarker[] {
+	return [
+		...projects.map((project) => ({
+			key: `world:${project.slug}`,
+			name: project.name,
+			description: project.description,
+			href: playPath(project.slug),
+		})),
+		{
+			key: "blog",
+			name: "Blog",
+			description: "Write-ups on the projects. A page to read, not a world.",
+			href: BLOG_PATH,
+		},
+	];
+}
+
 export type MapShape = "wide" | "tall";
 
 export interface MapPoint {

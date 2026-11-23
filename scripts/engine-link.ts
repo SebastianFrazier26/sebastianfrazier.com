@@ -21,7 +21,7 @@ function pnpm(args: string[], env: NodeJS.ProcessEnv = process.env): void {
 
 if (mode === "link") {
 	const dir = resolve(dirArg ?? process.env.CABN_ENGINE_DIR ?? "../cabn");
-	for (const pkg of ["engine", "cli", "world-schema"]) {
+	for (const pkg of ["engine", "cli", "world-schema", "blog"]) {
 		if (!existsSync(resolve(dir, "packages", pkg, "dist"))) {
 			console.error(
 				`${dir}/packages/${pkg}/dist missing — run \`pnpm -r build\` in ${dir}`,

@@ -40,5 +40,12 @@
 	@spa path /play /play/
 	rewrite @spa /index.html
 
+	# The build writes blog/index.html and blog/<slug>/index.html, each with
+	# its own title and link-preview tags (scripts/build-blog.ts). A blog path
+	# with no file falls back to the SPA shell, which shows the blog's
+	# not-found view. feed.xml and sitemap.xml match {path} as plain files.
+	@blog path /blog /blog/*
+	try_files @blog {path} {path}/index.html /index.html
+
 	file_server
 }

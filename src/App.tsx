@@ -1,22 +1,16 @@
 import { lazy, Suspense, useEffect, useState } from "react";
 import { MapLanding } from "./MapLanding.tsx";
 import { resolveWorld } from "./mapData.ts";
+import { parseRoute, type Route } from "./route.ts";
 import { useShelf } from "./useShelf.ts";
 
 const CabnWorld = lazy(() => import("./CabnWorld.tsx"));
 
-interface Route {
-	playing: boolean;
-	/** Raw `?world=` value; validated against the shelf once it has loaded. */
-	world: string | null;
-}
+// Its own chunk: the blog's code and stylesheet reach only blog visitors.
+const BlogPage = lazy(() => import("./BlogPage.tsx"));
 
 function readRoute(): Route {
-	const { pathname, search } = window.location;
-	return {
-		playing: pathname.replace(/\/$/, "") === "/play",
-		world: new URLSearchParams(search).get("world"),
-	};
+	return parseRoute(window.location.pathname, window.location.search);
 }
 
 export function App(): React.ReactElement {
@@ -35,7 +29,16 @@ export function App(): React.ReactElement {
 		window.scrollTo(0, 0);
 	};
 
-	if (!route.playing) return <MapLanding shelf={shelf} onNavigate={navigate} />;
+	if (route.page === "blog") {
+		return (
+			<Suspense fallback={<p className="loading">Turning the page…</p>}>
+				<BlogPage route={route.route} onNavigate={navigate} />
+			</Suspense>
+		);
+	}
+	if (route.page === "map") {
+		return <MapLanding shelf={shelf} onNavigate={navigate} />;
+	}
 
 	// A deep link waits for the shelf so an unknown id can be told from a slow
 	// load; the plain base world does not.
