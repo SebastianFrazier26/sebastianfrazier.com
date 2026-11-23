@@ -4,6 +4,10 @@
 // the snapshot.
 
 export const COPY = {
+	ui: {
+		more: "Read more",
+		less: "Show less",
+	},
 	opener: {
 		kicker: "2026 season · every fanbase · one test called in advance",
 		title: "Are the fans always right?",
@@ -49,6 +53,7 @@ export const COPY = {
 		body: 'Along the way I found my own test was miscalibrated. Fans react to how a player has just played, and my first version of the test ignored that, which shifted its idea of "nothing" off zero. I rebuilt it so that reaction stays in, re-ran everything, and corrected one conclusion I had already written up. None of it changes the result of the test called in advance.',
 		before: "first version",
 		after: "rebuilt",
+		replay: "Replay",
 	},
 	boxScore: {
 		inning: "Final",

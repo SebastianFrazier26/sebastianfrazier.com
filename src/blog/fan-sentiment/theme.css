@@ -676,3 +676,98 @@
 		font-size: 13px;
 	}
 }
+
+/* Dirt thrown up where a ball lands. */
+.post-fan-sentiment .fk-speck {
+	fill: var(--fs-clay-soft);
+}
+
+/* The league scoreboard hangs over its field. */
+.post-fan-sentiment .fk-bleed > .lg-board {
+	margin: 0 auto 1.75rem;
+}
+
+/* Replay booth: a clay bug in the corner and chalk framing on the call. */
+.post-fan-sentiment .rv .fk-scene svg {
+	overflow: hidden;
+}
+.post-fan-sentiment .rv-replay-chip {
+	fill: var(--fs-clay);
+}
+.post-fan-sentiment .rv-arrow {
+	fill: var(--fs-chalk);
+}
+.post-fan-sentiment .rv-replay-text {
+	fill: var(--fs-chalk);
+	font-family: var(--fs-score);
+	font-size: 14px;
+	letter-spacing: 0.18em;
+	text-transform: uppercase;
+}
+.post-fan-sentiment .rv-frame {
+	fill: none;
+	stroke: var(--fs-chalk);
+	stroke-width: 3;
+	stroke-linecap: round;
+}
+
+/* Copy that folds to three lines on phones (see Clamp). */
+.post-fan-sentiment .fk-more {
+	display: none;
+}
+@media (max-width: 599px) {
+	.post-fan-sentiment .fk-section {
+		padding-top: clamp(4rem, 12vh, 6rem);
+	}
+	.post-fan-sentiment .fk-copy {
+		font-size: 1.04rem;
+		line-height: 1.55;
+	}
+	.post-fan-sentiment .fk-numeral {
+		font-size: 8rem;
+	}
+	.post-fan-sentiment .fk-title {
+		margin-bottom: 1.1rem;
+	}
+	.post-fan-sentiment .fk-bleed {
+		margin-top: 1.25rem;
+	}
+	.post-fan-sentiment .fk-clamp .fk-copy {
+		margin-bottom: 0.4rem;
+	}
+	.post-fan-sentiment .fk-clamp:not(.is-open) .fk-copy {
+		display: -webkit-box;
+		-webkit-box-orient: vertical;
+		-webkit-line-clamp: 3;
+		line-clamp: 3;
+		overflow: hidden;
+		mask-image: linear-gradient(180deg, #000 60%, transparent);
+	}
+	.post-fan-sentiment .fk-more {
+		display: inline-flex;
+		align-items: center;
+		gap: 0.4rem;
+		margin: 0 0 1rem;
+		padding: 0.35rem 0.8rem;
+		border: 1px solid rgb(246 243 231 / 0.35);
+		border-radius: 999px;
+		background: none;
+		color: var(--fs-chalk);
+		font-family: var(--fs-score);
+		font-size: 0.85rem;
+		letter-spacing: 0.16em;
+		text-transform: uppercase;
+		cursor: pointer;
+	}
+	.post-fan-sentiment .fk-more:focus-visible {
+		outline: 2px solid var(--fs-chalk);
+		outline-offset: 2px;
+	}
+	.post-fan-sentiment .bx-limits {
+		font-size: 0.95rem;
+	}
+}
+/* Balls fall into the two-team scene from above its top edge, not over the section before it. */
+.post-fan-sentiment .fi .fk-scene svg {
+	overflow: hidden;
+}

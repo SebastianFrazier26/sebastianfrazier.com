@@ -1,5 +1,34 @@
-import { Fragment, type ReactNode, useRef } from "react";
+import { Fragment, type ReactNode, useRef, useState } from "react";
+import { COPY } from "../copy.ts";
 import { gsap, useParallax, useReveal } from "./motion.ts";
+
+/**
+ * Body copy that phones show as three lines and a "Read more" toggle; wider
+ * screens show it whole and never see the button. The full text is always in
+ * the page, so screen readers get all of it.
+ */
+export function Clamp({
+	children,
+	className = "",
+}: {
+	children: ReactNode;
+	className?: string;
+}): React.ReactElement {
+	const [open, setOpen] = useState(false);
+	return (
+		<div className={`fk-clamp${open ? " is-open" : ""}`}>
+			<p className={`fk-copy ${className}`}>{children}</p>
+			<button
+				type="button"
+				className="fk-more"
+				aria-expanded={open}
+				onClick={() => setOpen((o) => !o)}
+			>
+				{open ? COPY.ui.less : COPY.ui.more}
+			</button>
+		</div>
+	);
+}
 
 /**
  * A section's opening: a scoreboard numeral drifting behind, the inning

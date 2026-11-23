@@ -2,7 +2,7 @@ import { scaleLinear } from "d3-scale";
 import { useRef } from "react";
 import { COPY } from "../copy.ts";
 import { signed } from "../format.ts";
-import { BATTER, Batter, Flight, swingTo } from "../kit/Figures.tsx";
+import { BATTER, Batter, Flight, Puff, swingTo } from "../kit/Figures.tsx";
 import { Ground } from "../kit/Ground.tsx";
 import {
 	flightDrawer,
@@ -10,10 +10,12 @@ import {
 	flyPath,
 	gsap,
 	type Point,
+	puff,
+	SCRUBBED,
 	useReveal,
 } from "../kit/motion.ts";
 import { DataTable } from "../kit/Scorebug.tsx";
-import { SectionHead } from "../kit/SectionHead.tsx";
+import { Clamp, SectionHead } from "../kit/SectionHead.tsx";
 import { METRIC_NAMES as NAMES, type SnapshotRow } from "../snapshot.ts";
 import { useWidth } from "../useWidth.ts";
 import "../theme.css";
@@ -95,17 +97,18 @@ export function Hitting({ rows }: { rows: SnapshotRow[] }): React.ReactElement {
 						duration: 0.08,
 						yoyo: true,
 						repeat: 1,
-					})
-					.from(q(".ht-interval"), {
-						scaleX: 0,
-						transformOrigin: "50% 50%",
-						duration: 0.45,
-					})
-					.from(q(".ht-label"), { opacity: 0, y: 8, duration: 0.3 }, "<");
+					});
+				puff(tl, lane.querySelector(".ht-puff"), "<");
+				tl.from(q(".ht-interval"), {
+					scaleX: 0,
+					transformOrigin: "50% 50%",
+					duration: 0.45,
+				}).from(q(".ht-label"), { opacity: 0, y: 8, duration: 0.3 }, "<");
 			});
 			return tl;
 		},
 		width,
+		SCRUBBED.hitting ? { pin: ".ht-pin", distance: "+=160%" } : {},
 	);
 
 	return (
@@ -117,10 +120,10 @@ export function Hitting({ rows }: { rows: SnapshotRow[] }): React.ReactElement {
 					inning={COPY.hitting.inning}
 					title={COPY.hitting.title}
 				>
-					<p className="fk-copy">{COPY.hitting.body}</p>
+					<Clamp>{COPY.hitting.body}</Clamp>
 				</SectionHead>
 			</div>
-			<div className="fk-bleed">
+			<div className="fk-bleed ht-pin">
 				<div className="fk-scene" ref={box}>
 					{lanes.map(({ r, to, control }, i) => (
 						<svg
@@ -184,6 +187,7 @@ export function Hitting({ rows }: { rows: SnapshotRow[] }): React.ReactElement {
 								strokeDashoffset={0}
 							/>
 							<Batter x={batterX} y={G} scale={s} />
+							<Puff className="ht-puff" x={to[0]} y={G} />
 							<Flight className="ht-flight" to={to} ground={G} r={7 * s} />
 						</svg>
 					))}
