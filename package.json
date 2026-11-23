@@ -24,6 +24,7 @@
 		"typecheck": "tsc --noEmit -p tsconfig.json",
 		"test": "vitest run",
 		"e2e": "playwright test",
+		"check:caddy": "node scripts/check-caddy.ts",
 		"postbuild": "node scripts/check-dist.ts"
 	},
 	"dependencies": {

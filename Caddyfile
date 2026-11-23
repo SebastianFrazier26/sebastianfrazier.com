@@ -44,8 +44,13 @@
 	# its own title and link-preview tags (scripts/build-blog.ts). A blog path
 	# with no file falls back to the SPA shell, which shows the blog's
 	# not-found view. feed.xml and sitemap.xml match {path} as plain files.
+	# try_files takes no matcher of its own (given one, it reads it as another
+	# file to try and applies to every request, which turned real 404s into
+	# the shell: caught by scripts/check-caddy.ts, 2026-11-23), hence the handle.
 	@blog path /blog /blog/*
-	try_files @blog {path} {path}/index.html /index.html
+	handle @blog {
+		try_files {path} {path}/index.html /index.html
+	}
 
 	file_server
 }

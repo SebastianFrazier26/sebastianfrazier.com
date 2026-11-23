@@ -16,6 +16,9 @@
 - New `browser-smoke` CI job: one Playwright spec walks map → blog → post on
   the production build and fails on a CSP violation, a console error or an
   engine chunk loading on a blog page.
+- New `pnpm check:caddy`: runs the real `Caddyfile` under the pinned Caddy
+  image against `dist/` and checks routing and headers. It caught the first
+  version of the blog rule turning every missing file into the app shell.
 - Needs `@cabn/blog` 0.1.0 on npm; until then `pnpm-lock.yaml` has no entry
   for it and `pnpm install --frozen-lockfile` fails. Local work uses
   `pnpm engine:link`, which now links `@cabn/blog` as well.
