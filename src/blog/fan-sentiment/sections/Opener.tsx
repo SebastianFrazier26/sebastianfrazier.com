@@ -1,85 +1,149 @@
 import { useRef } from "react";
 import { COPY } from "../copy.ts";
-import { Ball, Batter, Fielder } from "../kit/Figures.tsx";
-import { gsap, useReveal } from "../kit/motion.ts";
+import { BATTER, Batter, Fielder, Flight, swingTo } from "../kit/Figures.tsx";
+import {
+	type Flight as FlightSpec,
+	flightDrawer,
+	flyControl,
+	gsap,
+	type Point,
+	useParallax,
+	useReveal,
+} from "../kit/motion.ts";
+import { SectionHead } from "../kit/SectionHead.tsx";
+import { Stadium } from "../kit/Stadium.tsx";
 import { useWidth } from "../useWidth.ts";
 import "../theme.css";
 
-const H = 150;
-const G = 118;
+const PARK = 180;
+const H = 170;
+const G = 136;
 
-/** Title card: the question, and a ball rolling from the batter to the fielder. */
+/**
+ * Title card in a ballpark: the question over the outfield wall, then the
+ * first play of the post, a two-hop grounder from the batter to the fielder.
+ */
 export function Opener(): React.ReactElement {
 	const root = useRef<HTMLElement>(null);
 	const box = useRef<HTMLDivElement>(null);
-	const width = useWidth(box, 900);
-	const s = width < 600 ? 0.8 : 1;
-	const start = 70 * s;
-	const stop = width - 62 * s;
+	const width = useWidth(box, 1200);
+	const narrow = width < 600;
+	const s = narrow ? 0.85 : 1.15;
+	const batterX = narrow ? 30 : Math.max(60, width * 0.08);
+	const fielderX = width - (narrow ? 34 : Math.max(70, width * 0.09));
+	const r = 7 * s;
+	const rest = G - r;
+	const from: Point = [
+		batterX + BATTER.contact[0] * s,
+		G + BATTER.contact[1] * s,
+	];
+	const stop: Point = [fielderX - 34 * s, rest];
+	const span = stop[0] - from[0];
+	const hop1: Point = [from[0] + span * 0.42, rest];
+	const hop2: Point = [from[0] + span * 0.74, rest];
+	const legs: FlightSpec[] = [
+		{ from, control: flyControl(from, hop1, 70), to: hop1, ground: G },
+		{ from: hop1, control: flyControl(hop1, hop2, 34), to: hop2, ground: G },
+		{ from: hop2, control: flyControl(hop2, stop, 10), to: stop, ground: G },
+	];
+	useParallax(root);
 
 	useReveal(
 		root,
 		(scope) => {
-			const ball = scope.querySelector(".op-ball");
-			const state = { x: start };
-			const draw = (): void => {
-				ball?.setAttribute(
-					"transform",
-					`translate(${state.x} ${G - 8}) rotate(${state.x * 4})`,
-				);
-			};
-			draw();
-			return gsap
-				.timeline({ defaults: { ease: "power2.out" } })
-				.from(".op-word", {
-					yPercent: 60,
-					opacity: 0,
-					stagger: 0.09,
-					duration: 0.5,
-				})
-				.from(".op-lede", { opacity: 0, y: 10, duration: 0.4 }, "<0.3")
-				.to(
+			const batter = scope.querySelector(".fk-batter");
+			const flight = scope.querySelector(".op-flight");
+			const squash = scope.querySelector(".op-flight .fk-squash");
+			const draws = legs.map((leg) => flightDrawer(flight, leg));
+			const swing = { angle: BATTER.cocked };
+			const state = { t: 0 };
+			swingTo(batter, swing.angle);
+			draws[0]?.(0);
+			const tl = gsap.timeline({ delay: 0.5 }).to(swing, {
+				angle: 0,
+				duration: 0.3,
+				ease: "power3.in",
+				onUpdate: () => swingTo(batter, swing.angle),
+			});
+			draws.forEach((draw, i) => {
+				tl.fromTo(
 					state,
-					{ x: stop, duration: 2.2, ease: "power1.out", onUpdate: draw },
-					"<",
+					{ t: 0 },
+					{
+						t: 1,
+						duration: [0.75, 0.5, 0.55][i],
+						ease: i === 2 ? "power2.out" : "none",
+						onUpdate: () => draw(state.t),
+					},
+				).to(
+					squash,
+					{
+						scaleX: 1.35 - i * 0.1,
+						scaleY: 0.68 + i * 0.08,
+						transformOrigin: "50% 100%",
+						duration: 0.07,
+						yoyo: true,
+						repeat: 1,
+						ease: "power1.out",
+					},
+					">-0.02",
 				);
+			});
+			return tl.from(
+				".fk-scroll-cue",
+				{ opacity: 0, y: -8, duration: 0.6 },
+				">0.2",
+			);
 		},
 		width,
 	);
 
 	return (
 		<header className="fk-section op" ref={root}>
-			<div className="fk-wrap">
-				<p className="fk-inning">{COPY.opener.kicker}</p>
-				<h1 className="fk-title op-title">
-					{COPY.opener.title.split(" ").map((word) => (
-						<span className="op-word" key={word}>
-							{word}{" "}
-						</span>
-					))}
-				</h1>
-				<p className="fk-copy op-lede">{COPY.opener.lede}</p>
-				<div className="fk-scene" ref={box}>
-					<svg
-						width={width}
-						height={H}
-						viewBox={`0 0 ${width} ${H}`}
-						role="img"
-						aria-label="A batter and a fielder on a chalk line, a ball rolling between them."
-					>
-						<ellipse
-							className="fk-dirt"
-							cx={36 * s}
-							cy={G}
-							rx={46 * s}
-							ry={9}
-						/>
-						<line className="fk-ground" x1={8} x2={width - 8} y1={G} y2={G} />
-						<Batter x={30 * s} y={G} scale={s} />
-						<Fielder x={width - 30 * s} y={G} scale={s} />
-						<Ball className="fk-ball op-ball" x={stop} y={G - 8} r={7 * s} />
-					</svg>
-				</div>
+			<div className="op-park" aria-hidden="true">
+				<Stadium width={width} height={PARK} />
+			</div>
+			<div className="fk-wrap op-wrap">
+				<SectionHead
+					id="op-title"
+					level={1}
+					numeral="26"
+					inning={COPY.opener.kicker}
+					title={COPY.opener.title}
+				>
+					<p className="fk-copy op-lede">{COPY.opener.lede}</p>
+				</SectionHead>
+			</div>
+			<div className="fk-bleed op-field" ref={box}>
+				<svg
+					width={width}
+					height={H}
+					viewBox={`0 0 ${width} ${H}`}
+					role="img"
+					aria-label="A batter hits a ground ball that hops across the chalk line to a fielder."
+				>
+					<ellipse
+						className="fk-dirt"
+						cx={batterX + 6 * s}
+						cy={G}
+						rx={52 * s}
+						ry={10}
+					/>
+					<ellipse
+						className="fk-dirt fk-dirt-soft"
+						cx={fielderX}
+						cy={G}
+						rx={40 * s}
+						ry={8}
+					/>
+					<line className="fk-ground" x1={0} x2={width} y1={G} y2={G} />
+					<Batter x={batterX} y={G} scale={s} />
+					<Fielder x={fielderX} y={G} scale={s} pose="ready" />
+					<Flight className="op-flight" to={stop} ground={G} r={r} />
+				</svg>
+				<p className="fk-scroll-cue" aria-hidden="true">
+					{COPY.opener.cue}
+				</p>
 			</div>
 		</header>
 	);

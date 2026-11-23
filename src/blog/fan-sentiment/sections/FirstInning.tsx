@@ -6,6 +6,7 @@ import { Ball, Fielder } from "../kit/Figures.tsx";
 import { Ground } from "../kit/Ground.tsx";
 import { gsap, useReveal } from "../kit/motion.ts";
 import { DataTable } from "../kit/Scorebug.tsx";
+import { SectionHead } from "../kit/SectionHead.tsx";
 import { METRIC_NAMES, type SnapshotRow } from "../snapshot.ts";
 import { useWidth } from "../useWidth.ts";
 import "../theme.css";
@@ -47,10 +48,22 @@ export function FirstInning({
 				.timeline({ defaults: { ease: "power2.out" } })
 				.from(".fi-ball", {
 					y: -(G + 40),
-					duration: 0.7,
+					duration: 0.8,
 					ease: "bounce.out",
-					stagger: 0.12,
+					stagger: 0.1,
 				})
+				.from(
+					".fi-ball .fk-ball > *",
+					{
+						scaleY: 1.35,
+						scaleX: 0.8,
+						transformOrigin: "50% 50%",
+						duration: 0.8,
+						ease: "elastic.out(1.2, 0.35)",
+						stagger: 0.1,
+					},
+					"<",
+				)
 				.from(
 					".fi-interval",
 					{ opacity: 0, duration: 0.3, stagger: 0.12 },
@@ -64,11 +77,16 @@ export function FirstInning({
 	return (
 		<section className="fk-section fi" ref={root} aria-labelledby="fi-title">
 			<div className="fk-wrap">
-				<p className="fk-inning">{COPY.firstInning.inning}</p>
-				<h2 id="fi-title" className="fk-title">
-					{COPY.firstInning.title}
-				</h2>
-				<p className="fk-copy">{COPY.firstInning.body}</p>
+				<SectionHead
+					id="fi-title"
+					numeral="2"
+					inning={COPY.firstInning.inning}
+					title={COPY.firstInning.title}
+				>
+					<p className="fk-copy">{COPY.firstInning.body}</p>
+				</SectionHead>
+			</div>
+			<div className="fk-bleed">
 				<div className="fk-scene" ref={box}>
 					<svg
 						width={width}
@@ -118,6 +136,8 @@ export function FirstInning({
 						<Fielder x={x(0) + 34 * s} y={G} scale={s * 0.9} />
 					</svg>
 				</div>
+			</div>
+			<div className="fk-wrap">
 				<p className="fk-copy fi-caveat">{COPY.firstInning.caveat}</p>
 				<DataTable
 					summary="The numbers behind these"

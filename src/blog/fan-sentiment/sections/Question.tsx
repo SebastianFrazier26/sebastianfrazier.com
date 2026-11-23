@@ -1,14 +1,15 @@
 import { useRef } from "react";
 import { COPY } from "../copy.ts";
-import { Ball } from "../kit/Figures.tsx";
+import { Flight } from "../kit/Figures.tsx";
 import {
-	bezier,
+	flightDrawer,
 	flyControl,
 	flyPath,
 	gsap,
 	type Point,
 	useReveal,
 } from "../kit/motion.ts";
+import { SectionHead } from "../kit/SectionHead.tsx";
 import { useWidth } from "../useWidth.ts";
 import "../theme.css";
 
@@ -21,7 +22,7 @@ export function Question(): React.ReactElement {
 	const box = useRef<HTMLDivElement>(null);
 	const width = useWidth(box, 900);
 	const narrow = width < 600;
-	const inset = narrow ? 70 : 150;
+	const inset = narrow ? 96 : 150;
 	const from: Point = [inset, BASE_Y - 16];
 	const to: Point = [width - inset, BASE_Y - 16];
 	const control = flyControl(from, to, 96);
@@ -29,13 +30,14 @@ export function Question(): React.ReactElement {
 	useReveal(
 		root,
 		(scope) => {
-			const ball = scope.querySelector(".qn-ball");
+			const draw = flightDrawer(scope.querySelector(".qn-flight"), {
+				from,
+				control,
+				to,
+				ground: BASE_Y,
+			});
 			const state = { t: 0 };
-			const draw = (): void => {
-				const [bx, by] = bezier(state.t, from, control, to);
-				ball?.setAttribute("transform", `translate(${bx} ${by})`);
-			};
-			draw();
+			draw(0);
 			return gsap
 				.timeline({ defaults: { ease: "power2.out" } })
 				.from(".qn-base", {
@@ -48,10 +50,38 @@ export function Question(): React.ReactElement {
 					{ opacity: 0, y: 8, stagger: 0.2, duration: 0.3 },
 					"<0.1",
 				)
-				.to(state, { t: 1, duration: 1.3, ease: "none", onUpdate: draw })
+				.to(state, {
+					t: 1,
+					duration: 1.3,
+					ease: "power1.inOut",
+					onUpdate: () => draw(state.t),
+				})
 				.from(
 					".fk-trace",
-					{ attr: { "stroke-dashoffset": 1 }, duration: 1.3, ease: "none" },
+					{
+						attr: { "stroke-dashoffset": 1 },
+						duration: 1.3,
+						ease: "power1.inOut",
+					},
+					"<",
+				)
+				.to(".qn-flight .fk-squash", {
+					scaleX: 1.3,
+					scaleY: 0.72,
+					transformOrigin: "50% 100%",
+					duration: 0.08,
+					yoyo: true,
+					repeat: 1,
+				})
+				.to(
+					".qn-base-to",
+					{
+						scale: 1.22,
+						transformOrigin: "50% 50%",
+						duration: 0.14,
+						yoyo: true,
+						repeat: 1,
+					},
 					"<",
 				);
 		},
@@ -61,11 +91,16 @@ export function Question(): React.ReactElement {
 	return (
 		<section className="fk-section qn" ref={root} aria-labelledby="qn-title">
 			<div className="fk-wrap">
-				<p className="fk-inning">{COPY.question.inning}</p>
-				<h2 id="qn-title" className="fk-title">
-					{COPY.question.title}
-				</h2>
-				<p className="fk-copy">{COPY.question.body}</p>
+				<SectionHead
+					id="qn-title"
+					numeral="1"
+					inning={COPY.question.inning}
+					title={COPY.question.title}
+				>
+					<p className="fk-copy">{COPY.question.body}</p>
+				</SectionHead>
+			</div>
+			<div className="fk-bleed">
 				<div className="fk-scene" ref={box}>
 					<svg
 						width={width}
@@ -77,7 +112,7 @@ export function Question(): React.ReactElement {
 						{[from, to].map(([bx], i) => (
 							<g key={bx} transform={`translate(${bx} ${BASE_Y})`}>
 								<path
-									className="fk-dirt qn-base"
+									className={`fk-dirt qn-base ${i === 1 ? "qn-base-to" : ""}`}
 									d="M0 -20 L26 0 L0 20 L-26 0 Z"
 								/>
 								<text className="fk-note qn-label" y={48} textAnchor="middle">
@@ -92,7 +127,7 @@ export function Question(): React.ReactElement {
 							strokeDasharray={1}
 							strokeDashoffset={0}
 						/>
-						<Ball className="fk-ball qn-ball" x={to[0]} y={to[1]} r={8} />
+						<Flight className="qn-flight" to={to} ground={BASE_Y} r={8} />
 					</svg>
 				</div>
 			</div>

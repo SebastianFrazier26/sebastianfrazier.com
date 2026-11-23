@@ -1,10 +1,21 @@
 import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { type RefObject, useLayoutEffect, useRef } from "react";
+import { signed } from "../format.ts";
 
 gsap.registerPlugin(ScrollTrigger);
+// Pins measure their element when created; the marquee and scorebug fonts
+// arrive later and change those heights, so measure again once they land.
+if (typeof document !== "undefined") {
+	document.fonts?.ready.then(() => ScrollTrigger.refresh());
+}
 
 export type Point = readonly [number, number];
+
+const MOTION = "(prefers-reduced-motion: no-preference)";
+/** Below this, a pinned scene would take the whole phone screen; play it instead. */
+const PIN_MEDIA = `${MOTION} and (min-width: 760px) and (min-height: 620px)`;
+const PLAY_MEDIA = `${MOTION} and ((max-width: 759px) or (max-height: 619px))`;
 
 /** Point on a quadratic Bézier at t in [0, 1]. */
 export function bezier(t: number, p0: Point, p1: Point, p2: Point): Point {
@@ -12,6 +23,19 @@ export function bezier(t: number, p0: Point, p1: Point, p2: Point): Point {
 	return [
 		u * u * p0[0] + 2 * u * t * p1[0] + t * t * p2[0],
 		u * u * p0[1] + 2 * u * t * p1[1] + t * t * p2[1],
+	];
+}
+
+/** Velocity of the same curve at t (per unit t). */
+export function bezierVelocity(
+	t: number,
+	p0: Point,
+	p1: Point,
+	p2: Point,
+): Point {
+	return [
+		2 * (1 - t) * (p1[0] - p0[0]) + 2 * t * (p2[0] - p1[0]),
+		2 * (1 - t) * (p1[1] - p0[1]) + 2 * t * (p2[1] - p1[1]),
 	];
 }
 
@@ -26,25 +50,89 @@ export function flyPath(from: Point, control: Point, to: Point): string {
 	return `M${from[0]} ${from[1]} Q${control[0]} ${control[1]} ${to[0]} ${to[1]}`;
 }
 
+export interface Flight {
+	from: Point;
+	control: Point;
+	to: Point;
+	/** The ground the shadow runs along. */
+	ground: number;
+}
+
+/** How far the ball stretches along its path at a given speed (units per t). */
+export function stretchFor(speed: number): number {
+	return Math.min(0.32, speed / 2400);
+}
+
 /**
- * Plays `build`'s timeline once, when the section scrolls into view. The
- * markup is always the finished picture: the timeline only animates towards
- * it, and under reduced motion (or with no script) nothing runs at all.
- * `layoutKey` names the layout the build measured (a width, say); the
- * timeline is rebuilt when it changes.
+ * Returns draw(t) for a Flight component: the ball rides the curve stretched
+ * along its velocity, a short trail of ghosts follows it, and its shadow
+ * tracks it on the ground, shrinking with height. At t = 1 everything is back
+ * to the markup's finished picture.
+ */
+export function flightDrawer(
+	root: Element | null,
+	f: Flight,
+): (t: number) => void {
+	const ball = root?.querySelector(".fk-flight-ball");
+	const shadow = root?.querySelector(".fk-shadow");
+	const ghosts = [...(root?.querySelectorAll(".fk-ghost") ?? [])];
+	return (t) => {
+		const [x, y] = bezier(t, f.from, f.control, f.to);
+		const [vx, vy] = bezierVelocity(t, f.from, f.control, f.to);
+		const k = t >= 1 ? 0 : stretchFor(Math.hypot(vx, vy));
+		const deg = (Math.atan2(vy, vx) * 180) / Math.PI;
+		ball?.setAttribute(
+			"transform",
+			`translate(${x} ${y}) rotate(${deg}) scale(${1 + k} ${1 - k * 0.6}) rotate(${-deg})`,
+		);
+		const lift = Math.max(0, f.ground - y);
+		const near = Math.max(0.35, 1 - lift / 260);
+		shadow?.setAttribute(
+			"transform",
+			`translate(${x} ${f.ground}) scale(${near})`,
+		);
+		shadow?.setAttribute("opacity", String(0.15 + 0.3 * near));
+		ghosts.forEach((g, i) => {
+			const back = Math.max(0, t - (i + 1) * 0.045);
+			const [gx, gy] = bezier(back, f.from, f.control, f.to);
+			g.setAttribute("transform", `translate(${gx} ${gy})`);
+			const live = t > 0 && t < 1 ? 1 : 0;
+			g.setAttribute("opacity", String(live * (0.4 - i * 0.09)));
+		});
+	};
+}
+
+interface RevealOptions {
+	/**
+	 * On roomy screens, tie the timeline to scrolling instead of playing it:
+	 * the element this selector names is pinned while the timeline scrubs.
+	 */
+	pin?: string;
+	/** How much scrolling the pinned timeline spans. */
+	distance?: string;
+}
+
+/**
+ * Plays `build`'s timeline once, when the section scrolls into view, or
+ * scrubs it under a pinned scene (see RevealOptions). The markup is always the
+ * finished picture: the timeline only animates towards it, and under reduced
+ * motion (or with no script) nothing runs at all. `layoutKey` names the layout
+ * the build measured (a width, say); the timeline is rebuilt when it changes.
  */
 export function useReveal(
 	ref: RefObject<HTMLElement | null>,
 	build: (scope: HTMLElement) => gsap.core.Timeline,
 	layoutKey: string | number,
+	options: RevealOptions = {},
 ): void {
 	const latest = useRef(build);
 	latest.current = build;
+	const { pin, distance = "+=120%" } = options;
 	useLayoutEffect(() => {
 		const scope = ref.current;
 		if (!scope || layoutKey === "") return;
 		const mm = gsap.matchMedia(scope);
-		mm.add("(prefers-reduced-motion: no-preference)", () => {
+		const play = (): void => {
 			const timeline = latest.current(scope).pause();
 			ScrollTrigger.create({
 				trigger: scope,
@@ -52,9 +140,129 @@ export function useReveal(
 				once: true,
 				onEnter: () => timeline.play(),
 			});
+		};
+		if (!pin) {
+			mm.add(MOTION, play);
+		} else {
+			mm.add(PLAY_MEDIA, play);
+			mm.add(PIN_MEDIA, () => {
+				const target = scope.querySelector(pin);
+				const timeline = latest.current(scope).pause();
+				ScrollTrigger.create({
+					trigger: target ?? scope,
+					start: "center center",
+					end: distance,
+					pin: target ?? true,
+					scrub: 0.7,
+					animation: timeline,
+				});
+			});
+		}
+		return () => mm.revert();
+	}, [ref, layoutKey, pin, distance]);
+}
+
+/**
+ * Moves every `[data-depth]` element in `ref` against the scroll, by its
+ * depth as a fraction of the viewport, so layers drift at different speeds.
+ */
+export function useParallax(ref: RefObject<HTMLElement | null>): void {
+	useLayoutEffect(() => {
+		const scope = ref.current;
+		if (!scope) return;
+		const mm = gsap.matchMedia(scope);
+		mm.add(MOTION, () => {
+			for (const el of scope.querySelectorAll<HTMLElement | SVGElement>(
+				"[data-depth]",
+			)) {
+				const depth = Number(el.getAttribute("data-depth")) || 0;
+				gsap.fromTo(
+					el,
+					{ y: () => depth * window.innerHeight * 0.5 },
+					{
+						y: () => -depth * window.innerHeight * 0.5,
+						ease: "none",
+						scrollTrigger: {
+							trigger: scope,
+							start: "top bottom",
+							end: "bottom top",
+							scrub: true,
+							invalidateOnRefresh: true,
+						},
+					},
+				);
+			}
 		});
 		return () => mm.revert();
-	}, [ref, layoutKey]);
+	}, [ref]);
+}
+
+/**
+ * Counts every `[data-count]` numeral in `scope` up from zero and pops its
+ * chip in, on `tl` at `at`. The markup already holds the final text.
+ */
+export function countUp(
+	tl: gsap.core.Timeline,
+	scope: Element,
+	at: gsap.Position = ">",
+): gsap.core.Timeline {
+	tl.from(
+		scope.querySelectorAll(".fk-stats"),
+		{
+			opacity: 0,
+			scaleX: 0.4,
+			transformOrigin: "50% 50%",
+			ease: "expo.out",
+			duration: 0.5,
+		},
+		at,
+	).from(
+		scope.querySelectorAll(".fk-stat"),
+		{
+			opacity: 0,
+			scale: 0.7,
+			y: 14,
+			transformOrigin: "50% 100%",
+			ease: "back.out(2.4)",
+			duration: 0.45,
+			stagger: 0.1,
+		},
+		"<0.15",
+	);
+	scope.querySelectorAll<HTMLElement>("[data-count]").forEach((el, i) => {
+		const end = Number(el.dataset.count);
+		const digits = Number(el.dataset.digits ?? 0);
+		const signedNum = el.dataset.signed === "true";
+		const final = el.textContent ?? "";
+		const state = { v: 0 };
+		tl.to(
+			state,
+			{
+				v: end,
+				duration: 0.9,
+				ease: "power3.out",
+				onStart: () => {
+					el.textContent = formatCount(0, digits, signedNum);
+				},
+				onUpdate: () => {
+					el.textContent = formatCount(state.v, digits, signedNum);
+				},
+				onComplete: () => {
+					el.textContent = final;
+				},
+			},
+			i === 0 ? "<" : "<0.1",
+		);
+	});
+	return tl;
+}
+
+export function formatCount(
+	v: number,
+	digits: number,
+	signedNum: boolean,
+): string {
+	return signedNum ? signed(v, digits) : v.toFixed(digits);
 }
 
 export { gsap };

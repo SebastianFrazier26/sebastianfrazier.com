@@ -8,6 +8,7 @@ export const COPY = {
 		kicker: "2026 season · every fanbase · one test called in advance",
 		title: "Are the fans always right?",
 		lede: "When a fanbase is high on a player one week, does he actually play better the next? I spent a season finding out.",
+		cue: "Scroll for the season ↓",
 	},
 	question: {
 		inning: "First inning · the question",

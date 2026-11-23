@@ -2,10 +2,19 @@ import { scaleLinear } from "d3-scale";
 import { useRef } from "react";
 import { COPY } from "../copy.ts";
 import { signed } from "../format.ts";
-import { BATTER, Ball, Batter, FIELDER, Fielder } from "../kit/Figures.tsx";
+import {
+	BATTER,
+	Batter,
+	FIELDER,
+	Fielder,
+	Flight,
+	poseFielder,
+	swingTo,
+} from "../kit/Figures.tsx";
 import { Ground } from "../kit/Ground.tsx";
 import {
-	bezier,
+	countUp,
+	flightDrawer,
 	flyControl,
 	flyPath,
 	gsap,
@@ -13,6 +22,7 @@ import {
 	useReveal,
 } from "../kit/motion.ts";
 import { DataTable, Stat } from "../kit/Scorebug.tsx";
+import { SectionHead } from "../kit/SectionHead.tsx";
 import type { PitchData } from "../snapshot.ts";
 import { useWidth } from "../useWidth.ts";
 import "../theme.css";
@@ -47,21 +57,26 @@ export function Pitch({ data }: { data: PitchData }): React.ReactElement {
 	];
 	const to: Point = [fielderX + FIELDER.glove[0] * s, G + FIELDER.glove[1] * s];
 	const control = flyControl(from, to, narrow ? 120 : 150);
-	const pivot = `${BATTER.pivot[0]} ${BATTER.pivot[1]}`;
 
 	useReveal(
 		root,
 		(scope) => {
-			const swing = scope.querySelector(".fk-swing");
-			const ball = scope.querySelector(".pt-ball");
+			const batter = scope.querySelector(".fk-batter");
+			const fielder = scope.querySelector(".fk-fielder");
+			const fly = flightDrawer(scope.querySelector(".pt-flight"), {
+				from,
+				control,
+				to,
+				ground: G,
+			});
 			const state = { angle: BATTER.cocked, t: 0 };
 			const draw = (): void => {
-				swing?.setAttribute("transform", `rotate(${state.angle} ${pivot})`);
-				const [bx, by] = bezier(state.t, from, control, to);
-				ball?.setAttribute("transform", `translate(${bx} ${by})`);
+				swingTo(batter, state.angle);
+				fly(state.t);
+				poseFielder(fielder, state.t > 0.86 ? "catch" : "ready");
 			};
 			draw();
-			return gsap
+			const tl = gsap
 				.timeline({ defaults: { ease: "power2.out" } })
 				.from(".pt-zone-all", { opacity: 0, duration: 0.5 })
 				.from(".pt-ring", {
@@ -77,35 +92,56 @@ export function Pitch({ data }: { data: PitchData }): React.ReactElement {
 				})
 				.to(
 					state,
-					{ t: 1, duration: 1.5, ease: "none", onUpdate: draw },
+					{ t: 1, duration: 1.6, ease: "power1.inOut", onUpdate: draw },
 					">-0.05",
 				)
 				.from(
 					".fk-trace",
-					{ attr: { "stroke-dashoffset": 1 }, duration: 1.5, ease: "none" },
+					{
+						attr: { "stroke-dashoffset": 1 },
+						duration: 1.6,
+						ease: "power1.inOut",
+					},
 					"<",
 				)
+				.to(".fk-hop", { y: -14, duration: 0.16, yoyo: true, repeat: 1 })
 				.to(
-					".fk-hop",
-					{ y: -12, duration: 0.16, yoyo: true, repeat: 1 },
-					">-0.2",
+					".pt-flight .fk-squash",
+					{
+						scaleX: 1.3,
+						scaleY: 0.74,
+						transformOrigin: "50% 50%",
+						duration: 0.08,
+						yoyo: true,
+						repeat: 1,
+					},
+					"<",
 				)
-				.from(".pt-interval", { opacity: 0, duration: 0.3 })
-				.from(".pt-label", { opacity: 0, y: 8, duration: 0.3 }, "<")
-				.from(".fk-stat", { opacity: 0, y: 10, stagger: 0.12, duration: 0.3 });
+				.from(".pt-interval", {
+					scaleX: 0,
+					transformOrigin: "50% 50%",
+					duration: 0.5,
+				})
+				.from(".pt-label", { opacity: 0, y: 8, duration: 0.3 }, "<");
+			return countUp(tl, scope, ">-0.1");
 		},
 		width,
+		{ pin: ".pt-pin", distance: "+=140%" },
 	);
 
 	return (
 		<section className="fk-section pt" ref={root} aria-labelledby="pt-title">
 			<div className="fk-wrap">
-				<p className="fk-inning">{COPY.pitch.inning}</p>
-				<h2 id="pt-title" className="fk-title">
-					{COPY.pitch.title}
-				</h2>
-				<p className="fk-copy">{COPY.pitch.body}</p>
-
+				<SectionHead
+					id="pt-title"
+					numeral="6"
+					inning={COPY.pitch.inning}
+					title={COPY.pitch.title}
+				>
+					<p className="fk-copy">{COPY.pitch.body}</p>
+				</SectionHead>
+			</div>
+			<div className="fk-bleed pt-pin">
 				<div className="fk-scene" ref={box}>
 					<svg
 						width={width}
@@ -182,24 +218,33 @@ export function Pitch({ data }: { data: PitchData }): React.ReactElement {
 						/>
 						<Batter x={batterX} y={G} scale={s} />
 						<Fielder x={fielderX} y={G} scale={s} />
-						<Ball className="fk-ball pt-ball" x={to[0]} y={to[1]} r={7 * s} />
+						<Flight className="pt-flight" to={to} ground={G} r={7 * s} />
 					</svg>
 				</div>
 
 				<div className="fk-stats">
-					<Stat label="Effect" value={signed(c.mu_mean)} />
+					<Stat
+						label="Effect"
+						value={signed(c.mu_mean)}
+						count={{ to: c.mu_mean, digits: 3, signed: true }}
+					/>
 					<Stat
 						label="95% interval"
 						value={`${signed(c.ci_low)} to ${signed(c.ci_high)}`}
 					/>
-					<Stat label="One-sided p" value={c.perm_p_less.toFixed(3)} />
+					<Stat
+						label="One-sided p"
+						value={c.perm_p_less.toFixed(3)}
+						count={{ to: c.perm_p_less, digits: 3 }}
+					/>
 					<Stat
 						className="fk-verdict"
 						label="The call"
 						value={c.confirmed ? "Confirmed" : "Not confirmed"}
 					/>
 				</div>
-
+			</div>
+			<div className="fk-wrap">
 				<DataTable
 					summary="The numbers in this play"
 					head={["What", "Effect", "95% interval"]}

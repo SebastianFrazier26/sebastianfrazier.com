@@ -30,7 +30,9 @@
 	--fs-score: "SfBarlowCondensed", "Arial Narrow", "Helvetica Neue", sans-serif;
 	--fs-body:
 		ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+	--fs-night: #10291c;
 	box-sizing: border-box;
+	overflow-x: clip;
 	color: var(--fs-chalk);
 	font-family: var(--fs-body);
 	font-size: 1.125rem;
@@ -54,39 +56,135 @@
 }
 
 .post-fan-sentiment .fk-section {
-	padding: clamp(4rem, 12vh, 8rem) 1.25rem;
+	position: relative;
+	padding: clamp(6rem, 20vh, 12rem) 0 clamp(2rem, 6vh, 4rem);
 }
 .post-fan-sentiment .fk-wrap {
-	max-width: 58rem;
+	position: relative;
+	max-width: 74rem;
 	margin: 0 auto;
+	padding: 0 clamp(1.25rem, 5vw, 4rem);
+}
+
+/* Section heads: a hollow scoreboard numeral behind, then a two-column
+   editorial layout on wide screens (title left, copy right). */
+.post-fan-sentiment .fk-head {
+	position: relative;
+	display: grid;
+	column-gap: clamp(2rem, 5vw, 5rem);
+}
+@media (min-width: 900px) {
+	.post-fan-sentiment .fk-head {
+		grid-template-columns: minmax(0, 1.3fr) minmax(0, 0.9fr);
+		align-items: end;
+	}
+	.post-fan-sentiment .fk-head > .fk-inning,
+	.post-fan-sentiment .fk-head > .fk-title {
+		grid-column: 1;
+	}
+	.post-fan-sentiment .fk-head-copy {
+		grid-column: 2;
+		grid-row: 2;
+		padding-bottom: 0.5rem;
+	}
+}
+.post-fan-sentiment .fk-numeral {
+	position: absolute;
+	top: -0.42em;
+	right: 0;
+	z-index: 0;
+	font-family: var(--fs-marquee);
+	font-size: clamp(9rem, 24vw, 21rem);
+	line-height: 1;
+	color: transparent;
+	-webkit-text-stroke: 2px rgb(246 243 231 / 0.12);
+	pointer-events: none;
+	user-select: none;
+}
+.post-fan-sentiment .fk-numeral-glyph {
+	display: inline-block;
 }
 .post-fan-sentiment .fk-inning {
-	margin: 0 0 0.6rem;
+	position: relative;
+	display: flex;
+	align-items: center;
+	gap: 0.75rem;
+	margin: 0 0 1.1rem;
 	font-family: var(--fs-score);
-	font-size: 1rem;
-	letter-spacing: 0.16em;
+	font-size: 0.95rem;
+	letter-spacing: 0.22em;
 	text-transform: uppercase;
 	color: var(--fs-chalk-dim);
 }
+.post-fan-sentiment .fk-inning::before {
+	content: "";
+	flex: none;
+	width: 2.2rem;
+	height: 3px;
+	border-radius: 2px;
+	background: var(--fs-clay-soft);
+}
 .post-fan-sentiment .fk-title {
-	margin: 0 0 1rem;
+	position: relative;
+	margin: 0 0 1.5rem;
 	font-family: var(--fs-marquee);
 	font-weight: 400;
-	font-size: clamp(1.9rem, 5.4vw, 3.4rem);
-	line-height: 1.05;
-	letter-spacing: 0.01em;
+	font-size: clamp(2.3rem, 6.2vw, 5rem);
+	line-height: 0.96;
+	letter-spacing: 0;
 	text-transform: uppercase;
+	text-wrap: balance;
+}
+.post-fan-sentiment .fk-word {
+	display: inline-block;
+	overflow: hidden;
+	vertical-align: bottom;
+	padding-bottom: 0.08em;
+	margin-bottom: -0.08em;
+}
+.post-fan-sentiment .fk-word > span {
+	display: inline-block;
+}
+.post-fan-sentiment .fk-head-copy {
+	position: relative;
 }
 .post-fan-sentiment .fk-copy {
-	max-width: 36rem;
+	max-width: 34rem;
 	margin: 0 0 1rem;
+	font-size: clamp(1.08rem, 1.3vw, 1.25rem);
+	line-height: 1.62;
+	color: rgb(246 243 231 / 0.88);
+	text-wrap: pretty;
 }
 .post-fan-sentiment .fk-copy strong {
 	color: var(--fs-chalk);
 	font-weight: 700;
 }
-.post-fan-sentiment .fk-scene {
-	margin: 2rem 0 0.5rem;
+
+/* Scenes run the full width of the post on a soft band of darker turf; the
+   chart inside stays at a readable width. */
+.post-fan-sentiment .fk-bleed {
+	position: relative;
+	margin-top: clamp(2.5rem, 7vh, 5rem);
+	padding: clamp(1.5rem, 4vh, 2.5rem) clamp(0.75rem, 4vw, 3rem);
+}
+.post-fan-sentiment .fk-bleed::before {
+	content: "";
+	position: absolute;
+	inset: 0;
+	background: linear-gradient(
+		180deg,
+		transparent,
+		rgb(16 41 28 / 0.26) 28%,
+		rgb(16 41 28 / 0.26) 72%,
+		transparent
+	);
+	pointer-events: none;
+}
+.post-fan-sentiment .fk-bleed > .fk-scene {
+	position: relative;
+	max-width: 76rem;
+	margin-inline: auto;
 }
 .post-fan-sentiment .fk-scene svg {
 	display: block;
@@ -233,6 +331,65 @@
 .post-fan-sentiment .fk-bat-barrel {
 	stroke-width: 8.5;
 }
+/* Arcade sprites: one flat colour per palette key, inked in a dark outline.
+   Team colours come from the figure, so one grid dresses both sides. */
+.post-fan-sentiment .fk-px {
+	shape-rendering: crispEdges;
+}
+.post-fan-sentiment .fk-batter {
+	--px-cap: var(--fs-clay);
+	--px-jersey: var(--fs-clay);
+	--px-trim: var(--fs-chalk);
+	--px-sock: var(--fs-deep);
+}
+.post-fan-sentiment .fk-fielder {
+	--px-cap: var(--fs-deep);
+	--px-jersey: var(--fs-chalk);
+	--px-trim: var(--fs-clay);
+	--px-sock: var(--fs-clay);
+}
+.post-fan-sentiment .fk-px-o,
+.post-fan-sentiment .fk-px-e {
+	fill: #0b1f15;
+}
+.post-fan-sentiment .fk-px-c {
+	fill: var(--px-cap);
+}
+.post-fan-sentiment .fk-px-s {
+	fill: var(--fs-skin);
+}
+.post-fan-sentiment .fk-px-h {
+	fill: #6b4327;
+}
+.post-fan-sentiment .fk-px-j {
+	fill: var(--px-jersey);
+}
+.post-fan-sentiment .fk-px-t {
+	fill: var(--px-trim);
+}
+.post-fan-sentiment .fk-px-p {
+	fill: var(--fs-chalk);
+}
+.post-fan-sentiment .fk-px-q {
+	fill: var(--px-sock);
+}
+.post-fan-sentiment .fk-px-b,
+.post-fan-sentiment .fk-px-k,
+.post-fan-sentiment .fk-px-g {
+	fill: var(--fs-deep);
+}
+.post-fan-sentiment .fk-px-w {
+	fill: var(--fs-wood);
+}
+.post-fan-sentiment .fk-px-l {
+	fill: var(--fs-leather);
+}
+.post-fan-sentiment .fk-px-x {
+	fill: color-mix(in srgb, var(--px-cap), white 38%);
+}
+.post-fan-sentiment .fk-px-d {
+	fill: #4f2f19;
+}
 .post-fan-sentiment .fk-ball-skin {
 	fill: #fffdf5;
 	stroke: rgb(21 63 42 / 0.35);
@@ -245,31 +402,58 @@
 	stroke-linecap: round;
 }
 
-/* Scorebug chips: matte chalk numerals on the dark of the outfield wall. */
+/* Scorebug: one dark strip of matte chalk numerals, segments split by hairlines. */
 .post-fan-sentiment .fk-stats {
 	display: flex;
 	flex-wrap: wrap;
-	gap: 0.6rem;
-	margin: 1.2rem 0 0;
+	width: fit-content;
+	max-width: 100%;
+	margin: 1.75rem 0 0;
+	border-radius: 0.85rem;
+	overflow: hidden;
+	background: var(--fs-night);
+	box-shadow: 0 22px 44px -26px rgb(0 0 0 / 0.65);
+}
+.post-fan-sentiment .fk-bleed > .fk-stats {
+	position: relative;
+	margin: 1.75rem auto 0;
 }
 .post-fan-sentiment .fk-stat {
 	display: flex;
 	flex-direction: column;
+	justify-content: center;
 	margin: 0;
-	padding: 0.45rem 0.9rem 0.35rem;
-	border-radius: 0.5rem;
-	background: var(--fs-deep);
+	padding: 0.85rem 1.5rem 0.75rem;
 	font-family: var(--fs-score);
 }
+.post-fan-sentiment .fk-stat + .fk-stat {
+	box-shadow: inset 1px 0 rgb(246 243 231 / 0.12);
+}
+@media (max-width: 599px) {
+	.post-fan-sentiment .fk-stats {
+		display: grid;
+		grid-template-columns: 1fr 1fr;
+		width: 100%;
+	}
+	.post-fan-sentiment .fk-stat {
+		padding: 0.7rem 1rem 0.6rem;
+		box-shadow:
+			inset 1px 0 rgb(246 243 231 / 0.12),
+			inset 0 1px rgb(246 243 231 / 0.12);
+	}
+	.post-fan-sentiment .fk-stat:last-child:nth-child(odd) {
+		grid-column: 1 / -1;
+	}
+}
 .post-fan-sentiment .fk-stat-label {
-	font-size: 0.82rem;
-	letter-spacing: 0.14em;
+	font-size: 0.8rem;
+	letter-spacing: 0.16em;
 	text-transform: uppercase;
 	color: var(--fs-chalk-dim);
 }
 .post-fan-sentiment .fk-stat-value {
-	font-size: clamp(1.5rem, 4vw, 2rem);
-	line-height: 1.1;
+	font-size: clamp(1.7rem, 3.4vw, 2.5rem);
+	line-height: 1.05;
 	font-variant-numeric: tabular-nums;
 	white-space: nowrap;
 }
@@ -324,19 +508,129 @@
 
 /* Section-specific touches, kept with the theme so a section is one import. */
 .post-fan-sentiment .op {
-	padding-top: clamp(5rem, 18vh, 11rem);
+	display: flex;
+	flex-direction: column;
+	justify-content: space-between;
+	min-height: 100svh;
+	padding: 0 0 1.5rem;
+	overflow: clip;
+	background: linear-gradient(
+		180deg,
+		#0c2218 0,
+		var(--fs-night) 120px,
+		transparent 182px
+	);
 }
-.post-fan-sentiment .op-title {
-	font-size: clamp(2.6rem, 9vw, 6rem);
-	line-height: 0.98;
+.post-fan-sentiment .op-park {
+	height: 180px;
 }
-.post-fan-sentiment .op-word {
-	display: inline-block;
-	white-space: pre;
+.post-fan-sentiment .op-wrap {
+	width: 100%;
+	padding-top: clamp(1.5rem, 5vh, 3.5rem);
+}
+.post-fan-sentiment .op .fk-title {
+	max-width: 13em;
+	margin-bottom: 1.25rem;
+	font-size: clamp(2.8rem, 7.2vw, 6.4rem);
+	line-height: 0.92;
+}
+@media (min-width: 900px) {
+	.post-fan-sentiment .op .fk-head {
+		grid-template-columns: minmax(0, 1fr) minmax(0, 0.5fr);
+	}
+	.post-fan-sentiment .op .fk-head > .fk-inning,
+	.post-fan-sentiment .op .fk-head > .fk-title {
+		grid-column: 1 / -1;
+	}
+	.post-fan-sentiment .op .fk-head-copy {
+		grid-column: 1;
+		grid-row: 3;
+	}
+}
+.post-fan-sentiment .op .fk-numeral {
+	top: -0.25em;
 }
 .post-fan-sentiment .op-lede {
-	font-size: 1.3rem;
+	font-size: clamp(1.2rem, 1.7vw, 1.45rem);
 }
+.post-fan-sentiment .op-field {
+	margin-top: 1.5rem;
+	padding: 0;
+}
+.post-fan-sentiment .op-field::before {
+	display: none;
+}
+.post-fan-sentiment .fk-scroll-cue {
+	margin: 0.75rem 0 0;
+	text-align: center;
+	font-family: var(--fs-score);
+	font-size: 0.9rem;
+	letter-spacing: 0.22em;
+	text-transform: uppercase;
+	color: var(--fs-chalk-dim);
+}
+.post-fan-sentiment .fk-dirt-soft {
+	opacity: 0.7;
+}
+
+/* The ballpark behind the opener. */
+.post-fan-sentiment .fk-stadium {
+	display: block;
+}
+.post-fan-sentiment .fk-stands {
+	fill: #173d2a;
+}
+.post-fan-sentiment .fk-fan-a {
+	fill: rgb(246 243 231 / 0.7);
+}
+.post-fan-sentiment .fk-fan-b {
+	fill: var(--fs-clay-soft);
+}
+.post-fan-sentiment .fk-fan-c {
+	fill: #2c5c42;
+}
+.post-fan-sentiment .fk-fan-d {
+	fill: var(--fs-clay);
+}
+.post-fan-sentiment .fk-fan-e {
+	fill: #c9b58f;
+}
+.post-fan-sentiment .fk-wall-face {
+	fill: var(--fs-deep);
+}
+.post-fan-sentiment .fk-wall-cap {
+	stroke: var(--fs-chalk);
+	stroke-width: 3;
+	opacity: 0.85;
+}
+.post-fan-sentiment .fk-tower,
+.post-fan-sentiment .fk-lamps {
+	fill: #0a1d14;
+}
+.post-fan-sentiment .fk-lamp {
+	fill: #fff8dc;
+}
+
+/* The last two innings play at night, under the scoreboard. */
+.post-fan-sentiment .rv {
+	background: linear-gradient(180deg, transparent 0, var(--fs-night) 16rem);
+}
+.post-fan-sentiment .bx {
+	background: var(--fs-night);
+	padding-bottom: clamp(5rem, 14vh, 8rem);
+}
+.post-fan-sentiment .bx .fk-stats {
+	background: #0a1d14;
+}
+
+/* Ball in flight. */
+.post-fan-sentiment .fk-shadow {
+	fill: #0b1f15;
+}
+.post-fan-sentiment .fk-ghost {
+	fill: var(--fs-chalk);
+}
+
 .post-fan-sentiment .fi-thin {
 	stroke-width: 4;
 	opacity: 0.8;
@@ -376,4 +670,9 @@
 	margin: 0;
 	font-size: 0.9rem;
 	color: var(--fs-chalk-dim);
+}
+@media (max-width: 599px) {
+	.post-fan-sentiment .qn-label {
+		font-size: 13px;
+	}
 }
