@@ -1,0 +1,334 @@
+@font-face {
+	font-family: "SfBungee";
+	src: url("./fonts/Bungee-Regular-Latin.woff2") format("woff2");
+	font-weight: 400;
+	font-style: normal;
+	font-display: swap;
+}
+@font-face {
+	font-family: "SfBarlowCondensed";
+	src: url("./fonts/BarlowCondensed-SemiBold-Latin.woff2") format("woff2");
+	font-weight: 600;
+	font-style: normal;
+	font-display: swap;
+}
+
+/* Every rule below sits under the post's root class, so the post takes
+   nothing from the page around it and leaks nothing into it. */
+.post-fan-sentiment {
+	--fs-grass: #2f7d4f;
+	--fs-grass-2: #2b764a;
+	--fs-deep: #153f2a;
+	--fs-clay: #b9553a;
+	--fs-clay-soft: #d98a6d;
+	--fs-chalk: #f6f3e7;
+	--fs-chalk-dim: rgb(246 243 231 / 0.72);
+	--fs-skin: #edc19a;
+	--fs-wood: #d9b382;
+	--fs-leather: #7a4e2c;
+	--fs-marquee: "SfBungee", "Arial Black", Impact, sans-serif;
+	--fs-score: "SfBarlowCondensed", "Arial Narrow", "Helvetica Neue", sans-serif;
+	--fs-body:
+		ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+	box-sizing: border-box;
+	color: var(--fs-chalk);
+	font-family: var(--fs-body);
+	font-size: 1.125rem;
+	line-height: 1.55;
+	/* Mown stripes, wide and faint. */
+	background: repeating-linear-gradient(
+		90deg,
+		var(--fs-grass) 0 9rem,
+		var(--fs-grass-2) 9rem 18rem
+	);
+}
+.post-fan-sentiment *,
+.post-fan-sentiment *::before,
+.post-fan-sentiment *::after {
+	box-sizing: inherit;
+}
+.post-fan-sentiment a {
+	color: var(--fs-chalk);
+	text-decoration-color: var(--fs-clay-soft);
+	text-underline-offset: 0.18em;
+}
+
+.post-fan-sentiment .fk-section {
+	padding: clamp(4rem, 12vh, 8rem) 1.25rem;
+}
+.post-fan-sentiment .fk-wrap {
+	max-width: 58rem;
+	margin: 0 auto;
+}
+.post-fan-sentiment .fk-inning {
+	margin: 0 0 0.6rem;
+	font-family: var(--fs-score);
+	font-size: 1rem;
+	letter-spacing: 0.16em;
+	text-transform: uppercase;
+	color: var(--fs-chalk-dim);
+}
+.post-fan-sentiment .fk-title {
+	margin: 0 0 1rem;
+	font-family: var(--fs-marquee);
+	font-weight: 400;
+	font-size: clamp(1.9rem, 5.4vw, 3.4rem);
+	line-height: 1.05;
+	letter-spacing: 0.01em;
+	text-transform: uppercase;
+}
+.post-fan-sentiment .fk-copy {
+	max-width: 36rem;
+	margin: 0 0 1rem;
+}
+.post-fan-sentiment .fk-copy strong {
+	color: var(--fs-chalk);
+	font-weight: 700;
+}
+.post-fan-sentiment .fk-scene {
+	margin: 2rem 0 0.5rem;
+}
+.post-fan-sentiment .fk-scene svg {
+	display: block;
+	overflow: visible;
+}
+
+/* Chart furniture: everything is chalk on grass. */
+.post-fan-sentiment .fk-ground {
+	stroke: var(--fs-chalk);
+	stroke-width: 3;
+	stroke-linecap: round;
+}
+.post-fan-sentiment .fk-tick {
+	stroke: var(--fs-chalk);
+	stroke-width: 2;
+	opacity: 0.7;
+}
+.post-fan-sentiment .fk-tick-label,
+.post-fan-sentiment .fk-note {
+	fill: var(--fs-chalk);
+	font-family: var(--fs-score);
+	font-size: 16px;
+	letter-spacing: 0.06em;
+	font-variant-numeric: tabular-nums;
+}
+.post-fan-sentiment .fk-note {
+	text-transform: uppercase;
+	opacity: 0.85;
+}
+.post-fan-sentiment .fk-zero {
+	stroke: var(--fs-chalk);
+	stroke-width: 2;
+	stroke-dasharray: 3 7;
+	stroke-linecap: round;
+	opacity: 0.7;
+}
+.post-fan-sentiment .fk-interval {
+	stroke: var(--fs-chalk);
+	stroke-width: 9;
+	stroke-linecap: round;
+}
+.post-fan-sentiment .fk-dirt {
+	fill: var(--fs-clay);
+}
+.post-fan-sentiment .fk-trace {
+	fill: none;
+	stroke: var(--fs-chalk);
+	stroke-width: 2.5;
+	stroke-linecap: round;
+	opacity: 0.55;
+}
+.post-fan-sentiment .fk-zone {
+	fill: rgb(246 243 231 / 0.1);
+	stroke: var(--fs-chalk);
+	stroke-width: 2;
+	stroke-dasharray: 7 6;
+}
+.post-fan-sentiment .fk-ring {
+	fill: none;
+	stroke: var(--fs-chalk);
+	stroke-width: 2.5;
+}
+
+/* Figures. */
+.post-fan-sentiment .fk-figure line {
+	stroke-linecap: round;
+}
+.post-fan-sentiment .fk-leg {
+	stroke: var(--fs-chalk);
+	stroke-width: 9;
+}
+.post-fan-sentiment .fk-jersey {
+	stroke-width: 19;
+}
+.post-fan-sentiment .fk-jersey-clay {
+	stroke: var(--fs-clay);
+}
+.post-fan-sentiment .fk-jersey-chalk {
+	stroke: var(--fs-chalk);
+}
+.post-fan-sentiment .fk-head {
+	fill: var(--fs-skin);
+}
+.post-fan-sentiment .fk-cap {
+	fill: var(--fs-deep);
+}
+.post-fan-sentiment .fk-brim {
+	stroke: var(--fs-deep);
+	stroke-width: 4.5;
+}
+.post-fan-sentiment .fk-arm {
+	stroke: var(--fs-skin);
+	stroke-width: 6.5;
+}
+.post-fan-sentiment .fk-bat {
+	stroke: var(--fs-wood);
+	stroke-width: 6.5;
+}
+.post-fan-sentiment .fk-glove {
+	fill: var(--fs-leather);
+}
+.post-fan-sentiment .fk-ball-skin {
+	fill: #fffdf5;
+	stroke: rgb(21 63 42 / 0.35);
+	stroke-width: 1;
+}
+.post-fan-sentiment .fk-ball-seam {
+	fill: none;
+	stroke: var(--fs-clay);
+	stroke-width: 1.3;
+	stroke-linecap: round;
+}
+
+/* Scorebug chips: matte chalk numerals on the dark of the outfield wall. */
+.post-fan-sentiment .fk-stats {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 0.6rem;
+	margin: 1.2rem 0 0;
+}
+.post-fan-sentiment .fk-stat {
+	display: flex;
+	flex-direction: column;
+	margin: 0;
+	padding: 0.45rem 0.9rem 0.35rem;
+	border-radius: 0.5rem;
+	background: var(--fs-deep);
+	font-family: var(--fs-score);
+}
+.post-fan-sentiment .fk-stat-label {
+	font-size: 0.82rem;
+	letter-spacing: 0.14em;
+	text-transform: uppercase;
+	color: var(--fs-chalk-dim);
+}
+.post-fan-sentiment .fk-stat-value {
+	font-size: clamp(1.5rem, 4vw, 2rem);
+	line-height: 1.1;
+	font-variant-numeric: tabular-nums;
+	white-space: nowrap;
+}
+.post-fan-sentiment .fk-verdict {
+	background: var(--fs-chalk);
+	color: var(--fs-clay);
+}
+.post-fan-sentiment .fk-verdict .fk-stat-label {
+	color: var(--fs-deep);
+}
+.post-fan-sentiment .fk-verdict .fk-stat-value {
+	font-family: var(--fs-marquee);
+	font-size: clamp(1.2rem, 3.4vw, 1.7rem);
+	line-height: 1.3;
+	text-transform: uppercase;
+}
+
+.post-fan-sentiment .fk-table {
+	margin-top: 1.4rem;
+	font-size: 0.92rem;
+}
+.post-fan-sentiment .fk-table summary {
+	cursor: pointer;
+	color: var(--fs-chalk-dim);
+}
+.post-fan-sentiment .fk-table-scroll {
+	overflow-x: auto;
+}
+.post-fan-sentiment .fk-table table {
+	margin-top: 0.6rem;
+	border-collapse: collapse;
+	font-variant-numeric: tabular-nums;
+	background: var(--fs-deep);
+	border-radius: 0.5rem;
+}
+.post-fan-sentiment .fk-table th,
+.post-fan-sentiment .fk-table td {
+	text-align: left;
+	padding: 0.35rem 0.9rem;
+	font-weight: 400;
+	white-space: nowrap;
+}
+.post-fan-sentiment .fk-table tbody tr + tr > * {
+	border-top: 1px solid rgb(246 243 231 / 0.14);
+}
+.post-fan-sentiment .fk-table thead th {
+	font-family: var(--fs-score);
+	letter-spacing: 0.1em;
+	text-transform: uppercase;
+	color: var(--fs-chalk-dim);
+}
+
+/* Section-specific touches, kept with the theme so a section is one import. */
+.post-fan-sentiment .op {
+	padding-top: clamp(5rem, 18vh, 11rem);
+}
+.post-fan-sentiment .op-title {
+	font-size: clamp(2.6rem, 9vw, 6rem);
+	line-height: 0.98;
+}
+.post-fan-sentiment .op-word {
+	display: inline-block;
+	white-space: pre;
+}
+.post-fan-sentiment .op-lede {
+	font-size: 1.3rem;
+}
+.post-fan-sentiment .fi-thin {
+	stroke-width: 4;
+	opacity: 0.8;
+}
+.post-fan-sentiment .lg-cell {
+	fill: var(--fs-chalk);
+	opacity: 0.78;
+}
+.post-fan-sentiment .lg-hot {
+	fill: var(--fs-clay);
+	opacity: 1;
+}
+.post-fan-sentiment .lg-pooled {
+	stroke-width: 6;
+}
+.post-fan-sentiment .rv-box {
+	fill: rgb(246 243 231 / 0.16);
+	stroke: var(--fs-chalk);
+	stroke-width: 3;
+}
+.post-fan-sentiment .rv-plate {
+	fill: var(--fs-chalk);
+}
+.post-fan-sentiment .bx-limits {
+	max-width: 36rem;
+	margin: 1.6rem 0 1rem;
+	padding-left: 1.2rem;
+	color: var(--fs-chalk-dim);
+}
+.post-fan-sentiment .bx-limits li + li {
+	margin-top: 0.35rem;
+}
+.post-fan-sentiment .bx-links {
+	margin: 0 0 0.5rem;
+}
+.post-fan-sentiment .bx-small {
+	margin: 0;
+	font-size: 0.9rem;
+	color: var(--fs-chalk-dim);
+}

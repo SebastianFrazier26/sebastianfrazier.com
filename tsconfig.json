@@ -10,6 +10,7 @@
 		"noUncheckedIndexedAccess": true,
 		"verbatimModuleSyntax": true,
 		"isolatedModules": true,
+		"resolveJsonModule": true,
 		"erasableSyntaxOnly": true,
 		"allowImportingTsExtensions": true,
 		"noEmit": true,
@@ -18,6 +19,7 @@
 	},
 	"include": [
 		"src",
+		"dev",
 		"scripts",
 		"tests",
 		"e2e",

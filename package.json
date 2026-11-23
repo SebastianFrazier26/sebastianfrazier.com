@@ -29,6 +29,8 @@
 	"dependencies": {
 		"@cabn/blog": "0.1.0",
 		"@cabn/engine": "0.3.1",
+		"d3-scale": "4.0.3",
+		"gsap": "3.15.1",
 		"pdfjs-dist": "6.3.289",
 		"react": "^19.3.0",
 		"react-dom": "^19.3.0"
@@ -38,6 +40,7 @@
 		"@cabn/cli": "0.2.2",
 		"@cabn/world-schema": "0.2.0",
 		"@playwright/test": "1.63.0",
+		"@types/d3-scale": "4.0.9",
 		"@types/node": "^22.20.4",
 		"@types/picomatch": "^4.0.3",
 		"@types/react": "^19.3.0",

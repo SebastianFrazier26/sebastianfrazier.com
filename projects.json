@@ -49,10 +49,7 @@
 			],
 			"excludes": ["data/"],
 			"history": false,
-			"hero": {
-				"url": "https://sebastianfrazier26.github.io/mlb-fan-sentiment/",
-				"status": "live"
-			},
+			"hero": null,
 			"order": 20
 		},
 		{
