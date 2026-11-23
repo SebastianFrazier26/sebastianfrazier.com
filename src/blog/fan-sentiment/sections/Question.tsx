@@ -9,7 +9,7 @@ import {
 	type Point,
 	useReveal,
 } from "../kit/motion.ts";
-import { SectionHead } from "../kit/SectionHead.tsx";
+import { Clamp, SectionHead } from "../kit/SectionHead.tsx";
 import { useWidth } from "../useWidth.ts";
 import "../theme.css";
 
@@ -97,7 +97,7 @@ export function Question(): React.ReactElement {
 					inning={COPY.question.inning}
 					title={COPY.question.title}
 				>
-					<p className="fk-copy">{COPY.question.body}</p>
+					<Clamp>{COPY.question.body}</Clamp>
 				</SectionHead>
 			</div>
 			<div className="fk-bleed">

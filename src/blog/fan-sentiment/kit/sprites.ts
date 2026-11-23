@@ -250,18 +250,18 @@ const FIELDER_SHOULDER: Point = [-8, -58];
 
 export type CatchPose = "ready" | "catch";
 
+/**
+ * The catch arm bends out in front of the face (elbow ahead of the nose)
+ * rather than running straight from shoulder to glove across it.
+ */
 export function catchStrokes(pose: CatchPose): Stroke[] {
 	const glove: Point = pose === "catch" ? GLOVE_POCKET : [-24, -58];
+	const elbow: Point = pose === "catch" ? [-28, -64] : [-16, -54];
 	const hand: Point =
-		pose === "catch" ? [glove[0] + 3, glove[1] + 7] : [glove[0] + 6, glove[1]];
+		pose === "catch" ? [glove[0] - 4, glove[1] + 8] : [glove[0] + 6, glove[1]];
 	return [
-		{
-			from: FIELDER_SHOULDER,
-			to: along(FIELDER_SHOULDER, hand, 0.4),
-			radius: 4.6,
-			k: "j",
-		},
-		{ from: along(FIELDER_SHOULDER, hand, 0.4), to: hand, radius: 4.2, k: "s" },
+		{ from: FIELDER_SHOULDER, to: elbow, radius: 4.6, k: "j" },
+		{ from: elbow, to: hand, radius: 4.2, k: "s" },
 		{ from: glove, to: glove, radius: 10.5, k: "l" },
 		{ from: glove, to: glove, radius: 4.5, k: "d" },
 	];

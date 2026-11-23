@@ -1,5 +1,21 @@
 # Changelog
 
+## 2026-11-23 (fan-sentiment post: signature moments and mobile)
+
+- Hitting: the two at-bats pin and scrub, so the ball draws each arc as you scroll, and it lands
+  in a puff of infield dirt. League: the scoreboard hangs over the field and counts the 217
+  fanbase tests as their balls land. Replay review: a replay booth, where the camera pushes in,
+  the zone rewinds from the first test's "nothing" to the rebuilt one with ghost frames, the call
+  is framed in chalk corners, and the camera pulls back.
+- Which scenes pin and scrub is one switch per scene (`SCRUBBED` in `kit/motion.ts`); pitch and
+  hitting are on, league and review play once.
+- The fielder's catching arm now bends out in front of his face instead of across it.
+- Phones show section copy as three lines with a "Read more" toggle (the full text stays in the
+  page for screen readers), with tighter spacing and a smaller inning numeral.
+- Fixes: pinned scenes no longer overlap the content after them (triggers re-measure when the web
+  fonts land and whenever a section re-lays out), and scorebug numerals can no longer stick
+  mid-count when a scrubbed timeline jumps.
+
 ## 2026-11-23 (fan-sentiment post: arcade players and motion pass)
 
 - Players are now original arcade-style pixel sprites (`FIGURE_STYLE = "arcade"`, the new

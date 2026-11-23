@@ -4,13 +4,38 @@ import { type RefObject, useLayoutEffect, useRef } from "react";
 import { signed } from "../format.ts";
 
 gsap.registerPlugin(ScrollTrigger);
-// Pins measure their element when created; the marquee and scorebug fonts
-// arrive later and change those heights, so measure again once they land.
-if (typeof document !== "undefined") {
-	document.fonts?.ready.then(() => ScrollTrigger.refresh());
+let pendingRefresh = 0;
+/**
+ * A pin's start and end are measured against everything above it, so every
+ * layout change above a pin re-measures all triggers (once per frame, however
+ * many ask): a section rebuilding for a new width, and the marquee and
+ * scorebug fonts arriving. `fonts.ready` alone is not enough, since it can
+ * resolve before the post has asked for any font.
+ */
+function scheduleRefresh(): void {
+	cancelAnimationFrame(pendingRefresh);
+	pendingRefresh = requestAnimationFrame(() => {
+		ScrollTrigger.sort();
+		ScrollTrigger.refresh();
+	});
+}
+if (typeof document !== "undefined" && document.fonts) {
+	document.fonts.addEventListener("loadingdone", scheduleRefresh);
 }
 
 export type Point = readonly [number, number];
+
+/**
+ * Which scenes pin and scrub with the scroll on roomy screens. The rest, and
+ * every scene on a phone, play once as they scroll into view. Flip one to
+ * false to make it play instead; nothing else changes.
+ */
+export const SCRUBBED = {
+	pitch: true,
+	hitting: true,
+	league: false,
+	review: false,
+} as const;
 
 const MOTION = "(prefers-reduced-motion: no-preference)";
 /** Below this, a pinned scene would take the whole phone screen; play it instead. */
@@ -158,6 +183,7 @@ export function useReveal(
 				});
 			});
 		}
+		scheduleRefresh();
 		return () => mm.revert();
 	}, [ref, layoutKey, pin, distance]);
 }
@@ -205,6 +231,8 @@ export function countUp(
 	tl: gsap.core.Timeline,
 	scope: Element,
 	at: gsap.Position = ">",
+	duration = 0.9,
+	ease = "power3.out",
 ): gsap.core.Timeline {
 	tl.from(
 		scope.querySelectorAll(".fk-stats"),
@@ -233,24 +261,27 @@ export function countUp(
 		const end = Number(el.dataset.count);
 		const digits = Number(el.dataset.digits ?? 0);
 		const signedNum = el.dataset.signed === "true";
-		const final = el.textContent ?? "";
-		const state = { v: 0 };
-		tl.to(
-			state,
-			{
-				v: end,
-				duration: 0.9,
-				ease: "power3.out",
-				onStart: () => {
-					el.textContent = formatCount(0, digits, signedNum);
-				},
-				onUpdate: () => {
-					el.textContent = formatCount(state.v, digits, signedNum);
-				},
-				onComplete: () => {
-					el.textContent = final;
-				},
+		// Kept from the first build: a rebuild may find the text mid-count.
+		el.dataset.final ??= el.textContent ?? "";
+		const final = el.dataset.final;
+		// The numeral is written by a setter, not an onUpdate callback: GSAP
+		// skips callbacks when a scrubbed timeline jumps (a refresh, a fast
+		// scroll), but always sets the property, so the text cannot go stale.
+		const counter = {
+			value: 0,
+			get v(): number {
+				return this.value;
 			},
+			set v(next: number) {
+				this.value = next;
+				el.textContent =
+					next === end ? final : formatCount(next, digits, signedNum);
+			},
+		};
+		tl.fromTo(
+			counter,
+			{ v: 0 },
+			{ v: end, duration, ease, immediateRender: false },
 			i === 0 ? "<" : "<0.1",
 		);
 	});
@@ -263,6 +294,32 @@ export function formatCount(
 	signedNum: boolean,
 ): string {
 	return signedNum ? signed(v, digits) : v.toFixed(digits);
+}
+
+/**
+ * A puff of infield dirt where a ball lands: the Puff component's specks fly
+ * out and fade, ending invisible as the markup has them.
+ */
+export function puff(
+	tl: gsap.core.Timeline,
+	el: Element | null,
+	at: gsap.Position = ">",
+): gsap.core.Timeline {
+	const specks = el ? [...el.querySelectorAll(".fk-speck")] : [];
+	if (specks.length === 0) return tl;
+	return tl.fromTo(
+		specks,
+		{ x: 0, y: 0, opacity: 0.95, scale: 1 },
+		{
+			x: (i: number) => ((i / (specks.length - 1)) * 2 - 1) * 22,
+			y: (i: number) => -6 - ((i * 5) % 9),
+			opacity: 0,
+			scale: 0.4,
+			duration: 0.55,
+			ease: "power2.out",
+		},
+		at,
+	);
 }
 
 export { gsap };

@@ -159,6 +159,31 @@ export function Flight({
 	);
 }
 
+/** Dirt specks at a landing spot, invisible until puff() throws them. */
+export function Puff({
+	x,
+	y,
+	className = "",
+}: {
+	x: number;
+	y: number;
+	className?: string;
+}): React.ReactElement {
+	return (
+		<g className={`fk-puff ${className}`} transform={`translate(${x} ${y})`}>
+			{[0, 1, 2, 3, 4, 5].map((i) => (
+				<circle
+					key={i}
+					className="fk-speck"
+					r={2.2 + (i % 3) * 0.9}
+					cy={-2}
+					opacity={0}
+				/>
+			))}
+		</g>
+	);
+}
+
 export function Batter({
 	x,
 	y,

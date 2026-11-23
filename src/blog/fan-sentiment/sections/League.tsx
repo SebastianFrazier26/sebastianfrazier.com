@@ -3,14 +3,16 @@ import { useRef } from "react";
 import { COPY } from "../copy.ts";
 import { signed } from "../format.ts";
 import { Ground } from "../kit/Ground.tsx";
-import { countUp, gsap, useReveal } from "../kit/motion.ts";
+import { countUp, gsap, SCRUBBED, useReveal } from "../kit/motion.ts";
 import { DataTable, Stat } from "../kit/Scorebug.tsx";
-import { SectionHead } from "../kit/SectionHead.tsx";
+import { Clamp, SectionHead } from "../kit/SectionHead.tsx";
 import { type LeagueData, METRIC_NAMES } from "../snapshot.ts";
 import { useWidth } from "../useWidth.ts";
 import "../theme.css";
 
 const ROW = 50;
+/** Seconds from the first ball dropping to the last one landing. */
+const DROP_SPAN = 2.4;
 const TOP = 30;
 
 /** Spreads the balls of one row vertically without any randomness. */
@@ -40,30 +42,42 @@ export function League({ data }: { data: LeagueData }): React.ReactElement {
 
 	useReveal(
 		root,
+		// The scoreboard hangs over the field and counts each ball as it lands,
+		// so its tally finishes with the last bounce.
 		(scope) =>
 			countUp(
-				gsap
-					.timeline({ defaults: { ease: "power2.out" } })
-					.from(".lg-cell", {
+				gsap.timeline({ defaults: { ease: "power2.out" } }),
+				scope,
+				0,
+				DROP_SPAN,
+				"none",
+			)
+				.from(
+					".lg-cell",
+					{
 						y: -(H + 20),
 						opacity: 0,
 						duration: 0.9,
 						ease: "bounce.out",
-						stagger: { each: 0.005, from: "random" },
-					})
-					.from(
-						".lg-pooled",
-						{
-							scaleX: 0,
-							transformOrigin: "50% 50%",
-							duration: 0.6,
-							stagger: 0.06,
+						stagger: {
+							amount: DROP_SPAN - 0.9,
+							from: "random",
 						},
-						">-0.3",
-					),
-				scope,
-			),
+					},
+					0.35,
+				)
+				.from(
+					".lg-pooled",
+					{
+						scaleX: 0,
+						transformOrigin: "50% 50%",
+						duration: 0.6,
+						stagger: 0.06,
+					},
+					">-0.3",
+				),
 		width,
+		SCRUBBED.league ? { pin: ".lg-pin", distance: "+=140%" } : {},
 	);
 
 	return (
@@ -75,10 +89,28 @@ export function League({ data }: { data: LeagueData }): React.ReactElement {
 					inning={COPY.league.inning}
 					title={COPY.league.title}
 				>
-					<p className="fk-copy">{COPY.league.body}</p>
+					<Clamp>{COPY.league.body}</Clamp>
 				</SectionHead>
 			</div>
-			<div className="fk-bleed">
+			<div className="fk-bleed lg-pin">
+				<div className="fk-stats lg-board">
+					<Stat
+						label="Fanbase tests"
+						value={String(data.cells.length)}
+						count={{ to: data.cells.length }}
+					/>
+					<Stat
+						label={`Clearing q < ${data.threshold}`}
+						value={String(data.clearing)}
+						count={{ to: data.clearing }}
+					/>
+					<Stat
+						label="League-wide stats that clear"
+						value={`${
+							data.pooled.filter((r) => (r.q_bh ?? 1) < 0.05).length
+						} of ${data.pooled.length}`}
+					/>
+				</div>
 				<div className="fk-scene" ref={box}>
 					<svg
 						width={width}
@@ -137,24 +169,6 @@ export function League({ data }: { data: LeagueData }): React.ReactElement {
 							digits={1}
 						/>
 					</svg>
-				</div>
-				<div className="fk-stats">
-					<Stat
-						label="Fanbase tests"
-						value={String(data.cells.length)}
-						count={{ to: data.cells.length }}
-					/>
-					<Stat
-						label={`Clearing q < ${data.threshold}`}
-						value={String(data.clearing)}
-						count={{ to: data.clearing }}
-					/>
-					<Stat
-						label="League-wide stats that clear"
-						value={`${
-							data.pooled.filter((r) => (r.q_bh ?? 1) < 0.05).length
-						} of ${data.pooled.length}`}
-					/>
 				</div>
 			</div>
 			<div className="fk-wrap">

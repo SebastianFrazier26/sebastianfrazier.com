@@ -87,6 +87,20 @@ describe("arcade sprites", () => {
 		expect(glove?.from).toEqual(GLOVE_POCKET);
 	});
 
+	it("keeps the catching arm off the fielder's face", () => {
+		const face = new Set<string>();
+		FIELDER_GRID.forEach((row, r) => {
+			[...row].forEach((k, c) => {
+				if (k === "e" || (k === "s" && r < 8)) face.add(`${c},${r}`);
+			});
+		});
+		const arm = rasterise(catchStrokes("catch"), -22, -96).filter(
+			(cell) => cell.k === "s" || cell.k === "j",
+		);
+		const covered = arm.filter((cell) => face.has(`${cell.c},${cell.r}`));
+		expect(covered).toEqual([]);
+	});
+
 	it("inks every rasterised shape with an outline", () => {
 		const cells = rasterise(
 			[{ from: [0, 0], to: [0, 0], radius: 2, k: "w" }],

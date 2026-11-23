@@ -19,10 +19,11 @@ import {
 	flyPath,
 	gsap,
 	type Point,
+	SCRUBBED,
 	useReveal,
 } from "../kit/motion.ts";
 import { DataTable, Stat } from "../kit/Scorebug.tsx";
-import { SectionHead } from "../kit/SectionHead.tsx";
+import { Clamp, SectionHead } from "../kit/SectionHead.tsx";
 import type { PitchData } from "../snapshot.ts";
 import { useWidth } from "../useWidth.ts";
 import "../theme.css";
@@ -126,7 +127,7 @@ export function Pitch({ data }: { data: PitchData }): React.ReactElement {
 			return countUp(tl, scope, ">-0.1");
 		},
 		width,
-		{ pin: ".pt-pin", distance: "+=140%" },
+		SCRUBBED.pitch ? { pin: ".pt-pin", distance: "+=140%" } : {},
 	);
 
 	return (
@@ -138,7 +139,7 @@ export function Pitch({ data }: { data: PitchData }): React.ReactElement {
 					inning={COPY.pitch.inning}
 					title={COPY.pitch.title}
 				>
-					<p className="fk-copy">{COPY.pitch.body}</p>
+					<Clamp>{COPY.pitch.body}</Clamp>
 				</SectionHead>
 			</div>
 			<div className="fk-bleed pt-pin">
