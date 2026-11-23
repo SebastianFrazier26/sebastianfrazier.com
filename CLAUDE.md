@@ -15,6 +15,7 @@ directly via type stripping), pnpm, TypeScript strict, Biome, Vitest, zod.
 - `pnpm upstream-changed` — scheduled-deploy decision (`DEPLOYED_MANIFEST_URL`, `GITHUB_TOKEN` env)
 - `pnpm engine:link [dir]` / `pnpm engine:unlink` — local cabn checkout via `.pnpmfile.cjs`; never leaves `link:` in the lockfile. While linked, every pnpm script needs `--config.verify-deps-before-run=false` or pnpm silently relinks npm 0.1.0
 - `node scripts/build-blog.ts` — runs inside `pnpm build`, after `vite build`: writes `dist/blog/index.html`, `dist/blog/<slug>/index.html` (copies of the shell with each page's title and link-preview tags), `feed.xml` and `sitemap.xml`
+- `pnpm e2e` — the one Playwright spec (`e2e/blog.spec.ts`) against `vite preview` of `dist/`, so `pnpm build` first. Locally set `PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH` to a cached Chrome for Testing build instead of running `playwright install`; `SF_E2E_PORT` moves it off 4391. CI runs it as the `browser-smoke` job
 - Full check before a commit: `pnpm lint && pnpm typecheck && pnpm test && pnpm build:fixture && pnpm build`
 
 ## Layout

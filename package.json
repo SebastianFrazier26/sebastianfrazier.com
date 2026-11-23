@@ -23,6 +23,7 @@
 		"format": "biome format --write .",
 		"typecheck": "tsc --noEmit -p tsconfig.json",
 		"test": "vitest run",
+		"e2e": "playwright test",
 		"postbuild": "node scripts/check-dist.ts"
 	},
 	"dependencies": {
@@ -36,6 +37,7 @@
 		"@biomejs/biome": "^2.5.14",
 		"@cabn/cli": "0.2.2",
 		"@cabn/world-schema": "0.2.0",
+		"@playwright/test": "1.63.0",
 		"@types/node": "^22.20.4",
 		"@types/picomatch": "^4.0.3",
 		"@types/react": "^19.3.0",

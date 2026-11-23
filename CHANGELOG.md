@@ -13,6 +13,9 @@
   `/blog/sitemap.xml`. The CSP is unchanged.
 - One post so far, an unlisted draft placeholder for the fan-sentiment
   write-up at `/blog/fan-sentiment/`.
+- New `browser-smoke` CI job: one Playwright spec walks map → blog → post on
+  the production build and fails on a CSP violation, a console error or an
+  engine chunk loading on a blog page.
 - Needs `@cabn/blog` 0.1.0 on npm; until then `pnpm-lock.yaml` has no entry
   for it and `pnpm install --frozen-lockfile` fails. Local work uses
   `pnpm engine:link`, which now links `@cabn/blog` as well.
