@@ -1,5 +1,25 @@
 # Changelog
 
+## 2026-11-22 (fan-sentiment post)
+
+- New post in `src/blog/fan-sentiment/`, in the shape the blog module (`@cabn/blog`, on
+  `feat/cabn-blog`) loads: the folder's default export is the post and every CSS selector sits
+  under `.post-fan-sentiment`. Eight sections on a mown-grass field in chalk white and clay red
+  (opener, question, two teams, the pre-registered test, hitting, every fanbase, replay review,
+  final), with small vector players. Charts are the play itself: a batter swings and the ball's
+  flight ends where the effect is; the league test is a fly ball caught on zero. Hand-built SVG
+  on `d3-scale`; GSAP ScrollTrigger plays each animation once as its section scrolls in, and
+  reduced motion shows the finished picture. Every chart has a data table.
+- Data is a copy of fansent's aggregate-only snapshot (including the 217 per-fanbase tests); a
+  test validates it and rejects a copy carrying free text. All reader-facing text sits in
+  `copy.ts`, marked as a draft for the owner.
+- Fonts: Bungee and Barlow Condensed, self-hosted under the SIL Open Font License (licence files
+  beside them). GSAP is under Webflow's no-charge standard licence.
+- A dev-only page (`dev/fan-sentiment.html`, not a build input) mounts the post for previews.
+  This branch does not touch `App.tsx`, the router or the Caddyfile.
+- The fansent world no longer has a hero site: its GitHub Pages page is being retired, and
+  worlds link to posts by plain navigation.
+
 ## 2026-11-22 (dependency policy cleanup)
 
 - `minimumReleaseAgeExclude` is gone: the cabn 0.3.1 packages are past pnpm's
