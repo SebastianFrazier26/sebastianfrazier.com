@@ -4,9 +4,27 @@
 
 - Every font the blog posts self-host now ships its OFL licence: the build copies the licence
   file beside each font under `src/` to `dist/assets/fonts/<Family>-OFL.txt` (e.g.
-  `/assets/fonts/Bungee-OFL.txt`, `/assets/fonts/BarlowCondensed-OFL.txt`), next to the existing
+  `/assets/fonts/Bungee-OFL.txt`, `/assets/fonts/BarlowCondensed-OFL.txt`,
+  `/assets/fonts/PressStart2P-OFL.txt`), next to the existing
   `DotGothic16-OFL.txt`. A font under `src/` with no licence beside it fails the build, and the
   postbuild check fails if any font family in `dist/` lacks its licence.
+
+## 2026-11-23 (loosy-goose post: pixel geese and a pixel face)
+
+- The geese are now original pixel sprites (idle, step and honk frames), drawn on whole pixels
+  like the ball and paddles, which lose their rounded corners.
+- Titles, section scores and scoreboard numerals are set in Press Start 2P (OFL), self-hosted
+  next to the post with its licence; body text stays the system font. Shipped unmodified,
+  because the font has a Reserved Font Name and a subset would count as a modified version.
+
+## 2026-11-23 (loosy-goose post, first draft)
+
+- New post at `/blog/loosy-goose/`: the loosy-goose context-compression project as a pong match.
+  Token squares as the ball, the compression budget as the paddle, geese honking dropped context
+  off the court. Seven scenes, every one scrubbed by the scroll on phones and desktops (pinned
+  where the screen is tall enough); reduced motion shows the finished picture.
+- Every number comes from the loosy-goose repo's committed result tables, named per scene with a
+  link to the file. Copy in `src/blog/loosy-goose/copy.ts` is a draft for the owner's edit.
 
 ## 2026-11-23 (fan-sentiment post published)
 

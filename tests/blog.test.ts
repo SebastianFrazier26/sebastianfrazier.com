@@ -20,6 +20,12 @@ describe("the post list", () => {
 		expect(blog.posts.map((p) => p.slug)).toContain("fan-sentiment");
 	});
 
+	it("lists the loosy-goose post as a bare-layout page", () => {
+		const post = blog.find("loosy-goose");
+		expect(post?.draft).toBe(false);
+		expect(post?.layout).toBe("bare");
+	});
+
 	// scripts/build-blog.ts imports posts.ts in Node, where a component or a
 	// stylesheet cannot load.
 	it("has only lazy imports, so the build script can load it in Node", () => {
