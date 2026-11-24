@@ -3,6 +3,7 @@ import { BATTER, FIELDER } from "../src/blog/fan-sentiment/kit/Figures.tsx";
 import {
 	bezier,
 	bezierVelocity,
+	driven,
 	formatCount,
 	stretchFor,
 } from "../src/blog/fan-sentiment/kit/motion.ts";
@@ -148,5 +149,20 @@ describe("ball motion", () => {
 		expect(formatCount(-0.0019, 3, true)).toBe("−0.002");
 		expect(formatCount(0, 3, true)).toBe("0.000");
 		expect(formatCount(216.6, 0, false)).toBe("217");
+	});
+});
+
+describe("driven", () => {
+	it("redraws with every value on each write, as a tween's setter would", () => {
+		const drawn: Array<{ angle: number; t: number }> = [];
+		const state = driven({ angle: -40, t: 0 }, (s) => drawn.push({ ...s }));
+		expect(drawn).toEqual([]);
+		state.t = 0.5;
+		state.angle = 0;
+		expect(drawn).toEqual([
+			{ angle: -40, t: 0.5 },
+			{ angle: 0, t: 0.5 },
+		]);
+		expect(Object.keys(state)).toEqual(["angle", "t"]);
 	});
 });

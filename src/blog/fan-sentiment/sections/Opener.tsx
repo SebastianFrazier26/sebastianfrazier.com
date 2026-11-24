@@ -2,6 +2,7 @@ import { useRef } from "react";
 import { COPY } from "../copy.ts";
 import { BATTER, Batter, Fielder, Flight, swingTo } from "../kit/Figures.tsx";
 import {
+	driven,
 	type Flight as FlightSpec,
 	flightDrawer,
 	flyControl,
@@ -55,25 +56,26 @@ export function Opener(): React.ReactElement {
 			const flight = scope.querySelector(".op-flight");
 			const squash = scope.querySelector(".op-flight .fk-squash");
 			const draws = legs.map((leg) => flightDrawer(flight, leg));
-			const swing = { angle: BATTER.cocked };
-			const state = { t: 0 };
-			swingTo(batter, swing.angle);
+			const swing = driven({ angle: BATTER.cocked }, (s) =>
+				swingTo(batter, s.angle),
+			);
+			swingTo(batter, BATTER.cocked);
 			draws[0]?.(0);
-			const tl = gsap.timeline({ delay: 0.5 }).to(swing, {
+			const tl = gsap.timeline().to(swing, {
 				angle: 0,
 				duration: 0.3,
 				ease: "power3.in",
-				onUpdate: () => swingTo(batter, swing.angle),
 			});
 			draws.forEach((draw, i) => {
+				// One target per leg: whichever leg GSAP writes last owns the ball.
 				tl.fromTo(
-					state,
+					driven({ t: 0 }, (s) => draw(s.t)),
 					{ t: 0 },
 					{
 						t: 1,
 						duration: [0.75, 0.5, 0.55][i],
 						ease: i === 2 ? "power2.out" : "none",
-						onUpdate: () => draw(state.t),
+						immediateRender: false,
 					},
 				).to(
 					squash,
@@ -89,13 +91,11 @@ export function Opener(): React.ReactElement {
 					">-0.02",
 				);
 			});
-			return tl.from(
-				".fk-scroll-cue",
-				{ opacity: 0, y: -8, duration: 0.6 },
-				">0.2",
-			);
+			return tl;
 		},
 		width,
+		// Nothing moves before the first scroll, so the cue is what invites it.
+		{ start: "top top", end: "clamp(bottom 45%)" },
 	);
 
 	return (

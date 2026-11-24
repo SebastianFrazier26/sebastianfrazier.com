@@ -3,8 +3,8 @@ import { useRef } from "react";
 import { COPY } from "../copy.ts";
 import { signed } from "../format.ts";
 import { Ground } from "../kit/Ground.tsx";
-import { gsap, SCRUBBED, useReveal } from "../kit/motion.ts";
-import { Clamp, SectionHead } from "../kit/SectionHead.tsx";
+import { gsap, useReveal } from "../kit/motion.ts";
+import { SectionHead } from "../kit/SectionHead.tsx";
 import { useWidth } from "../useWidth.ts";
 import "../theme.css";
 
@@ -123,7 +123,7 @@ export function Review({
 				.to(".rv-stage", { scale: 1, svgOrigin: focus, duration: 0.8 }, ">0.2")
 				.from(".rv-after", { opacity: 0, x: -10, duration: 0.3 }, "<0.3"),
 		width,
-		SCRUBBED.review ? { pin: ".rv-pin", distance: "+=140%" } : {},
+		{ pin: ".rv-pin", distance: "+=140%" },
 	);
 
 	return (
@@ -135,7 +135,7 @@ export function Review({
 					inning={COPY.review.inning}
 					title={COPY.review.title}
 				>
-					<Clamp>{COPY.review.body}</Clamp>
+					<p className="fk-copy">{COPY.review.body}</p>
 				</SectionHead>
 			</div>
 			<div className="fk-bleed rv-pin">

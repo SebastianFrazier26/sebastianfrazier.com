@@ -1,5 +1,19 @@
 # Changelog
 
+## 2026-11-23 (fan-sentiment post: every scene scrubs, phones included)
+
+- Every animation now moves with the scroll instead of playing once: section heads, the opener's
+  hit, the two-team bounce, the scorebugs, and all four big scenes (pitch, hitting, league,
+  replay review), which pin while they scrub. Phones pin and scrub the same way; a scene too tall
+  for the screen, or any scene on a short landscape screen, scrubs in place instead. The page
+  title is the one exception: it is on screen before any scroll, so it still plays in on load,
+  and the opener's batter waits for the first scroll with the "Scroll for the season" cue showing.
+- Phones show the full section copy again; the three-line "Read more" toggle is gone.
+- Scenes redraw their players and ball through property setters (`driven` in `kit/motion.ts`)
+  rather than onUpdate callbacks, so a fast scroll or a refresh can no longer leave a ball or a
+  swing out of step with the scroll position.
+- Reduced motion still shows every scene's finished picture with nothing pinned.
+
 ## 2026-11-23 (fan-sentiment post: signature moments and mobile)
 
 - Hitting: the two at-bats pin and scrub, so the ball draws each arc as you scroll, and it lands

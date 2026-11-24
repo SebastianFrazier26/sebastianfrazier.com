@@ -14,16 +14,16 @@ import {
 import { Ground } from "../kit/Ground.tsx";
 import {
 	countUp,
+	driven,
 	flightDrawer,
 	flyControl,
 	flyPath,
 	gsap,
 	type Point,
-	SCRUBBED,
 	useReveal,
 } from "../kit/motion.ts";
 import { DataTable, Stat } from "../kit/Scorebug.tsx";
-import { Clamp, SectionHead } from "../kit/SectionHead.tsx";
+import { SectionHead } from "../kit/SectionHead.tsx";
 import type { PitchData } from "../snapshot.ts";
 import { useWidth } from "../useWidth.ts";
 import "../theme.css";
@@ -70,13 +70,13 @@ export function Pitch({ data }: { data: PitchData }): React.ReactElement {
 				to,
 				ground: G,
 			});
-			const state = { angle: BATTER.cocked, t: 0 };
-			const draw = (): void => {
-				swingTo(batter, state.angle);
-				fly(state.t);
-				poseFielder(fielder, state.t > 0.86 ? "catch" : "ready");
+			const draw = (s: { angle: number; t: number }): void => {
+				swingTo(batter, s.angle);
+				fly(s.t);
+				poseFielder(fielder, s.t > 0.86 ? "catch" : "ready");
 			};
-			draw();
+			const state = driven({ angle: BATTER.cocked, t: 0 }, draw);
+			draw(state);
 			const tl = gsap
 				.timeline({ defaults: { ease: "power2.out" } })
 				.from(".pt-zone-all", { opacity: 0, duration: 0.5 })
@@ -89,13 +89,8 @@ export function Pitch({ data }: { data: PitchData }): React.ReactElement {
 					angle: 0,
 					duration: 0.28,
 					ease: "power3.in",
-					onUpdate: draw,
 				})
-				.to(
-					state,
-					{ t: 1, duration: 1.6, ease: "power1.inOut", onUpdate: draw },
-					">-0.05",
-				)
+				.to(state, { t: 1, duration: 1.6, ease: "power1.inOut" }, ">-0.05")
 				.from(
 					".fk-trace",
 					{
@@ -127,7 +122,7 @@ export function Pitch({ data }: { data: PitchData }): React.ReactElement {
 			return countUp(tl, scope, ">-0.1");
 		},
 		width,
-		SCRUBBED.pitch ? { pin: ".pt-pin", distance: "+=140%" } : {},
+		{ pin: ".pt-pin", distance: "+=140%" },
 	);
 
 	return (
@@ -139,7 +134,7 @@ export function Pitch({ data }: { data: PitchData }): React.ReactElement {
 					inning={COPY.pitch.inning}
 					title={COPY.pitch.title}
 				>
-					<Clamp>{COPY.pitch.body}</Clamp>
+					<p className="fk-copy">{COPY.pitch.body}</p>
 				</SectionHead>
 			</div>
 			<div className="fk-bleed pt-pin">

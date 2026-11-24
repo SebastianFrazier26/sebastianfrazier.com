@@ -2,6 +2,7 @@ import { useRef } from "react";
 import { COPY } from "../copy.ts";
 import { Flight } from "../kit/Figures.tsx";
 import {
+	driven,
 	flightDrawer,
 	flyControl,
 	flyPath,
@@ -9,7 +10,7 @@ import {
 	type Point,
 	useReveal,
 } from "../kit/motion.ts";
-import { Clamp, SectionHead } from "../kit/SectionHead.tsx";
+import { SectionHead } from "../kit/SectionHead.tsx";
 import { useWidth } from "../useWidth.ts";
 import "../theme.css";
 
@@ -36,7 +37,7 @@ export function Question(): React.ReactElement {
 				to,
 				ground: BASE_Y,
 			});
-			const state = { t: 0 };
+			const state = driven({ t: 0 }, (s) => draw(s.t));
 			draw(0);
 			return gsap
 				.timeline({ defaults: { ease: "power2.out" } })
@@ -54,7 +55,6 @@ export function Question(): React.ReactElement {
 					t: 1,
 					duration: 1.3,
 					ease: "power1.inOut",
-					onUpdate: () => draw(state.t),
 				})
 				.from(
 					".fk-trace",
@@ -97,7 +97,7 @@ export function Question(): React.ReactElement {
 					inning={COPY.question.inning}
 					title={COPY.question.title}
 				>
-					<Clamp>{COPY.question.body}</Clamp>
+					<p className="fk-copy">{COPY.question.body}</p>
 				</SectionHead>
 			</div>
 			<div className="fk-bleed">

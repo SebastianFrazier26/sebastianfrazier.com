@@ -5,17 +5,17 @@ import { signed } from "../format.ts";
 import { BATTER, Batter, Flight, Puff, swingTo } from "../kit/Figures.tsx";
 import { Ground } from "../kit/Ground.tsx";
 import {
+	driven,
 	flightDrawer,
 	flyControl,
 	flyPath,
 	gsap,
 	type Point,
 	puff,
-	SCRUBBED,
 	useReveal,
 } from "../kit/motion.ts";
 import { DataTable } from "../kit/Scorebug.tsx";
-import { Clamp, SectionHead } from "../kit/SectionHead.tsx";
+import { SectionHead } from "../kit/SectionHead.tsx";
 import { METRIC_NAMES as NAMES, type SnapshotRow } from "../snapshot.ts";
 import { useWidth } from "../useWidth.ts";
 import "../theme.css";
@@ -63,24 +63,19 @@ export function Hitting({ rows }: { rows: SnapshotRow[] }): React.ReactElement {
 					to: spec.to,
 					ground: G,
 				});
-				const state = { angle: BATTER.cocked, t: 0 };
-				const draw = (): void => {
-					swingTo(batter, state.angle);
-					fly(state.t);
+				const draw = (s: { angle: number; t: number }): void => {
+					swingTo(batter, s.angle);
+					fly(s.t);
 				};
-				draw();
+				const state = driven({ angle: BATTER.cocked, t: 0 }, draw);
+				draw(state);
 				const q = gsap.utils.selector(lane);
 				tl.to(state, {
 					angle: 0,
 					duration: 0.28,
 					ease: "power3.in",
-					onUpdate: draw,
 				})
-					.to(
-						state,
-						{ t: 1, duration: 1.2, ease: "power1.in", onUpdate: draw },
-						">-0.05",
-					)
+					.to(state, { t: 1, duration: 1.2, ease: "power1.in" }, ">-0.05")
 					.from(
 						q(".fk-trace"),
 						{
@@ -108,7 +103,7 @@ export function Hitting({ rows }: { rows: SnapshotRow[] }): React.ReactElement {
 			return tl;
 		},
 		width,
-		SCRUBBED.hitting ? { pin: ".ht-pin", distance: "+=160%" } : {},
+		{ pin: ".ht-pin", distance: "+=160%" },
 	);
 
 	return (
@@ -120,7 +115,7 @@ export function Hitting({ rows }: { rows: SnapshotRow[] }): React.ReactElement {
 					inning={COPY.hitting.inning}
 					title={COPY.hitting.title}
 				>
-					<Clamp>{COPY.hitting.body}</Clamp>
+					<p className="fk-copy">{COPY.hitting.body}</p>
 				</SectionHead>
 			</div>
 			<div className="fk-bleed ht-pin">
