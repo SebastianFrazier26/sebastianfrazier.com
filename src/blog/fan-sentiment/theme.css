@@ -31,6 +31,10 @@
 	--fs-body:
 		ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
 	--fs-night: #10291c;
+	--fs-ink: #0c2218;
+	--fs-sign: #c4302b;
+	--fs-sign-deep: #9c231f;
+	--fs-bulb: #ffe7a3;
 	box-sizing: border-box;
 	overflow-x: clip;
 	color: var(--fs-chalk);
@@ -545,6 +549,77 @@
 	.post-fan-sentiment .op .fk-head-copy {
 		grid-column: 1;
 		grid-row: 3;
+	}
+}
+/* The page title's marquee sign (kit/Marquee.tsx). The bulb band is 26px
+   deep, so the padding keeps the letters inside the cream trim. */
+.post-fan-sentiment .mq {
+	position: relative;
+	display: inline-block;
+	max-width: 100%;
+	margin: 0.25rem 0 1.5rem;
+	padding: 38px 40px 34px;
+	border-radius: 14px;
+	background: var(--fs-sign);
+	box-shadow:
+		0 0 0 3px var(--fs-ink),
+		0 9px 0 3px var(--fs-ink);
+}
+.post-fan-sentiment .mq-frame {
+	position: absolute;
+	inset: 0;
+	overflow: visible;
+	pointer-events: none;
+}
+.post-fan-sentiment .mq-trim {
+	fill: var(--fs-sign-deep);
+	stroke: var(--fs-chalk);
+	stroke-width: 2.5;
+}
+.post-fan-sentiment .mq-halo {
+	fill: var(--fs-bulb);
+	opacity: 0.28;
+}
+.post-fan-sentiment .mq-glass {
+	fill: var(--fs-bulb);
+	stroke: var(--fs-ink);
+	stroke-width: 1.5;
+}
+.post-fan-sentiment .op .mq-title {
+	position: relative;
+	max-width: 17em;
+	margin: 0;
+	font-size: clamp(2.6rem, 4.6vw, 4.2rem);
+	text-align: center;
+	color: var(--fs-chalk);
+	text-shadow: 0 0.06em 0 var(--fs-ink);
+}
+.post-fan-sentiment .mq-word {
+	display: inline-block;
+	white-space: nowrap;
+}
+.post-fan-sentiment .mq-letter {
+	display: inline-block;
+}
+.post-fan-sentiment .mq-sr {
+	position: absolute;
+	width: 1px;
+	height: 1px;
+	overflow: hidden;
+	clip-path: inset(50%);
+	white-space: nowrap;
+}
+@media (max-width: 599px) {
+	.post-fan-sentiment .mq {
+		margin-bottom: 1.1rem;
+		padding: 34px 28px 30px;
+	}
+	/* The sign is taller than a bare title; this keeps the batter on a phone's first screen. */
+	.post-fan-sentiment .op-wrap {
+		padding-top: 1rem;
+	}
+	.post-fan-sentiment .op .mq-title {
+		font-size: 2.2rem;
 	}
 }
 .post-fan-sentiment .op .fk-numeral {

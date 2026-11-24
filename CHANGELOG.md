@@ -1,5 +1,13 @@
 # Changelog
 
+## 2026-11-23 (fan-sentiment post: marquee title)
+
+- The page title is now an original ballpark marquee: a red sign with a cream trim and a ring of
+  bulbs, drawn flat in the post's arcade style. On load the sign snaps open, the bulbs flicker on
+  dim, the letters flip up one by one, the bulbs chase round the frame and the sign settles fully
+  lit. Reduced motion shows the lit sign. Screen readers get the title as one string.
+- Phones tighten the space above the sign so the batter stays on the first screen.
+
 ## 2026-11-23 (fan-sentiment post: every scene scrubs, phones included)
 
 - Every animation now moves with the scroll instead of playing once: section heads, the opener's
