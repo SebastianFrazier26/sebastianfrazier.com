@@ -1,8 +1,10 @@
 import { describe, expect, it } from "vitest";
 import { BATTER, FIELDER } from "../src/blog/fan-sentiment/kit/Figures.tsx";
+import { bulbRing } from "../src/blog/fan-sentiment/kit/Marquee.tsx";
 import {
 	bezier,
 	bezierVelocity,
+	driven,
 	formatCount,
 	stretchFor,
 } from "../src/blog/fan-sentiment/kit/motion.ts";
@@ -148,5 +150,41 @@ describe("ball motion", () => {
 		expect(formatCount(-0.0019, 3, true)).toBe("−0.002");
 		expect(formatCount(0, 3, true)).toBe("0.000");
 		expect(formatCount(216.6, 0, false)).toBe("217");
+	});
+});
+
+describe("driven", () => {
+	it("redraws with every value on each write, as a tween's setter would", () => {
+		const drawn: Array<{ angle: number; t: number }> = [];
+		const state = driven({ angle: -40, t: 0 }, (s) => drawn.push({ ...s }));
+		expect(drawn).toEqual([]);
+		state.t = 0.5;
+		state.angle = 0;
+		expect(drawn).toEqual([
+			{ angle: -40, t: 0.5 },
+			{ angle: 0, t: 0.5 },
+		]);
+		expect(Object.keys(state)).toEqual(["angle", "t"]);
+	});
+});
+
+describe("marquee bulbs", () => {
+	it("ring the sign clockwise, evenly, with each corner lit once", () => {
+		const ring = bulbRing(300, 120);
+		expect(ring[0]).toEqual([13, 13]);
+		const keys = ring.map(([x, y]) => `${x},${y}`);
+		expect(new Set(keys).size).toBe(ring.length);
+		for (const corner of ["13,13", "287,13", "287,107", "13,107"]) {
+			expect(keys).toContain(corner);
+		}
+		const steps = ring.map(([x, y], i) => {
+			const [nx, ny] = ring[(i + 1) % ring.length] ?? [x, y];
+			return Math.hypot(nx - x, ny - y);
+		});
+		expect(Math.max(...steps) - Math.min(...steps)).toBeLessThan(6);
+	});
+
+	it("draws no bulbs before the sign has a size", () => {
+		expect(bulbRing(0, 0)).toEqual([]);
 	});
 });

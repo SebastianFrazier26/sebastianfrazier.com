@@ -3,9 +3,9 @@ import { useRef } from "react";
 import { COPY } from "../copy.ts";
 import { signed } from "../format.ts";
 import { Ground } from "../kit/Ground.tsx";
-import { countUp, gsap, SCRUBBED, useReveal } from "../kit/motion.ts";
+import { countUp, gsap, useReveal } from "../kit/motion.ts";
 import { DataTable, Stat } from "../kit/Scorebug.tsx";
-import { Clamp, SectionHead } from "../kit/SectionHead.tsx";
+import { SectionHead } from "../kit/SectionHead.tsx";
 import { type LeagueData, METRIC_NAMES } from "../snapshot.ts";
 import { useWidth } from "../useWidth.ts";
 import "../theme.css";
@@ -77,7 +77,7 @@ export function League({ data }: { data: LeagueData }): React.ReactElement {
 					">-0.3",
 				),
 		width,
-		SCRUBBED.league ? { pin: ".lg-pin", distance: "+=140%" } : {},
+		{ pin: ".lg-pin", distance: "+=140%" },
 	);
 
 	return (
@@ -89,7 +89,7 @@ export function League({ data }: { data: LeagueData }): React.ReactElement {
 					inning={COPY.league.inning}
 					title={COPY.league.title}
 				>
-					<Clamp>{COPY.league.body}</Clamp>
+					<p className="fk-copy">{COPY.league.body}</p>
 				</SectionHead>
 			</div>
 			<div className="fk-bleed lg-pin">

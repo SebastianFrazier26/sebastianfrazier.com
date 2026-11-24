@@ -6,7 +6,7 @@ import { Ball, Fielder } from "../kit/Figures.tsx";
 import { Ground } from "../kit/Ground.tsx";
 import { gsap, useReveal } from "../kit/motion.ts";
 import { DataTable } from "../kit/Scorebug.tsx";
-import { Clamp, SectionHead } from "../kit/SectionHead.tsx";
+import { SectionHead } from "../kit/SectionHead.tsx";
 import { METRIC_NAMES, type SnapshotRow } from "../snapshot.ts";
 import { useWidth } from "../useWidth.ts";
 import "../theme.css";
@@ -43,8 +43,8 @@ export function FirstInning({
 
 	useReveal(
 		root,
-		() =>
-			gsap
+		() => {
+			const tl = gsap
 				.timeline({ defaults: { ease: "power2.out" } })
 				.from(".fi-ball", {
 					y: -(G + 40),
@@ -68,9 +68,13 @@ export function FirstInning({
 					".fi-interval",
 					{ opacity: 0, duration: 0.3, stagger: 0.12 },
 					"<0.5",
-				)
-				.from(".fi-name", { opacity: 0, duration: 0.3, stagger: 0.12 }, "<")
-				.from(".fi-caveat", { opacity: 0, y: 10, duration: 0.4 }),
+				);
+			// Phones draw no names, and GSAP warns about an empty target.
+			if (!narrow) {
+				tl.from(".fi-name", { opacity: 0, duration: 0.3, stagger: 0.12 }, "<");
+			}
+			return tl.from(".fi-caveat", { opacity: 0, y: 10, duration: 0.4 });
+		},
 		width,
 	);
 
@@ -83,7 +87,7 @@ export function FirstInning({
 					inning={COPY.firstInning.inning}
 					title={COPY.firstInning.title}
 				>
-					<Clamp>{COPY.firstInning.body}</Clamp>
+					<p className="fk-copy">{COPY.firstInning.body}</p>
 				</SectionHead>
 			</div>
 			<div className="fk-bleed">
@@ -138,7 +142,7 @@ export function FirstInning({
 				</div>
 			</div>
 			<div className="fk-wrap">
-				<Clamp className="fi-caveat">{COPY.firstInning.caveat}</Clamp>
+				<p className="fk-copy fi-caveat">{COPY.firstInning.caveat}</p>
 				<DataTable
 					summary="The numbers behind these"
 					head={["Stat, fanbase", "Effect", "95% interval", "q"]}

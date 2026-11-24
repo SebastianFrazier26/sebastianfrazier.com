@@ -4,10 +4,6 @@
 // the snapshot.
 
 export const COPY = {
-	ui: {
-		more: "Read more",
-		less: "Show less",
-	},
 	opener: {
 		kicker: "2026 season · every fanbase · one test called in advance",
 		title: "Are the fans always right?",

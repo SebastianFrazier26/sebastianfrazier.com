@@ -12,7 +12,7 @@ export const blog = createBlog({
 		definePost({
 			slug: "fan-sentiment",
 			title: "Are the fans always right?",
-			date: "2026-11-22",
+			date: "2026-11-23",
 			summary:
 				"When a fanbase is upbeat about a player one week, does he play better the next?",
 			// The post paints its own full-width field, so it takes the whole page.

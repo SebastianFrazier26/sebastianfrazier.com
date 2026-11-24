@@ -25,22 +25,10 @@ if (typeof document !== "undefined" && document.fonts) {
 
 export type Point = readonly [number, number];
 
-/**
- * Which scenes pin and scrub with the scroll on roomy screens. The rest, and
- * every scene on a phone, play once as they scroll into view. Flip one to
- * false to make it play instead; nothing else changes.
- */
-export const SCRUBBED = {
-	pitch: true,
-	hitting: true,
-	league: false,
-	review: false,
-} as const;
-
 const MOTION = "(prefers-reduced-motion: no-preference)";
-/** Below this, a pinned scene would take the whole phone screen; play it instead. */
-const PIN_MEDIA = `${MOTION} and (min-width: 760px) and (min-height: 620px)`;
-const PLAY_MEDIA = `${MOTION} and ((max-width: 759px) or (max-height: 619px))`;
+/** A pin needs some height to hold a scene; on a landscape phone the scene scrubs in place instead. */
+const PIN_MEDIA = `${MOTION} and (min-height: 520px)`;
+const SHORT_MEDIA = `${MOTION} and (max-height: 519px)`;
 
 /** Point on a quadratic Bézier at t in [0, 1]. */
 export function bezier(t: number, p0: Point, p1: Point, p2: Point): Point {
@@ -127,22 +115,52 @@ export function flightDrawer(
 	};
 }
 
+/**
+ * A tween target whose numbers redraw the scene as they are written. Scenes
+ * draw through setters, not onUpdate callbacks: GSAP skips callbacks when a
+ * scrubbed timeline jumps (a refresh, a fast scroll) but always sets the
+ * property, so the picture cannot be left behind the scroll position.
+ */
+export function driven<K extends string>(
+	initial: Record<K, number>,
+	draw: (values: Readonly<Record<K, number>>) => void,
+): Record<K, number> {
+	const values = { ...initial };
+	const target = {} as Record<K, number>;
+	for (const key of Object.keys(values) as K[]) {
+		Object.defineProperty(target, key, {
+			enumerable: true,
+			get: () => values[key],
+			set: (next: number) => {
+				values[key] = next;
+				draw(values);
+			},
+		});
+	}
+	return target;
+}
+
 interface RevealOptions {
 	/**
-	 * On roomy screens, tie the timeline to scrolling instead of playing it:
-	 * the element this selector names is pinned while the timeline scrubs.
+	 * Pin the element this selector names while the timeline scrubs, for
+	 * `distance` of scrolling. A scene too tall to pin whole on this screen
+	 * scrubs in place instead.
 	 */
 	pin?: string;
-	/** How much scrolling the pinned timeline spans. */
 	distance?: string;
+	/** Where an unpinned scrub starts and ends, in ScrollTrigger terms. */
+	start?: string;
+	end?: string;
+	/** Play once on load instead of scrubbing: only for what is on screen before any scroll. */
+	play?: boolean;
 }
 
 /**
- * Plays `build`'s timeline once, when the section scrolls into view, or
- * scrubs it under a pinned scene (see RevealOptions). The markup is always the
- * finished picture: the timeline only animates towards it, and under reduced
- * motion (or with no script) nothing runs at all. `layoutKey` names the layout
- * the build measured (a width, say); the timeline is rebuilt when it changes.
+ * Ties `build`'s timeline to the scroll: scrubbed in place, or pinned and
+ * scrubbed (see RevealOptions). The markup is always the finished picture:
+ * the timeline only animates towards it, and under reduced motion (or with no
+ * script) nothing runs at all. `layoutKey` names the layout the build
+ * measured (a width, say); the timeline is rebuilt when it changes.
  */
 export function useReveal(
 	ref: RefObject<HTMLElement | null>,
@@ -152,40 +170,55 @@ export function useReveal(
 ): void {
 	const latest = useRef(build);
 	latest.current = build;
-	const { pin, distance = "+=120%" } = options;
+	const {
+		pin,
+		distance = "+=120%",
+		start = "top 85%",
+		// clamp() keeps the end reachable for a scene near the foot of the page,
+		// so it always finishes.
+		end = "clamp(center 55%)",
+		play = false,
+	} = options;
 	useLayoutEffect(() => {
 		const scope = ref.current;
 		if (!scope || layoutKey === "") return;
 		const mm = gsap.matchMedia(scope);
-		const play = (): void => {
-			const timeline = latest.current(scope).pause();
+		const inPlace = (): void => {
 			ScrollTrigger.create({
 				trigger: scope,
-				start: "top 62%",
-				once: true,
-				onEnter: () => timeline.play(),
+				start,
+				end,
+				scrub: 0.6,
+				animation: latest.current(scope).pause(),
 			});
 		};
-		if (!pin) {
-			mm.add(MOTION, play);
+		if (play) {
+			mm.add(MOTION, () => {
+				latest.current(scope);
+			});
+		} else if (!pin) {
+			mm.add(MOTION, inPlace);
 		} else {
-			mm.add(PLAY_MEDIA, play);
+			mm.add(SHORT_MEDIA, inPlace);
 			mm.add(PIN_MEDIA, () => {
-				const target = scope.querySelector(pin);
-				const timeline = latest.current(scope).pause();
+				const target = scope.querySelector<HTMLElement>(pin);
+				if (!target || target.offsetHeight > window.innerHeight * 0.92) {
+					inPlace();
+					return;
+				}
 				ScrollTrigger.create({
-					trigger: target ?? scope,
+					trigger: target,
 					start: "center center",
 					end: distance,
-					pin: target ?? true,
+					pin: target,
 					scrub: 0.7,
-					animation: timeline,
+					animation: latest.current(scope).pause(),
 				});
 			});
 		}
 		scheduleRefresh();
 		return () => mm.revert();
-	}, [ref, layoutKey, pin, distance]);
+	}, [ref, layoutKey, pin, distance, start, end, play]);
 }
 
 /**

@@ -2,3 +2,8 @@ allowBuilds:
   esbuild: true
 ignoredOptionalDependencies:
   - "@napi-rs/canvas"
+
+# 2026-11-23: @cabn/blog 0.1.0 was published today; pnpm's default release-age window would
+# refuse it for a day. Drop this once it is older than that.
+minimumReleaseAgeExclude:
+  - "@cabn/blog@0.1.0"

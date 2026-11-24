@@ -2,7 +2,7 @@ import { useRef } from "react";
 import { COPY } from "../copy.ts";
 import { countUp, gsap, useReveal } from "../kit/motion.ts";
 import { Stat } from "../kit/Scorebug.tsx";
-import { Clamp, SectionHead } from "../kit/SectionHead.tsx";
+import { SectionHead } from "../kit/SectionHead.tsx";
 import type { LeagueData, Snapshot } from "../snapshot.ts";
 import "../theme.css";
 
@@ -35,7 +35,7 @@ export function BoxScore({
 					inning={COPY.boxScore.inning}
 					title={COPY.boxScore.title}
 				>
-					<Clamp>{COPY.boxScore.body}</Clamp>
+					<p className="fk-copy">{COPY.boxScore.body}</p>
 				</SectionHead>
 				<div className="fk-stats">
 					<Stat

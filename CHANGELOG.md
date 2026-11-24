@@ -7,6 +7,7 @@
 - Titles, section scores and scoreboard numerals are set in Press Start 2P (OFL), self-hosted
   next to the post with its licence; body text stays the system font. Shipped unmodified,
   because the font has a Reserved Font Name and a subset would count as a modified version.
+
 ## 2026-11-23 (loosy-goose post, first draft)
 
 - New post at `/blog/loosy-goose/`: the loosy-goose context-compression project as a pong match.
@@ -15,6 +16,40 @@
   where the screen is tall enough); reduced motion shows the finished picture.
 - Every number comes from the loosy-goose repo's committed result tables, named per scene with a
   link to the file. Copy in `src/blog/loosy-goose/copy.ts` is a draft for the owner's edit.
+
+## 2026-11-23 (fan-sentiment post published)
+
+- The fan-sentiment write-up replaces the draft placeholder at `/blog/fan-sentiment/`: it is
+  listed on `/blog/`, in the Atom feed and the sitemap, and is no longer `noindex`.
+
+## 2026-11-23 (fan-sentiment post: replay arrow and phone warnings)
+
+- Replay review: the blinking arrow now finishes at full opacity instead of a quarter.
+- Phones no longer log GSAP "target not found" warnings for the first-inning names and pitch
+  labels they don't draw.
+
+## 2026-11-23 (fan-sentiment post: marquee title)
+
+- The page title is now an original ballpark marquee: a red sign with a cream trim and a ring of
+  bulbs, drawn flat in the post's arcade style. On load the sign snaps open, the bulbs flicker on
+  dim, the letters flip up one by one, the bulbs chase round the frame and the sign settles fully
+  lit. Reduced motion shows the lit sign. Screen readers get the title as one string.
+- Phones tighten the space above the sign so the batter stays on the first screen.
+
+## 2026-11-23 (fan-sentiment post: every scene scrubs, phones included)
+
+- Every animation now moves with the scroll instead of playing once: section heads, the opener's
+  hit, the two-team bounce, the scorebugs, and all four big scenes (pitch, hitting, league,
+  replay review), which pin while they scrub. Phones pin and scrub the same way; a scene too tall
+  for the screen, or any scene on a short landscape screen, scrubs in place instead. The page
+  title is the one exception: it is on screen before any scroll, so it still plays in on load,
+  and the opener's batter waits for the first scroll with the "Scroll for the season" cue showing.
+- Phones show the full section copy again; the three-line "Read more" toggle is gone.
+- Scenes redraw their players and ball through property setters (`driven` in `kit/motion.ts`)
+  rather than onUpdate callbacks, so a fast scroll or a refresh can no longer leave a ball or a
+  swing out of step with the scroll position.
+- Reduced motion still shows every scene's finished picture with nothing pinned.
+
 ## 2026-11-23 (fan-sentiment post: signature moments and mobile)
 
 - Hitting: the two at-bats pin and scrub, so the ball draws each arc as you scroll, and it lands
@@ -47,6 +82,17 @@
   a full-screen ballpark (crowd, light towers, outfield wall, parallax) with a two-hop grounder;
   the last two innings fade to night. Data tables stay behind their toggles.
 
+## 2026-11-23 (error responses)
+
+- 404s and other error responses now carry the same security headers as
+  every other response (CSP, HSTS, X-Frame-Options, Referrer-Policy,
+  Permissions-Policy, nosniff) and no longer send `Server: Caddy`. Before,
+  Caddy dropped the whole header block on errors, on the live site too.
+- An unknown blog URL such as `/blog/no-such-post/` returns a real 404 while
+  still showing the blog's not-found page, instead of a 200 that search
+  engines could index.
+- `pnpm check:caddy` asserts both, and now runs in the `browser-smoke` CI job.
+
 ## 2026-11-22 (blog is a page, not a world)
 
 - The blog moves from a cabn world to `/blog/`, built on the new `@cabn/blog`
@@ -63,6 +109,9 @@
 - New `browser-smoke` CI job: one Playwright spec walks map → blog → post on
   the production build and fails on a CSP violation, a console error or an
   engine chunk loading on a blog page.
+- New `pnpm check:caddy`: runs the real `Caddyfile` under the pinned Caddy
+  image against `dist/` and checks routing and headers. It caught the first
+  version of the blog rule turning every missing file into the app shell.
 - Needs `@cabn/blog` 0.1.0 on npm; until then `pnpm-lock.yaml` has no entry
   for it and `pnpm install --frozen-lockfile` fails. Local work uses
   `pnpm engine:link`, which now links `@cabn/blog` as well.
