@@ -13,9 +13,11 @@ describe("the post list", () => {
 		expect(blog.siteUrl).toBe("https://sebastianfrazier.com");
 	});
 
-	it("keeps the fan-sentiment placeholder unlisted until the real post lands", () => {
-		expect(blog.find("fan-sentiment")?.draft).toBe(true);
-		expect(blog.posts.map((post) => post.slug)).not.toContain("fan-sentiment");
+	it("lists the fan-sentiment post as a bare-layout page", () => {
+		const post = blog.find("fan-sentiment");
+		expect(post?.draft).toBe(false);
+		expect(post?.layout).toBe("bare");
+		expect(blog.posts.map((p) => p.slug)).toContain("fan-sentiment");
 	});
 
 	// scripts/build-blog.ts imports posts.ts in Node, where a component or a

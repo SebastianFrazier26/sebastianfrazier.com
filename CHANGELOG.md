@@ -1,5 +1,70 @@
 # Changelog
 
+## 2026-11-23 (fan-sentiment post published)
+
+- The fan-sentiment write-up replaces the draft placeholder at `/blog/fan-sentiment/`: it is
+  listed on `/blog/`, in the Atom feed and the sitemap, and is no longer `noindex`.
+
+## 2026-11-23 (fan-sentiment post: replay arrow and phone warnings)
+
+- Replay review: the blinking arrow now finishes at full opacity instead of a quarter.
+- Phones no longer log GSAP "target not found" warnings for the first-inning names and pitch
+  labels they don't draw.
+
+## 2026-11-23 (fan-sentiment post: marquee title)
+
+- The page title is now an original ballpark marquee: a red sign with a cream trim and a ring of
+  bulbs, drawn flat in the post's arcade style. On load the sign snaps open, the bulbs flicker on
+  dim, the letters flip up one by one, the bulbs chase round the frame and the sign settles fully
+  lit. Reduced motion shows the lit sign. Screen readers get the title as one string.
+- Phones tighten the space above the sign so the batter stays on the first screen.
+
+## 2026-11-23 (fan-sentiment post: every scene scrubs, phones included)
+
+- Every animation now moves with the scroll instead of playing once: section heads, the opener's
+  hit, the two-team bounce, the scorebugs, and all four big scenes (pitch, hitting, league,
+  replay review), which pin while they scrub. Phones pin and scrub the same way; a scene too tall
+  for the screen, or any scene on a short landscape screen, scrubs in place instead. The page
+  title is the one exception: it is on screen before any scroll, so it still plays in on load,
+  and the opener's batter waits for the first scroll with the "Scroll for the season" cue showing.
+- Phones show the full section copy again; the three-line "Read more" toggle is gone.
+- Scenes redraw their players and ball through property setters (`driven` in `kit/motion.ts`)
+  rather than onUpdate callbacks, so a fast scroll or a refresh can no longer leave a ball or a
+  swing out of step with the scroll position.
+- Reduced motion still shows every scene's finished picture with nothing pinned.
+
+## 2026-11-23 (fan-sentiment post: signature moments and mobile)
+
+- Hitting: the two at-bats pin and scrub, so the ball draws each arc as you scroll, and it lands
+  in a puff of infield dirt. League: the scoreboard hangs over the field and counts the 217
+  fanbase tests as their balls land. Replay review: a replay booth, where the camera pushes in,
+  the zone rewinds from the first test's "nothing" to the rebuilt one with ghost frames, the call
+  is framed in chalk corners, and the camera pulls back.
+- Which scenes pin and scrub is one switch per scene (`SCRUBBED` in `kit/motion.ts`); pitch and
+  hitting are on, league and review play once.
+- The fielder's catching arm now bends out in front of his face instead of across it.
+- Phones show section copy as three lines with a "Read more" toggle (the full text stays in the
+  page for screen readers), with tighter spacing and a smaller inning numeral.
+- Fixes: pinned scenes no longer overlap the content after them (triggers re-measure when the web
+  fonts land and whenever a section re-lays out), and scorebug numerals can no longer stick
+  mid-count when a scrubbed timeline jumps.
+
+## 2026-11-23 (fan-sentiment post: arcade players and motion pass)
+
+- Players are now original arcade-style pixel sprites (`FIGURE_STYLE = "arcade"`, the new
+  default): big-headed batter in a helmet, fielder in a cap, inked outlines, team colours from the
+  post's palette. The swing plays four drawn frames (stance, load, whip, contact) and the fielder
+  switches from a waiting glove to a reach for the catch. Same pivot, contact point and glove
+  pocket as before; "simple" and "full" remain and `dev/figures.html` shows all three.
+- Motion pass: balls fly with a trail, a ground shadow that shrinks with height, and squash and
+  stretch on contact and landing. The pre-registered test scene pins and scrubs with the scroll
+  on roomy screens (plays once on phones). Scorebugs are one dark strip whose numerals count up
+  and pop in. Reduced motion still shows the finished picture.
+- Layout: section heads set the title and copy side by side on wide screens, with a hollow
+  inning numeral drifting behind (parallax); scenes sit on a full-width turf band; the opener is
+  a full-screen ballpark (crowd, light towers, outfield wall, parallax) with a two-hop grounder;
+  the last two innings fade to night. Data tables stay behind their toggles.
+
 ## 2026-11-23 (error responses)
 
 - 404s and other error responses now carry the same security headers as
@@ -33,6 +98,28 @@
 - Needs `@cabn/blog` 0.1.0 on npm; until then `pnpm-lock.yaml` has no entry
   for it and `pnpm install --frozen-lockfile` fails. Local work uses
   `pnpm engine:link`, which now links `@cabn/blog` as well.
+
+## 2026-11-22 (fan-sentiment post)
+
+- New post in `src/blog/fan-sentiment/`, in the shape the blog module (`@cabn/blog`, on
+  `feat/cabn-blog`) loads: the folder's default export is the post and every CSS selector sits
+  under `.post-fan-sentiment`. Eight sections on a mown-grass field in chalk white and clay red
+  (opener, question, two teams, the pre-registered test, hitting, every fanbase, replay review,
+  final), with small vector players. Charts are the play itself: a batter swings and the ball's
+  flight ends where the effect is; the league test is a fly ball caught on zero. Hand-built SVG
+  on `d3-scale`; GSAP ScrollTrigger plays each animation once as its section scrolls in, and
+  reduced motion shows the finished picture. Every chart has a data table.
+- Data is a copy of fansent's aggregate-only snapshot (including the 217 per-fanbase tests); a
+  test validates it and rejects a copy carrying free text. All reader-facing text sits in
+  `copy.ts`, marked as a draft for the owner.
+- Fonts: Bungee and Barlow Condensed, self-hosted under the SIL Open Font License (licence files
+  beside them). GSAP is under Webflow's no-charge standard licence.
+- Optional fuller drawing of the players (shaped torso, shoes, face, tapered bat, mitt) behind
+  `FIGURE_STYLE` in `kit/Figures.tsx`; the default stays "simple". `dev/figures.html` shows both.
+- A dev-only page (`dev/fan-sentiment.html`, not a build input) mounts the post for previews.
+  This branch does not touch `App.tsx`, the router or the Caddyfile.
+- The fansent world no longer has a hero site: its GitHub Pages page is being retired, and
+  worlds link to posts by plain navigation.
 
 ## 2026-11-22 (dependency policy cleanup)
 

@@ -1,0 +1,190 @@
+import { describe, expect, it } from "vitest";
+import { BATTER, FIELDER } from "../src/blog/fan-sentiment/kit/Figures.tsx";
+import { bulbRing } from "../src/blog/fan-sentiment/kit/Marquee.tsx";
+import {
+	bezier,
+	bezierVelocity,
+	driven,
+	formatCount,
+	stretchFor,
+} from "../src/blog/fan-sentiment/kit/motion.ts";
+import {
+	BATTER_GRID,
+	batTip,
+	catchStrokes,
+	cellPaths,
+	FIELDER_GRID,
+	GLOVE_POCKET,
+	PX,
+	rasterise,
+	SHOULDER,
+	SWING_POSES,
+	swingFrame,
+	swingStrokes,
+} from "../src/blog/fan-sentiment/kit/sprites.ts";
+
+function distanceToSegment(
+	p: readonly [number, number],
+	a: readonly [number, number],
+	b: readonly [number, number],
+): number {
+	const dx = b[0] - a[0];
+	const dy = b[1] - a[1];
+	const t = Math.max(
+		0,
+		Math.min(
+			1,
+			((p[0] - a[0]) * dx + (p[1] - a[1]) * dy) / (dx * dx + dy * dy),
+		),
+	);
+	return Math.hypot(p[0] - (a[0] + t * dx), p[1] - (a[1] + t * dy));
+}
+
+describe("arcade sprites", () => {
+	it("draws both players on one rectangular grid standing on y = 0", () => {
+		for (const grid of [BATTER_GRID, FIELDER_GRID]) {
+			expect(grid).toHaveLength(24);
+			expect(new Set(grid.map((row) => row.length))).toEqual(new Set([14]));
+			expect(grid.at(-1)).toMatch(/o/);
+		}
+		expect(-96 + BATTER_GRID.length * PX).toBe(0);
+	});
+
+	it("swings the arms from the scenes' pivot", () => {
+		expect(
+			Math.hypot(SHOULDER[0] - BATTER.pivot[0], SHOULDER[1] - BATTER.pivot[1]),
+		).toBeLessThanOrEqual(PX);
+		for (const pose of SWING_POSES) {
+			const arm = swingStrokes(pose).find((s) => s.k === "j");
+			expect(arm?.from).toEqual(SHOULDER);
+		}
+	});
+
+	it("meets the ball at the scenes' contact point in the contact frame", () => {
+		const contact = SWING_POSES.at(-1);
+		if (!contact) throw new Error("no contact frame");
+		expect(contact.angle).toBe(0);
+		const reach = distanceToSegment(
+			BATTER.contact,
+			contact.hands,
+			batTip(contact),
+		);
+		expect(reach).toBeLessThan(4.7);
+	});
+
+	it("picks the frame nearest the scene's swing angle", () => {
+		expect(swingFrame(BATTER.cocked)).toBe(0);
+		expect(swingFrame(0)).toBe(SWING_POSES.length - 1);
+		expect(swingFrame(-100)).toBe(1);
+	});
+
+	it("catches with the glove pocket where the scenes aim the ball", () => {
+		expect(
+			Math.hypot(
+				GLOVE_POCKET[0] - FIELDER.glove[0],
+				GLOVE_POCKET[1] - FIELDER.glove[1],
+			),
+		).toBeLessThanOrEqual(1.5);
+		const glove = catchStrokes("catch").find((s) => s.k === "l");
+		expect(glove?.from).toEqual(GLOVE_POCKET);
+	});
+
+	it("keeps the catching arm off the fielder's face", () => {
+		const face = new Set<string>();
+		FIELDER_GRID.forEach((row, r) => {
+			[...row].forEach((k, c) => {
+				if (k === "e" || (k === "s" && r < 8)) face.add(`${c},${r}`);
+			});
+		});
+		const arm = rasterise(catchStrokes("catch"), -22, -96).filter(
+			(cell) => cell.k === "s" || cell.k === "j",
+		);
+		const covered = arm.filter((cell) => face.has(`${cell.c},${cell.r}`));
+		expect(covered).toEqual([]);
+	});
+
+	it("inks every rasterised shape with an outline", () => {
+		const cells = rasterise(
+			[{ from: [0, 0], to: [0, 0], radius: 2, k: "w" }],
+			-6,
+			-6,
+		);
+		expect(cells.filter((c) => c.k === "w")).toHaveLength(1);
+		expect(cells.filter((c) => c.k === "o")).toHaveLength(4);
+	});
+
+	it("merges a row's neighbouring cells into one rectangle", () => {
+		const paths = cellPaths(
+			[
+				{ c: 0, r: 0, k: "o" },
+				{ c: 1, r: 0, k: "o" },
+				{ c: 3, r: 0, k: "o" },
+			],
+			0,
+			0,
+		);
+		expect(paths.o).toBe("M0 0h8v4h-8zM12 0h4v4h-4z");
+	});
+});
+
+describe("ball motion", () => {
+	it("gives the curve's true velocity", () => {
+		const p0 = [0, 0] as const;
+		const p1 = [50, -80] as const;
+		const p2 = [100, 0] as const;
+		const h = 1e-5;
+		const [ax, ay] = bezier(0.3, p0, p1, p2);
+		const [bx, by] = bezier(0.3 + h, p0, p1, p2);
+		const [vx, vy] = bezierVelocity(0.3, p0, p1, p2);
+		expect(vx).toBeCloseTo((bx - ax) / h, 2);
+		expect(vy).toBeCloseTo((by - ay) / h, 2);
+	});
+
+	it("stretches faster balls more, up to a limit", () => {
+		expect(stretchFor(0)).toBe(0);
+		expect(stretchFor(600)).toBeLessThan(stretchFor(1200));
+		expect(stretchFor(1e6)).toBe(0.32);
+	});
+
+	it("counts in the post's number format", () => {
+		expect(formatCount(-0.0019, 3, true)).toBe("−0.002");
+		expect(formatCount(0, 3, true)).toBe("0.000");
+		expect(formatCount(216.6, 0, false)).toBe("217");
+	});
+});
+
+describe("driven", () => {
+	it("redraws with every value on each write, as a tween's setter would", () => {
+		const drawn: Array<{ angle: number; t: number }> = [];
+		const state = driven({ angle: -40, t: 0 }, (s) => drawn.push({ ...s }));
+		expect(drawn).toEqual([]);
+		state.t = 0.5;
+		state.angle = 0;
+		expect(drawn).toEqual([
+			{ angle: -40, t: 0.5 },
+			{ angle: 0, t: 0.5 },
+		]);
+		expect(Object.keys(state)).toEqual(["angle", "t"]);
+	});
+});
+
+describe("marquee bulbs", () => {
+	it("ring the sign clockwise, evenly, with each corner lit once", () => {
+		const ring = bulbRing(300, 120);
+		expect(ring[0]).toEqual([13, 13]);
+		const keys = ring.map(([x, y]) => `${x},${y}`);
+		expect(new Set(keys).size).toBe(ring.length);
+		for (const corner of ["13,13", "287,13", "287,107", "13,107"]) {
+			expect(keys).toContain(corner);
+		}
+		const steps = ring.map(([x, y], i) => {
+			const [nx, ny] = ring[(i + 1) % ring.length] ?? [x, y];
+			return Math.hypot(nx - x, ny - y);
+		});
+		expect(Math.max(...steps) - Math.min(...steps)).toBeLessThan(6);
+	});
+
+	it("draws no bulbs before the sign has a size", () => {
+		expect(bulbRing(0, 0)).toEqual([]);
+	});
+});
