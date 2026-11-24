@@ -19,5 +19,14 @@ export const blog = createBlog({
 			layout: "bare",
 			load: () => import("./fan-sentiment/FanSentimentPost.tsx"),
 		}),
+		definePost({
+			slug: "loosy-goose",
+			title: "Loosy-Goose: honking out the context",
+			date: "2026-11-23",
+			summary:
+				"Compressing AI agent sessions like JPEG compresses photos: where a frontier summary still wins, and where the goose does.",
+			layout: "bare",
+			load: () => import("./loosy-goose/LoosyGoosePost.tsx"),
+		}),
 	],
 });
