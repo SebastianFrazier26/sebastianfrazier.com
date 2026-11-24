@@ -7,6 +7,7 @@ import {
 	Clamp,
 	DataTable,
 	Goose,
+	honker,
 	SectionHead,
 	Stat,
 	Stats,
@@ -38,7 +39,7 @@ export function Serve(): React.ReactElement {
 	const gridY = 34;
 	const gridBottom = gridY + rows * cell;
 	const H = narrow ? gridBottom + 104 : gridBottom + 30;
-	const gooseScale = narrow ? 0.9 : 1.15;
+	const goosePx = narrow ? 3 : 4;
 	const geese = narrow
 		? [
 				{ x: width * 0.3, y: H - 8 },
@@ -67,29 +68,11 @@ export function Serve(): React.ReactElement {
 			const honk = (goose: number, fate: Fate, at: gsap.Position): void => {
 				const g = scope.querySelector(`.sv-goose-${goose}`);
 				const [gx, gy] = [geese[goose]?.x ?? 0, geese[goose]?.y ?? 0];
-				tl.fromTo(
-					g?.querySelector(".lg-honk") ?? [],
-					{ opacity: 0 },
-					{ opacity: 1, duration: 0.12, yoyo: true, repeat: 1 },
-					at,
-				)
-					.fromTo(
-						g?.querySelector(".lg-beak-low") ?? [],
-						{ rotation: 0 },
-						{
-							rotation: 28,
-							svgOrigin: "19.5 -52",
-							duration: 0.12,
-							yoyo: true,
-							repeat: 1,
-						},
-						"<",
-					)
-					.from(
-						scope.querySelectorAll(`.sv-cover-${fate}`),
-						{ opacity: 1, duration: 0.25, stagger: 0.006 },
-						"<0.05",
-					);
+				tl.to(honker(g), { t: 1, duration: 0.3, ease: "none" }, at).from(
+					scope.querySelectorAll(`.sv-cover-${fate}`),
+					{ opacity: 1, duration: 0.25, stagger: 0.006 },
+					"<0.05",
+				);
 				scope
 					.querySelectorAll<SVGRectElement>(`.sv-ghost-${fate}`)
 					.forEach((el, i) => {
@@ -158,7 +141,7 @@ export function Serve(): React.ReactElement {
 										y={y}
 										width={sq}
 										height={sq}
-										rx={2}
+										rx={0}
 									/>
 									<rect
 										className={`sv-cover sv-cover-${fate}`}
@@ -166,7 +149,7 @@ export function Serve(): React.ReactElement {
 										y={y}
 										width={sq}
 										height={sq}
-										rx={2}
+										rx={0}
 										opacity={0}
 									/>
 									{fate !== "kept" && (
@@ -176,7 +159,7 @@ export function Serve(): React.ReactElement {
 											y={y}
 											width={sq}
 											height={sq}
-											rx={2}
+											rx={0}
 											opacity={0}
 										/>
 									)}
@@ -196,7 +179,7 @@ export function Serve(): React.ReactElement {
 							className="sv-goose-0"
 							x={geese[0]?.x ?? 0}
 							y={geese[0]?.y ?? 0}
-							scale={gooseScale}
+							px={goosePx}
 							flip
 							honk={COPY.serve.honkStale}
 						/>
@@ -204,7 +187,7 @@ export function Serve(): React.ReactElement {
 							className="sv-goose-1"
 							x={geese[1]?.x ?? 0}
 							y={geese[1]?.y ?? 0}
-							scale={gooseScale}
+							px={goosePx}
 							flip
 							honk={COPY.serve.honkDrop}
 						/>

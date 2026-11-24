@@ -2,7 +2,7 @@ import { scaleLinear } from "d3-scale";
 import { useId, useRef } from "react";
 import { COPY } from "../copy.ts";
 import { type Arm, OPEN_WEIGHT } from "../data.ts";
-import { acc, formatP, signed, tokens } from "../format.ts";
+import { acc, formatP, pixelSigned, signed, tokens } from "../format.ts";
 import { driver, gsap, useScrub } from "../kit/motion.ts";
 import { Clamp, DataTable, SectionHead, Stat, Stats } from "../kit/Parts.tsx";
 import { useWidth } from "../kit/useWidth.ts";
@@ -211,12 +211,12 @@ export function Rally(): React.ReactElement {
 				<Stats>
 					<Stat
 						label={COPY.rally.stats.vsFull}
-						value={signed(OPEN_WEIGHT.freezeVsFull.delta)}
+						value={pixelSigned(OPEN_WEIGHT.freezeVsFull.delta)}
 						accent
 					/>
 					<Stat
 						label={COPY.rally.stats.vsSelf}
-						value={signed(OPEN_WEIGHT.freezeVsSelfSummary.delta)}
+						value={pixelSigned(OPEN_WEIGHT.freezeVsSelfSummary.delta)}
 						accent
 					/>
 					<Stat

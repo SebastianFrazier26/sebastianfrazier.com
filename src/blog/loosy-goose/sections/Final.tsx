@@ -3,7 +3,7 @@ import { COPY } from "../copy.ts";
 import { DEMO, OPEN_WEIGHT, REPO, SET_D } from "../data.ts";
 import { acc } from "../format.ts";
 import { countUp, gsap, useScrub } from "../kit/motion.ts";
-import { Goose, SectionHead } from "../kit/Parts.tsx";
+import { Goose, honker, SectionHead, walker } from "../kit/Parts.tsx";
 
 interface Board {
 	title: string;
@@ -73,10 +73,14 @@ export function Final(): React.ReactElement {
 					{ x: -60, opacity: 0, duration: 0.5 },
 					"<",
 				)
-				.fromTo(
-					scope.querySelector(".fn-goose .lg-honk"),
-					{ opacity: 0 },
-					{ opacity: 1, duration: 0.15, yoyo: true, repeat: 1 },
+				.to(
+					walker(scope.querySelector(".fn-goose"), 5),
+					{ t: 1, duration: 0.5, ease: "none" },
+					"<",
+				)
+				.to(
+					honker(scope.querySelector(".fn-goose")),
+					{ t: 1, duration: 0.3, ease: "none" },
 					">",
 				);
 		},
@@ -136,7 +140,7 @@ export function Final(): React.ReactElement {
 								className="fn-goose"
 								x={50}
 								y={84}
-								scale={1.2}
+								px={4}
 								honk={COPY.serve.honkDrop}
 							/>
 						</g>

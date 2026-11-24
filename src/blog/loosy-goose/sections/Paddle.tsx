@@ -51,7 +51,7 @@ export function Paddle(): React.ReactElement {
 			top + v * (bottom - top - ball),
 		];
 	};
-	const final = at(1);
+	const final = at(1).map(Math.round) as [number, number];
 	const heavyHalf = halfFor(SET_D.keep.heavy);
 	const finalLeft = paddleFollow(
 		at(1 - 1 / crossings)[1] + ball / 2,
@@ -77,7 +77,7 @@ export function Paddle(): React.ReactElement {
 				const { from, to, k } = levelAt(t);
 				const keep = lerp(SET_D.keep[from], SET_D.keep[to], k);
 				const half = halfFor(keep);
-				const [x, y] = at(t);
+				const [x, y] = at(t).map(Math.round) as [number, number];
 				ballEl?.setAttribute("transform", `translate(${x} ${y})`);
 				const onLeft = x < width / 2;
 				const ly = paddleFollow(
@@ -96,8 +96,8 @@ export function Paddle(): React.ReactElement {
 					[left, ly],
 					[right, ry],
 				] as const) {
-					el?.setAttribute("y", String(cy - half));
-					el?.setAttribute("height", String(half * 2));
+					el?.setAttribute("y", String(Math.round(cy - half)));
+					el?.setAttribute("height", String(Math.round(half * 2)));
 				}
 				// Scores snap between measured levels: an in-between value was never measured.
 				const lv = k < 0.5 ? from : to;
@@ -189,18 +189,18 @@ export function Paddle(): React.ReactElement {
 						<rect
 							className="lg-paddle lg-paddle-goose pd-paddle-l"
 							x={leftX}
-							y={finalLeft - heavyHalf}
+							y={Math.round(finalLeft - heavyHalf)}
 							width={paddleW}
-							height={heavyHalf * 2}
-							rx={3}
+							height={Math.round(heavyHalf * 2)}
+							rx={0}
 						/>
 						<rect
 							className="lg-paddle pd-paddle-r"
 							x={rightX}
-							y={finalRight - heavyHalf}
+							y={Math.round(finalRight - heavyHalf)}
 							width={paddleW}
-							height={heavyHalf * 2}
-							rx={3}
+							height={Math.round(heavyHalf * 2)}
+							rx={0}
 						/>
 						<rect
 							className="lg-ball pd-ball"
@@ -208,7 +208,7 @@ export function Paddle(): React.ReactElement {
 							height={ball}
 							transform={`translate(${final[0]} ${final[1]})`}
 						/>
-						{!narrow && <Goose x={leftX + 60} y={top - 12} scale={0.8} />}
+						{!narrow && <Goose x={leftX + 60} y={top - 12} px={2} />}
 					</svg>
 					<p className="pd-caption">
 						<span className="pd-level">

@@ -4,7 +4,14 @@ import { COPY } from "../copy.ts";
 import { type Est, SET_D } from "../data.ts";
 import { acc, formatP, percent, signed } from "../format.ts";
 import { countUp, gsap, useScrub } from "../kit/motion.ts";
-import { Clamp, DataTable, Goose, SectionHead } from "../kit/Parts.tsx";
+import {
+	Clamp,
+	DataTable,
+	Goose,
+	honker,
+	SectionHead,
+	walker,
+} from "../kit/Parts.tsx";
 import { useWidth } from "../kit/useWidth.ts";
 
 interface Bar {
@@ -45,7 +52,7 @@ export function Home(): React.ReactElement {
 		.range([labelW + 8, width - (narrow ? 56 : 90)]);
 	const thick = narrow ? 12 : 14;
 	const barY = (i: number): number => head + i * rowH + (narrow ? 26 : 18);
-	const gooseScale = narrow ? 0.8 : 1;
+	const goosePx = narrow ? 2 : 3;
 
 	useScrub(
 		root,
@@ -62,9 +69,9 @@ export function Home(): React.ReactElement {
 					{ x: x(0) - x(SET_D.loosy.medium.mean), duration: 0.6 },
 					0,
 				)
-				.from(
-					scope.querySelector(".hm-walker-bob"),
-					{ y: -4, duration: 0.1, repeat: 5, yoyo: true, ease: "sine.inOut" },
+				.to(
+					walker(scope.querySelector(".hm-walker .lg-goose"), 6),
+					{ t: 1, duration: 0.6, ease: "none" },
 					0,
 				)
 				.from(
@@ -72,10 +79,9 @@ export function Home(): React.ReactElement {
 					{ opacity: 0, duration: 0.2, stagger: 0.05 },
 					">-0.1",
 				)
-				.fromTo(
-					scope.querySelector(".hm-walker .lg-honk"),
-					{ opacity: 0 },
-					{ opacity: 1, duration: 0.12, yoyo: true, repeat: 1 },
+				.to(
+					honker(scope.querySelector(".hm-walker .lg-goose")),
+					{ t: 1, duration: 0.3, ease: "none" },
 					">",
 				);
 			return countUp(tl, scope, 0.1, 0.7);
@@ -154,7 +160,7 @@ export function Home(): React.ReactElement {
 										y={y}
 										width={x(b.acc.mean) - x(0)}
 										height={thick}
-										rx={thick / 2}
+										rx={0}
 									/>
 									<text
 										className="hm-value"
@@ -178,17 +184,10 @@ export function Home(): React.ReactElement {
 							);
 						})}
 						<g
-							transform={`translate(${x(goose.mean) - 26 * gooseScale} ${barY(0) - 2})`}
+							transform={`translate(${Math.round(x(goose.mean) - 6 * goosePx)} ${barY(0) - 2})`}
 						>
 							<g className="hm-walker">
-								<g className="hm-walker-bob">
-									<Goose
-										x={0}
-										y={0}
-										scale={gooseScale}
-										honk={COPY.serve.honkDrop}
-									/>
-								</g>
+								<Goose x={0} y={0} px={goosePx} honk={COPY.serve.honkDrop} />
 							</g>
 						</g>
 					</svg>

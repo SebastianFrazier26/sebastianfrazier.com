@@ -3,6 +3,13 @@ import { COPY } from "../src/blog/loosy-goose/copy.ts";
 import { OPEN_WEIGHT, SET_D, SHOTS } from "../src/blog/loosy-goose/data.ts";
 import { formatP, signed } from "../src/blog/loosy-goose/format.ts";
 import { fates, rally, triangle } from "../src/blog/loosy-goose/kit/pong.ts";
+import {
+	GOOSE_COLS,
+	GOOSE_FRAMES,
+	GOOSE_KEYS,
+	GOOSE_ROWS,
+	gridPaths,
+} from "../src/blog/loosy-goose/kit/sprites.ts";
 import { levelAt } from "../src/blog/loosy-goose/sections/Paddle.tsx";
 import { along } from "../src/blog/loosy-goose/sections/Rally.tsx";
 
@@ -27,6 +34,38 @@ describe("pong geometry", () => {
 		expect(count("stale")).toBe(24);
 		expect(count("kept") + count("stale") + count("dropped")).toBe(96);
 		expect(fates(96, 6422 / 19333, 0.248)).toEqual(plan);
+	});
+});
+
+describe("the goose sprite", () => {
+	it("draws every frame on the same grid, feet on the bottom row", () => {
+		for (const grid of Object.values(GOOSE_FRAMES)) {
+			expect(grid).toHaveLength(GOOSE_ROWS);
+			for (const row of grid) expect(row).toHaveLength(GOOSE_COLS);
+			expect(grid[GOOSE_ROWS - 1]).toMatch(/f/);
+		}
+	});
+
+	it("uses only palette keys it paints", () => {
+		const keys = new Set<string>(GOOSE_KEYS);
+		for (const grid of Object.values(GOOSE_FRAMES)) {
+			for (const ch of grid.join("")) {
+				if (ch !== ".") expect(keys.has(ch)).toBe(true);
+			}
+		}
+	});
+
+	it("opens the beak only when honking", () => {
+		expect(GOOSE_FRAMES.honk).not.toEqual(GOOSE_FRAMES.idle);
+		expect(GOOSE_FRAMES.idle.slice(0, 17)).toEqual(
+			GOOSE_FRAMES.step.slice(0, 17),
+		);
+	});
+
+	it("merges a row's run of cells into one rectangle on whole pixels", () => {
+		const paths = gridPaths([".ww.b"], 3, -6, -3);
+		expect(paths.w).toBe("M-3 -3h6v3h-6z");
+		expect(paths.b).toBe("M6 -3h3v3h-3z");
 	});
 });
 

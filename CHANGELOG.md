@@ -1,5 +1,12 @@
 # Changelog
 
+## 2026-11-23 (loosy-goose post: pixel geese and a pixel face)
+
+- The geese are now original pixel sprites (idle, step and honk frames), drawn on whole pixels
+  like the ball and paddles, which lose their rounded corners.
+- Titles, section scores and scoreboard numerals are set in Press Start 2P (OFL), self-hosted
+  next to the post with its licence; body text stays the system font. Shipped unmodified,
+  because the font has a Reserved Font Name and a subset would count as a modified version.
 ## 2026-11-23 (loosy-goose post, first draft)
 
 - New post at `/blog/loosy-goose/`: the loosy-goose context-compression project as a pong match.

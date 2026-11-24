@@ -24,3 +24,11 @@ export function tokens(n: number, short = false): string {
 export function percent(share: number, digits = 1): string {
 	return `${(share * 100).toFixed(digits)}%`;
 }
+
+/**
+ * `signed` for text set in the pixel font, which has no U+2212: a real minus
+ * there falls back to another font and sits off the pixel baseline.
+ */
+export function pixelSigned(value: number, digits = 3): string {
+	return signed(value, digits).replace("−", "-");
+}

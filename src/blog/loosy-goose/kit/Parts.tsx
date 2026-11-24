@@ -1,64 +1,87 @@
 import { Fragment, type ReactNode, useRef, useState } from "react";
 import { COPY } from "../copy.ts";
 import { resultsUrl } from "../data.ts";
-import { useHeadScrub } from "./motion.ts";
+import { driver, useHeadScrub } from "./motion.ts";
+import {
+	GOOSE_FRAMES,
+	GOOSE_KEYS,
+	GOOSE_OX,
+	GOOSE_ROWS,
+	type GooseFrame,
+	gridPaths,
+} from "./sprites.ts";
 
 /**
- * A white goose facing right, feet on (x, y). Its lower beak (`.lg-beak-low`)
- * opens around the hinge and its `.lg-honk` bubble shows when a scene honks;
- * at rest the beak is shut and the bubble hidden, which is the finished
- * picture every scene ends on.
+ * A pixel goose facing right, feet on (x, y), `px` screen pixels per sprite
+ * cell. Every frame is in the markup and only the visible one shows; at rest
+ * it stands idle with its honk bubble hidden, the finished picture every
+ * scene ends on. Scenes change frames only through `poseGoose`/`honker`.
  */
 export function Goose({
 	x,
 	y,
-	scale = 1,
+	px = 3,
 	flip = false,
 	honk,
 	className = "",
 }: {
 	x: number;
 	y: number;
-	scale?: number;
+	px?: number;
 	flip?: boolean;
 	honk?: string;
 	className?: string;
 }): React.ReactElement {
+	const ox = -GOOSE_OX * px;
+	const oy = -GOOSE_ROWS * px;
+	// Press Start 2P is drawn on an 8px grid; other sizes blur its pixels.
+	const font = px >= 4 ? 16 : 8;
 	return (
 		<g
-			className={`lg-goose ${className}`}
-			transform={`translate(${x} ${y}) scale(${flip ? -scale : scale} ${scale})`}
+			className={`lg-goose lg-px ${className}`}
+			transform={`translate(${Math.round(x)} ${Math.round(y)})${flip ? " scale(-1 1)" : ""}`}
 		>
-			<line className="lg-goose-leg" x1={-5} y1={-11} x2={-6} y2={0} />
-			<line className="lg-goose-leg" x1={3} y1={-11} x2={5} y2={0} />
-			<path className="lg-goose-foot" d="M-11 0h8M1 0h8" />
-			<path
-				className="lg-goose-body"
-				d="M-30 -28 L-37 -33 L-31 -20 Q-27 -8 -8 -8 Q10 -8 12 -20 Q12 -31 -2 -32 Q-18 -33 -30 -28 Z"
-			/>
-			<path
-				className="lg-goose-wing"
-				d="M-24 -24 Q-12 -14 2 -20 Q-8 -27 -24 -24 Z"
-			/>
-			<path className="lg-goose-neck" d="M5 -27 Q14 -40 11 -52" />
-			<circle className="lg-goose-head" cx={13} cy={-55} r={7} />
-			<circle className="lg-goose-eye" cx={15.5} cy={-57} r={1.5} />
-			<path className="lg-goose-beak" d="M19 -57.5 L31 -54.5 L19.5 -52.5 Z" />
-			<g className="lg-beak-low">
-				<path className="lg-goose-beak" d="M19.5 -53 L28 -51.5 L19 -49.5 Z" />
-			</g>
+			{(Object.keys(GOOSE_FRAMES) as GooseFrame[]).map((frame) => {
+				const paths = gridPaths(GOOSE_FRAMES[frame], px, ox, oy);
+				return (
+					<g
+						key={frame}
+						data-frame={frame}
+						visibility={frame === "idle" ? "visible" : "hidden"}
+					>
+						{GOOSE_KEYS.map((k) =>
+							paths[k] ? (
+								<path key={k} className={`lg-px-${k}`} d={paths[k]} />
+							) : null,
+						)}
+					</g>
+				);
+			})}
 			{honk && (
-				<g className="lg-honk" opacity={0}>
-					<path
-						className="lg-honk-arc"
-						d="M35 -62 q5 7 0 14 M41 -66 q8 11 0 22"
+				<g className="lg-honk" visibility="hidden">
+					<rect
+						className="lg-honk-bar"
+						x={11 * px}
+						y={-18 * px}
+						width={px}
+						height={3 * px}
+					/>
+					<rect
+						className="lg-honk-bar"
+						x={13 * px}
+						y={-19 * px}
+						width={px}
+						height={5 * px}
 					/>
 					<text
 						className="lg-honk-text"
-						x={48}
-						y={-60}
+						x={15 * px}
+						y={-15 * px}
+						fontSize={font}
 						// Undo the goose's mirror so a flipped goose's honk still reads left to right.
-						transform={flip ? "scale(-1 1) translate(-96 0)" : undefined}
+						transform={
+							flip ? `scale(-1 1) translate(${-30 * px} 0)` : undefined
+						}
 						textAnchor={flip ? "end" : "start"}
 					>
 						{honk}
@@ -66,6 +89,38 @@ export function Goose({
 				</g>
 			)}
 		</g>
+	);
+}
+
+/** Shows one frame of a Goose and, when honking, its bubble. */
+export function poseGoose(goose: Element | null, frame: GooseFrame): void {
+	if (!goose) return;
+	for (const g of goose.querySelectorAll("[data-frame]")) {
+		g.setAttribute(
+			"visibility",
+			g.getAttribute("data-frame") === frame ? "visible" : "hidden",
+		);
+	}
+	goose
+		.querySelector(".lg-honk")
+		?.setAttribute("visibility", frame === "honk" ? "visible" : "hidden");
+}
+
+/**
+ * A driver for one honk: tween its `t` from 0 to 1 and the goose honks for
+ * the whole tween, standing idle again at both ends.
+ */
+export function honker(goose: Element | null): { t: number } {
+	return driver((t) => poseGoose(goose, t > 0 && t < 1 ? "honk" : "idle"));
+}
+
+/** A driver for a walk: legs alternate `steps` times and the goose stops idle. */
+export function walker(goose: Element | null, steps: number): { t: number } {
+	return driver((t) =>
+		poseGoose(
+			goose,
+			t > 0 && t < 1 && Math.floor(t * steps * 2) % 2 === 0 ? "step" : "idle",
+		),
 	);
 }
 

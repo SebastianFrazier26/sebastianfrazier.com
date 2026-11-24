@@ -1,7 +1,7 @@
 import { useRef } from "react";
 import { COPY } from "../copy.ts";
 import { driver, gsap, useScrub } from "../kit/motion.ts";
-import { Goose, SectionHead } from "../kit/Parts.tsx";
+import { Goose, poseGoose, SectionHead } from "../kit/Parts.tsx";
 import { paddleFollow, rally } from "../kit/pong.ts";
 import { useWidth } from "../kit/useWidth.ts";
 
@@ -34,7 +34,7 @@ export function Opener(): React.ReactElement {
 		const [u, v] = rally(t, CROSSINGS, WALLS);
 		return [minX + u * (maxX - minX), top + v * (bottom - top - ball)];
 	};
-	const [endX, endY] = at(1);
+	const [endX, endY] = at(1).map(Math.round) as [number, number];
 	const leftEnd = paddleFollow(
 		at(1 - 1 / CROSSINGS)[1] + ball / 2,
 		half,
@@ -42,7 +42,7 @@ export function Opener(): React.ReactElement {
 		bottom,
 	);
 	const rightEnd = paddleFollow(endY + ball / 2, half, top, bottom);
-	const gooseScale = narrow ? 0.85 : 1.1;
+	const goosePx = 3;
 
 	useScrub(
 		root,
@@ -51,10 +51,9 @@ export function Opener(): React.ReactElement {
 			const left = scope.querySelector(".op-paddle-l");
 			const right = scope.querySelector(".op-paddle-r");
 			const ghosts = [...scope.querySelectorAll(".op-ghost")];
-			const honk = scope.querySelector(".op-goose .lg-honk");
-			const beak = scope.querySelector(".op-goose .lg-beak-low");
+			const goose = scope.querySelector(".op-goose");
 			const draw = (t: number): void => {
-				const [x, y] = at(t);
+				const [x, y] = at(t).map(Math.round) as [number, number];
 				ballEl?.setAttribute("transform", `translate(${x} ${y})`);
 				// Each paddle chases the ball only while it is on that side.
 				const ly = paddleFollow(
@@ -69,20 +68,19 @@ export function Opener(): React.ReactElement {
 					top,
 					bottom,
 				);
-				left?.setAttribute("y", String(ly - half));
-				right?.setAttribute("y", String(ry - half));
+				left?.setAttribute("y", String(Math.round(ly - half)));
+				right?.setAttribute("y", String(Math.round(ry - half)));
 				ghosts.forEach((g, i) => {
 					const [gx, gy] = at(Math.max(0, t - (i + 1) * 0.012));
-					g.setAttribute("transform", `translate(${gx} ${gy})`);
+					g.setAttribute(
+						"transform",
+						`translate(${Math.round(gx)} ${Math.round(gy)})`,
+					);
 					const live = t > 0.01 && t < 0.99 ? 1 : 0;
 					g.setAttribute("opacity", String(live * (0.5 - i * 0.07)));
 				});
 				const near = Math.max(0, 1 - Math.abs(x + ball / 2 - width / 2) / 90);
-				honk?.setAttribute("opacity", String(t < 1 ? near : 0));
-				beak?.setAttribute(
-					"transform",
-					`rotate(${(t < 1 ? near : 0) * 28} 19.5 -52)`,
-				);
+				poseGoose(goose, t < 1 && near > 0.35 ? "honk" : "idle");
 			};
 			const state = driver(draw);
 			return gsap
@@ -146,18 +144,18 @@ export function Opener(): React.ReactElement {
 						<rect
 							className="lg-paddle lg-paddle-goose op-paddle-l"
 							x={leftX}
-							y={leftEnd - half}
+							y={Math.round(leftEnd - half)}
 							width={paddleW}
 							height={half * 2}
-							rx={3}
+							rx={0}
 						/>
 						<rect
 							className="lg-paddle op-paddle-r"
 							x={rightX}
-							y={rightEnd - half}
+							y={Math.round(rightEnd - half)}
 							width={paddleW}
 							height={half * 2}
-							rx={3}
+							rx={0}
 						/>
 						<rect
 							className="lg-ball op-ball"
@@ -167,9 +165,9 @@ export function Opener(): React.ReactElement {
 						/>
 						<Goose
 							className="op-goose"
-							x={width / 2 - 4 * gooseScale}
+							x={width / 2 - 4 * goosePx}
 							y={bottom + 2}
-							scale={gooseScale}
+							px={goosePx}
 							honk={COPY.serve.honkDrop}
 						/>
 					</svg>
