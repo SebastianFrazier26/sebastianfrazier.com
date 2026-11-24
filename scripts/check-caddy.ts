@@ -207,6 +207,16 @@ try {
 	);
 	if (!hashed) throw new Error("dist/assets has no hashed index chunk");
 	await expectPage(`/assets/${hashed}`, { cache: "immutable" });
+	const licences = readdirSync(join(dist, "assets", "fonts")).filter((name) =>
+		name.endsWith(".txt"),
+	);
+	if (licences.length === 0)
+		throw new Error("dist/assets/fonts has no licences");
+	for (const name of licences) {
+		await expectPage(`/assets/fonts/${name}`, {
+			contains: name.endsWith("-OFL.txt") ? ["SIL OPEN FONT LICENSE"] : [],
+		});
+	}
 
 	// Outside the SPA routes and the blog, a missing file is a bare 404. Error
 	// responses go through handle_errors, which must repeat the header set.

@@ -1,5 +1,13 @@
 # Changelog
 
+## 2026-11-23 (font licences ship with the fonts)
+
+- Every font the blog posts self-host now ships its OFL licence: the build copies the licence
+  file beside each font under `src/` to `dist/assets/fonts/<Family>-OFL.txt` (e.g.
+  `/assets/fonts/Bungee-OFL.txt`, `/assets/fonts/BarlowCondensed-OFL.txt`), next to the existing
+  `DotGothic16-OFL.txt`. A font under `src/` with no licence beside it fails the build, and the
+  postbuild check fails if any font family in `dist/` lacks its licence.
+
 ## 2026-11-23 (fan-sentiment post published)
 
 - The fan-sentiment write-up replaces the draft placeholder at `/blog/fan-sentiment/`: it is
