@@ -1,5 +1,13 @@
 # Changelog
 
+## 2026-11-23 (fan-sentiment post: replay arrow and phone warnings)
+
+- Replay review: the blinking arrow now finishes at full opacity instead of a quarter.
+- Phones no longer log GSAP "target not found" warnings for the first-inning names and pitch
+  labels they don't draw.
+- `@cabn/blog` 0.1.0 now installs from npm (lockfile entry, plus a release-age exclusion to drop
+  once the version ages out).
+
 ## 2026-11-23 (fan-sentiment post: marquee title)
 
 - The page title is now an original ballpark marquee: a red sign with a cream trim and a ring of

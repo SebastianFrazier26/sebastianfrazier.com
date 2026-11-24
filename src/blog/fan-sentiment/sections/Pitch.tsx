@@ -118,7 +118,11 @@ export function Pitch({ data }: { data: PitchData }): React.ReactElement {
 					transformOrigin: "50% 50%",
 					duration: 0.5,
 				})
-				.from(".pt-label", { opacity: 0, y: 8, duration: 0.3 }, "<");
+				.addLabel("interval", "<");
+			// Phones draw no labels, and GSAP warns about an empty target.
+			if (!narrow) {
+				tl.from(".pt-label", { opacity: 0, y: 8, duration: 0.3 }, "interval");
+			}
 			return countUp(tl, scope, ">-0.1");
 		},
 		width,

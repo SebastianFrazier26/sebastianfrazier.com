@@ -43,8 +43,8 @@ export function FirstInning({
 
 	useReveal(
 		root,
-		() =>
-			gsap
+		() => {
+			const tl = gsap
 				.timeline({ defaults: { ease: "power2.out" } })
 				.from(".fi-ball", {
 					y: -(G + 40),
@@ -68,9 +68,13 @@ export function FirstInning({
 					".fi-interval",
 					{ opacity: 0, duration: 0.3, stagger: 0.12 },
 					"<0.5",
-				)
-				.from(".fi-name", { opacity: 0, duration: 0.3, stagger: 0.12 }, "<")
-				.from(".fi-caveat", { opacity: 0, y: 10, duration: 0.4 }),
+				);
+			// Phones draw no names, and GSAP warns about an empty target.
+			if (!narrow) {
+				tl.from(".fi-name", { opacity: 0, duration: 0.3, stagger: 0.12 }, "<");
+			}
+			return tl.from(".fi-caveat", { opacity: 0, y: 10, duration: 0.4 });
+		},
 		width,
 	);
 

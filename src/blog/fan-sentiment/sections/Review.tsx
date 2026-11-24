@@ -93,7 +93,8 @@ export function Review({
 					{
 						opacity: 0.25,
 						duration: 0.18,
-						repeat: 5,
+						// An even number of plays, so the last one lands on full opacity.
+						repeat: 4,
 						yoyo: true,
 						ease: "none",
 					},
