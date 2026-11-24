@@ -2,3 +2,5 @@ allowBuilds:
   esbuild: true
 ignoredOptionalDependencies:
   - "@napi-rs/canvas"
+minimumReleaseAgeExclude:
+  - "@cabn/blog@0.1.0"
