@@ -1,0 +1,750 @@
+@font-face {
+	font-family: "SfPixel";
+	src: url("./fonts/PressStart2P-Regular.ttf") format("truetype");
+	font-weight: 400;
+	font-style: normal;
+	font-display: swap;
+}
+
+/* Every rule sits under the post's root class, so the post takes nothing
+   from the page around it and leaks nothing into it. */
+.post-loosy-goose {
+	--lg-court: #0d2630;
+	--lg-court-2: #10303b;
+	--lg-deep: #081a21;
+	--lg-line: #ece7da;
+	--lg-dim: rgb(236 231 218 / 0.7);
+	--lg-faint: rgb(236 231 218 / 0.16);
+	--lg-beak: #f39a3a;
+	--lg-beak-deep: #d9761b;
+	--lg-summary: #a9d3e6;
+	--lg-local: #9a9fd0;
+	--lg-stale: #5d7a84;
+	--lg-goose: #fbfaf6;
+	--lg-wing: #d9dcdc;
+	--lg-mono:
+		ui-monospace, "SF Mono", "JetBrains Mono", Menlo, Consolas, monospace;
+	--lg-pixel: "SfPixel", ui-monospace, "SF Mono", Menlo, monospace;
+	--lg-body:
+		ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+	box-sizing: border-box;
+	overflow-x: clip;
+	color: var(--lg-line);
+	font-family: var(--lg-body);
+	font-size: 1.125rem;
+	line-height: 1.55;
+	background:
+		radial-gradient(
+			120rem 60rem at 50% -10%,
+			var(--lg-court-2),
+			transparent 70%
+		),
+		var(--lg-court);
+}
+.post-loosy-goose *,
+.post-loosy-goose *::before,
+.post-loosy-goose *::after {
+	box-sizing: inherit;
+}
+.post-loosy-goose a {
+	color: var(--lg-line);
+	text-decoration-color: var(--lg-beak);
+	text-underline-offset: 0.18em;
+}
+
+.post-loosy-goose .lg-section {
+	position: relative;
+	padding: clamp(5rem, 18vh, 11rem) 0 clamp(2rem, 6vh, 4rem);
+}
+.post-loosy-goose .lg-section.op {
+	padding-top: clamp(4rem, 14vh, 8rem);
+}
+.post-loosy-goose .lg-wrap {
+	position: relative;
+	max-width: 72rem;
+	margin: 0 auto;
+	padding: 0 clamp(1rem, 5vw, 4rem);
+}
+
+/* Section heads. */
+.post-loosy-goose .lg-head {
+	position: relative;
+	display: grid;
+	column-gap: clamp(2rem, 5vw, 5rem);
+}
+@media (min-width: 900px) {
+	.post-loosy-goose .lg-head {
+		grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr);
+		align-items: end;
+	}
+	.post-loosy-goose .lg-head > .lg-kicker,
+	.post-loosy-goose .lg-head > .lg-title {
+		grid-column: 1;
+	}
+	.post-loosy-goose .lg-head-copy {
+		grid-column: 2;
+		grid-row: 2;
+		padding-bottom: 0.4rem;
+	}
+}
+.post-loosy-goose .lg-score {
+	position: absolute;
+	top: -0.5em;
+	right: 0;
+	font-family: var(--lg-pixel);
+	font-weight: 400;
+	font-size: clamp(3.5rem, 11vw, 9rem);
+	line-height: 1;
+	letter-spacing: -0.06em;
+	/* Filled, not stroked: the pixel font's glyphs are overlapping squares,
+	   so an outline would trace every inner seam. */
+	color: rgb(236 231 218 / 0.05);
+	pointer-events: none;
+	user-select: none;
+	white-space: nowrap;
+}
+.post-loosy-goose .lg-kicker {
+	position: relative;
+	display: flex;
+	align-items: center;
+	gap: 0.7rem;
+	margin: 0 0 1rem;
+	font-family: var(--lg-mono);
+	font-size: 0.82rem;
+	letter-spacing: 0.16em;
+	text-transform: uppercase;
+	color: var(--lg-dim);
+}
+.post-loosy-goose .lg-kicker::before {
+	content: "";
+	flex: none;
+	width: 0.7rem;
+	height: 0.7rem;
+	background: var(--lg-beak);
+}
+.post-loosy-goose .lg-title {
+	position: relative;
+	margin: 0 0 1.4rem;
+	font-family: var(--lg-pixel);
+	font-weight: 400;
+	font-size: clamp(1.45rem, 3.2vw, 2.6rem);
+	line-height: 1.3;
+	letter-spacing: 0;
+	text-wrap: balance;
+}
+.post-loosy-goose .op .lg-title {
+	font-size: clamp(1.9rem, 7.6vw, 5.5rem);
+	line-height: 1.15;
+}
+.post-loosy-goose .lg-word {
+	display: inline-block;
+	overflow: hidden;
+	vertical-align: bottom;
+	/* Press Start 2P's descenders drop a full pixel row below the line box. */
+	padding-bottom: 0.3em;
+	margin-bottom: -0.3em;
+}
+.post-loosy-goose .lg-word > span {
+	display: inline-block;
+}
+.post-loosy-goose .lg-head-copy {
+	position: relative;
+}
+.post-loosy-goose .lg-copy {
+	max-width: 34rem;
+	margin: 0 0 1rem;
+	font-size: clamp(1.05rem, 1.25vw, 1.2rem);
+	line-height: 1.62;
+	color: rgb(236 231 218 / 0.88);
+	text-wrap: pretty;
+}
+.post-loosy-goose .lg-note {
+	max-width: 44rem;
+	margin: 1rem 0 0;
+	font-size: 0.88rem;
+	color: var(--lg-dim);
+}
+
+/* Scenes run the full width of the post. */
+.post-loosy-goose .lg-bleed {
+	position: relative;
+	margin-top: clamp(2rem, 6vh, 4rem);
+	padding: clamp(1.25rem, 4vh, 2.5rem) clamp(0.75rem, 4vw, 3rem);
+}
+.post-loosy-goose .lg-scene {
+	position: relative;
+	max-width: 72rem;
+	margin-inline: auto;
+}
+.post-loosy-goose .lg-scene svg,
+.post-loosy-goose .lg-bleed > svg {
+	display: block;
+	overflow: visible;
+}
+.post-loosy-goose .lg-cue {
+	margin: 1rem 0 0;
+	text-align: center;
+	font-family: var(--lg-mono);
+	font-size: 0.85rem;
+	letter-spacing: 0.12em;
+	text-transform: uppercase;
+	color: var(--lg-dim);
+}
+
+/* Court furniture. */
+.post-loosy-goose .lg-court-edge {
+	fill: rgb(8 26 33 / 0.45);
+	stroke: var(--lg-faint);
+	stroke-width: 2;
+}
+.post-loosy-goose .lg-net {
+	stroke: var(--lg-line);
+	stroke-width: 3;
+	stroke-dasharray: 8 10;
+	opacity: 0.45;
+}
+.post-loosy-goose .lg-net-tall {
+	opacity: 0.6;
+}
+.post-loosy-goose .lg-floor,
+.post-loosy-goose .lg-grid,
+.post-loosy-goose .lg-lane {
+	stroke: var(--lg-faint);
+	stroke-width: 1.5;
+}
+.post-loosy-goose .lg-lane {
+	stroke-dasharray: 2 6;
+}
+.post-loosy-goose .lg-paddle {
+	fill: var(--lg-summary);
+}
+.post-loosy-goose .lg-paddle-goose {
+	fill: var(--lg-beak);
+}
+.post-loosy-goose .lg-paddle.is-local {
+	fill: var(--lg-local);
+}
+.post-loosy-goose .lg-ball {
+	fill: var(--lg-line);
+}
+.post-loosy-goose .lg-ball.is-hollow {
+	fill: var(--lg-court);
+	stroke: var(--lg-line);
+	stroke-width: 2;
+}
+.post-loosy-goose .lg-tick-label,
+.post-loosy-goose .lg-note-svg {
+	fill: var(--lg-dim);
+	font-family: var(--lg-mono);
+	font-size: 13px;
+	font-variant-numeric: tabular-nums;
+}
+.post-loosy-goose .lg-note-svg {
+	text-transform: uppercase;
+	letter-spacing: 0.1em;
+	font-size: 11px;
+}
+
+/* Pixel sprites: the goose, the ball and the paddles stay on whole pixels. */
+.post-loosy-goose .lg-px,
+.post-loosy-goose .lg-ball,
+.post-loosy-goose .lg-paddle,
+.post-loosy-goose .sv-sq,
+.post-loosy-goose .sv-cover,
+.post-loosy-goose .sv-ghost {
+	shape-rendering: crispEdges;
+}
+.post-loosy-goose .lg-px-o {
+	fill: var(--lg-deep);
+}
+.post-loosy-goose .lg-px-w {
+	fill: var(--lg-goose);
+}
+.post-loosy-goose .lg-px-g {
+	fill: var(--lg-wing);
+}
+.post-loosy-goose .lg-px-p {
+	fill: #f4b4a4;
+}
+.post-loosy-goose .lg-px-e {
+	fill: var(--lg-deep);
+}
+.post-loosy-goose .lg-px-b {
+	fill: var(--lg-beak);
+}
+.post-loosy-goose .lg-px-f {
+	fill: var(--lg-beak-deep);
+}
+.post-loosy-goose .lg-honk-bar {
+	fill: var(--lg-beak);
+}
+.post-loosy-goose .lg-honk-text {
+	fill: var(--lg-beak);
+	font-family: var(--lg-pixel);
+}
+
+/* Legends and scoreboard strips. */
+.post-loosy-goose .lg-legend {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 0.4rem 1.4rem;
+	margin: 1rem 0 0;
+	padding: 0;
+	list-style: none;
+	font-size: 0.9rem;
+	color: var(--lg-dim);
+}
+.post-loosy-goose .lg-legend li,
+.post-loosy-goose .lg-legend-inline {
+	display: flex;
+	align-items: center;
+	gap: 0.5rem;
+}
+.post-loosy-goose .lg-legend-inline {
+	flex-wrap: wrap;
+	margin: 0.75rem 0 0;
+	font-size: 0.88rem;
+	color: var(--lg-dim);
+}
+.post-loosy-goose .lg-swatch {
+	display: inline-block;
+	flex: none;
+	width: 0.85rem;
+	height: 0.85rem;
+	border-radius: 2px;
+}
+.post-loosy-goose .lg-swatch.is-kept {
+	background: var(--lg-beak);
+}
+.post-loosy-goose .lg-swatch.is-stale {
+	background: var(--lg-stale);
+}
+.post-loosy-goose .lg-swatch.is-dropped {
+	border: 2px solid var(--lg-faint);
+}
+.post-loosy-goose .lg-swatch.is-ball {
+	background: var(--lg-line);
+	border-radius: 0;
+}
+.post-loosy-goose .lg-swatch.is-ball.is-hollow {
+	background: transparent;
+	border: 2px solid var(--lg-line);
+}
+.post-loosy-goose .lg-legend-inline .lg-swatch:not(:first-child) {
+	margin-left: 0.9rem;
+}
+.post-loosy-goose .lg-swatch.is-band {
+	width: 1.4rem;
+	border-radius: 999px;
+	background: rgb(236 231 218 / 0.2);
+}
+.post-loosy-goose .lg-swatch.is-line {
+	height: 4px;
+	width: 1.4rem;
+}
+.post-loosy-goose .lg-stats {
+	position: relative;
+	display: flex;
+	flex-wrap: wrap;
+	width: fit-content;
+	max-width: 100%;
+	margin: 1.75rem auto 0;
+	border-radius: 0.75rem;
+	overflow: hidden;
+	background: var(--lg-deep);
+	box-shadow: 0 20px 40px -24px rgb(0 0 0 / 0.7);
+}
+.post-loosy-goose .lg-stat {
+	display: flex;
+	flex-direction: column;
+	gap: 0.2rem;
+	margin: 0;
+	padding: 0.8rem 1.4rem 0.75rem;
+}
+.post-loosy-goose .lg-stat + .lg-stat {
+	box-shadow: inset 1px 0 rgb(236 231 218 / 0.1);
+}
+.post-loosy-goose .lg-stat-label {
+	font-family: var(--lg-mono);
+	font-size: 0.7rem;
+	letter-spacing: 0.14em;
+	text-transform: uppercase;
+	color: var(--lg-dim);
+}
+.post-loosy-goose .lg-stat-value {
+	font-family: var(--lg-pixel);
+	font-weight: 400;
+	font-size: 1.25rem;
+	font-variant-numeric: tabular-nums;
+	line-height: 1.1;
+}
+.post-loosy-goose .lg-stat.is-accent .lg-stat-value {
+	color: var(--lg-beak);
+}
+@media (max-width: 599px) {
+	.post-loosy-goose .lg-stats {
+		display: grid;
+		grid-template-columns: 1fr 1fr;
+		width: 100%;
+	}
+	.post-loosy-goose .lg-stat {
+		padding: 0.65rem 0.9rem 0.6rem;
+		box-shadow:
+			inset 1px 0 rgb(236 231 218 / 0.1),
+			inset 0 1px rgb(236 231 218 / 0.1);
+	}
+	.post-loosy-goose .lg-stat:last-child:nth-child(odd) {
+		grid-column: 1 / -1;
+	}
+	.post-loosy-goose .lg-stat-value {
+		font-size: 1rem;
+	}
+}
+
+/* Folded tables. */
+.post-loosy-goose .lg-table {
+	margin-top: 1.4rem;
+	font-size: 0.9rem;
+}
+.post-loosy-goose .lg-table summary {
+	cursor: pointer;
+	font-family: var(--lg-mono);
+	font-size: 0.8rem;
+	letter-spacing: 0.12em;
+	text-transform: uppercase;
+	color: var(--lg-dim);
+}
+.post-loosy-goose .lg-table summary:focus-visible,
+.post-loosy-goose .lg-more:focus-visible {
+	outline: 2px solid var(--lg-beak);
+	outline-offset: 3px;
+}
+.post-loosy-goose .lg-table-scroll {
+	overflow-x: auto;
+	margin-top: 0.75rem;
+}
+.post-loosy-goose .lg-table table {
+	width: 100%;
+	border-collapse: collapse;
+	font-variant-numeric: tabular-nums;
+}
+.post-loosy-goose .lg-table th,
+.post-loosy-goose .lg-table td {
+	padding: 0.45rem 0.75rem 0.45rem 0;
+	text-align: left;
+	font-weight: 400;
+	white-space: nowrap;
+}
+.post-loosy-goose .lg-table thead th {
+	font-family: var(--lg-mono);
+	font-size: 0.75rem;
+	text-transform: uppercase;
+	letter-spacing: 0.08em;
+	color: var(--lg-dim);
+}
+.post-loosy-goose .lg-table tbody tr + tr > * {
+	border-top: 1px solid var(--lg-faint);
+}
+.post-loosy-goose .lg-source {
+	margin: 0.6rem 0 0;
+	font-size: 0.82rem;
+	color: var(--lg-dim);
+}
+
+/* Serve: the token grid. */
+.post-loosy-goose .sv-sq-kept {
+	fill: var(--lg-beak);
+}
+.post-loosy-goose .sv-sq-stale {
+	fill: var(--lg-stale);
+	opacity: 0.55;
+}
+.post-loosy-goose .sv-sq-dropped {
+	fill: none;
+	stroke: var(--lg-faint);
+	stroke-width: 2;
+}
+.post-loosy-goose .sv-cover,
+.post-loosy-goose .sv-ghost {
+	fill: var(--lg-line);
+}
+.post-loosy-goose .sv-ghost-stale {
+	fill: var(--lg-stale);
+}
+
+/* Paddle: the scoreboard over the court. */
+.post-loosy-goose .pd-name {
+	fill: var(--lg-dim);
+	font-family: var(--lg-mono);
+	font-size: 12px;
+	letter-spacing: 0.12em;
+	text-transform: uppercase;
+}
+.post-loosy-goose .pd-score {
+	fill: var(--lg-line);
+	font-family: var(--lg-pixel);
+	font-size: 32px;
+	font-variant-numeric: tabular-nums;
+}
+.post-loosy-goose .pd-score-l {
+	fill: var(--lg-beak);
+}
+.post-loosy-goose .pd-score-r {
+	fill: var(--lg-summary);
+}
+.post-loosy-goose .pd-caption {
+	display: flex;
+	flex-wrap: wrap;
+	justify-content: space-between;
+	gap: 0.3rem 1.5rem;
+	margin: 0.9rem 0 0;
+	font-family: var(--lg-mono);
+	font-size: 0.85rem;
+	letter-spacing: 0.06em;
+	text-transform: uppercase;
+	color: var(--lg-dim);
+}
+@media (max-width: 599px) {
+	.post-loosy-goose .pd-score {
+		font-size: 24px;
+	}
+	.post-loosy-goose .pd-name {
+		font-size: 10px;
+	}
+}
+
+/* Shots. */
+.post-loosy-goose .sh-label {
+	fill: var(--lg-line);
+	font-size: 15px;
+}
+.post-loosy-goose .sh-vs {
+	fill: var(--lg-dim);
+	font-size: 12px;
+}
+.post-loosy-goose .sh-stem {
+	stroke: var(--lg-line);
+	stroke-width: 2;
+	opacity: 0.5;
+}
+.post-loosy-goose .sh-value {
+	fill: var(--lg-line);
+	font-family: var(--lg-mono);
+	font-size: 13px;
+	font-variant-numeric: tabular-nums;
+}
+
+/* Home. */
+.post-loosy-goose .hm-name {
+	fill: var(--lg-line);
+	font-family: var(--lg-mono);
+	font-size: 14px;
+}
+.post-loosy-goose .hm-name.is-goose {
+	fill: var(--lg-beak);
+	font-weight: 700;
+}
+.post-loosy-goose .hm-ci {
+	stroke: var(--lg-line);
+	stroke-width: 22;
+	stroke-linecap: round;
+	opacity: 0.12;
+}
+.post-loosy-goose .hm-value {
+	fill: var(--lg-line);
+	font-family: var(--lg-mono);
+	font-weight: 700;
+	font-size: 16px;
+	font-variant-numeric: tabular-nums;
+}
+.post-loosy-goose .hm-used {
+	fill: var(--lg-dim);
+	font-family: var(--lg-mono);
+	font-size: 11px;
+}
+
+/* Rally: one line per policy. */
+.post-loosy-goose .rl-line {
+	fill: none;
+	stroke-width: 3.5;
+	stroke-linejoin: round;
+	stroke-linecap: round;
+}
+.post-loosy-goose .rl-line.is-full {
+	stroke: var(--lg-line);
+	stroke-dasharray: 2 7;
+}
+.post-loosy-goose .rl-line.is-freeze {
+	stroke: var(--lg-beak);
+}
+.post-loosy-goose .rl-line.is-tloosy {
+	stroke: var(--lg-beak);
+	opacity: 0.5;
+	stroke-dasharray: 10 6;
+}
+.post-loosy-goose .rl-line.is-qthresh {
+	stroke: var(--lg-local);
+}
+.post-loosy-goose .lg-ball.is-freeze,
+.post-loosy-goose .lg-ball.is-tloosy {
+	fill: var(--lg-beak);
+}
+.post-loosy-goose .lg-ball.is-qthresh {
+	fill: var(--lg-local);
+}
+.post-loosy-goose .rl-end {
+	font-family: var(--lg-mono);
+	font-size: 13px;
+	fill: var(--lg-line);
+}
+.post-loosy-goose .rl-end.is-freeze,
+.post-loosy-goose .rl-end.is-tloosy {
+	fill: var(--lg-beak);
+}
+.post-loosy-goose .rl-end.is-qthresh {
+	fill: var(--lg-local);
+}
+.post-loosy-goose .lg-swatch.is-full {
+	background: var(--lg-line);
+}
+.post-loosy-goose .lg-swatch.is-freeze {
+	background: var(--lg-beak);
+}
+.post-loosy-goose .lg-swatch.is-tloosy {
+	background: var(--lg-beak);
+	opacity: 0.5;
+}
+.post-loosy-goose .lg-swatch.is-qthresh {
+	background: var(--lg-local);
+}
+
+/* Final. */
+.post-loosy-goose .fn-boards {
+	display: grid;
+	grid-template-columns: repeat(auto-fit, minmax(min(100%, 19rem), 1fr));
+	gap: 1.25rem;
+	margin-top: 2.5rem;
+	perspective: 900px;
+}
+.post-loosy-goose .fn-board {
+	padding: 1.1rem 1.3rem 1rem;
+	border-radius: 0.75rem;
+	background: var(--lg-deep);
+	box-shadow: 0 20px 40px -24px rgb(0 0 0 / 0.7);
+}
+.post-loosy-goose .fn-board-title,
+.post-loosy-goose .fn-board-note {
+	margin: 0 0 0.7rem;
+	font-family: var(--lg-mono);
+	font-size: 0.75rem;
+	letter-spacing: 0.14em;
+	text-transform: uppercase;
+	color: var(--lg-dim);
+}
+.post-loosy-goose .fn-board-note {
+	margin: 0.6rem 0 0;
+	letter-spacing: 0.06em;
+}
+.post-loosy-goose .fn-side {
+	display: flex;
+	justify-content: space-between;
+	align-items: baseline;
+	gap: 1rem;
+	margin: 0;
+	padding: 0.35rem 0;
+}
+.post-loosy-goose .fn-side + .fn-side {
+	border-top: 1px solid var(--lg-faint);
+}
+.post-loosy-goose .fn-side-name {
+	font-size: 0.98rem;
+}
+.post-loosy-goose .fn-side-value {
+	font-family: var(--lg-pixel);
+	font-size: 1.5rem;
+	font-variant-numeric: tabular-nums;
+	color: var(--lg-summary);
+}
+.post-loosy-goose .fn-side.is-goose .fn-side-value {
+	color: var(--lg-beak);
+}
+.post-loosy-goose .fn-play {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: flex-end;
+	justify-content: space-between;
+	gap: 1rem;
+	margin-top: 2.5rem;
+}
+.post-loosy-goose .fn-uses {
+	flex: 1 1 22rem;
+	margin: 0;
+	padding: 0;
+	list-style: none;
+}
+.post-loosy-goose .fn-uses li {
+	position: relative;
+	padding: 0.4rem 0 0.4rem 1.5rem;
+}
+.post-loosy-goose .fn-uses li::before {
+	content: "";
+	position: absolute;
+	left: 0;
+	top: 0.95rem;
+	width: 0.55rem;
+	height: 0.55rem;
+	background: var(--lg-beak);
+}
+.post-loosy-goose .fn-goose-svg {
+	flex: none;
+	overflow: visible;
+}
+.post-loosy-goose .fn-limits ul {
+	margin: 0.75rem 0 0;
+	padding-left: 1.2rem;
+	color: var(--lg-dim);
+}
+.post-loosy-goose .fn-links {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 0.6rem 2rem;
+	margin: 2.5rem 0 4rem;
+	font-family: var(--lg-mono);
+	font-size: 0.95rem;
+}
+
+/* Phones: section copy clamps to four lines behind a toggle. */
+.post-loosy-goose .lg-more {
+	display: none;
+}
+@media (max-width: 599px) {
+	.post-loosy-goose .lg-section {
+		padding-top: 4.5rem;
+	}
+	.post-loosy-goose .lg-score {
+		top: -0.2em;
+		font-size: 3rem;
+	}
+	.post-loosy-goose .lg-clamp:not(.is-open) .lg-copy {
+		display: -webkit-box;
+		-webkit-box-orient: vertical;
+		-webkit-line-clamp: 4;
+		line-clamp: 4;
+		overflow: hidden;
+		mask-image: linear-gradient(180deg, #000 60%, transparent);
+	}
+	.post-loosy-goose .lg-more {
+		display: inline-flex;
+		padding: 0.3rem 0.8rem;
+		border: 1px solid var(--lg-faint);
+		border-radius: 999px;
+		background: transparent;
+		color: var(--lg-line);
+		font: inherit;
+		font-family: var(--lg-mono);
+		font-size: 0.75rem;
+		letter-spacing: 0.1em;
+		text-transform: uppercase;
+		cursor: pointer;
+	}
+}
