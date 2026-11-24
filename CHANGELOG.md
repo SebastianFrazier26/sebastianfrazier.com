@@ -1,12 +1,15 @@
 # Changelog
 
+## 2026-11-23 (fan-sentiment post published)
+
+- The fan-sentiment write-up replaces the draft placeholder at `/blog/fan-sentiment/`: it is
+  listed on `/blog/`, in the Atom feed and the sitemap, and is no longer `noindex`.
+
 ## 2026-11-23 (fan-sentiment post: replay arrow and phone warnings)
 
 - Replay review: the blinking arrow now finishes at full opacity instead of a quarter.
 - Phones no longer log GSAP "target not found" warnings for the first-inning names and pitch
   labels they don't draw.
-- `@cabn/blog` 0.1.0 now installs from npm (lockfile entry, plus a release-age exclusion to drop
-  once the version ages out).
 
 ## 2026-11-23 (fan-sentiment post: marquee title)
 
@@ -62,6 +65,17 @@
   a full-screen ballpark (crowd, light towers, outfield wall, parallax) with a two-hop grounder;
   the last two innings fade to night. Data tables stay behind their toggles.
 
+## 2026-11-23 (error responses)
+
+- 404s and other error responses now carry the same security headers as
+  every other response (CSP, HSTS, X-Frame-Options, Referrer-Policy,
+  Permissions-Policy, nosniff) and no longer send `Server: Caddy`. Before,
+  Caddy dropped the whole header block on errors, on the live site too.
+- An unknown blog URL such as `/blog/no-such-post/` returns a real 404 while
+  still showing the blog's not-found page, instead of a 200 that search
+  engines could index.
+- `pnpm check:caddy` asserts both, and now runs in the `browser-smoke` CI job.
+
 ## 2026-11-22 (blog is a page, not a world)
 
 - The blog moves from a cabn world to `/blog/`, built on the new `@cabn/blog`
@@ -78,6 +92,9 @@
 - New `browser-smoke` CI job: one Playwright spec walks map → blog → post on
   the production build and fails on a CSP violation, a console error or an
   engine chunk loading on a blog page.
+- New `pnpm check:caddy`: runs the real `Caddyfile` under the pinned Caddy
+  image against `dist/` and checks routing and headers. It caught the first
+  version of the blog rule turning every missing file into the app shell.
 - Needs `@cabn/blog` 0.1.0 on npm; until then `pnpm-lock.yaml` has no entry
   for it and `pnpm install --frozen-lockfile` fails. Local work uses
   `pnpm engine:link`, which now links `@cabn/blog` as well.

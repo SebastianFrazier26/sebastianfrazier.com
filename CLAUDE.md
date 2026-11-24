@@ -16,6 +16,7 @@ directly via type stripping), pnpm, TypeScript strict, Biome, Vitest, zod.
 - `pnpm engine:link [dir]` / `pnpm engine:unlink` — local cabn checkout via `.pnpmfile.cjs`; never leaves `link:` in the lockfile. While linked, every pnpm script needs `--config.verify-deps-before-run=false` or pnpm silently relinks npm 0.1.0
 - `node scripts/build-blog.ts` — runs inside `pnpm build`, after `vite build`: writes `dist/blog/index.html`, `dist/blog/<slug>/index.html` (copies of the shell with each page's title and link-preview tags), `feed.xml` and `sitemap.xml`
 - `pnpm e2e` — the one Playwright spec (`e2e/blog.spec.ts`) against `vite preview` of `dist/`, so `pnpm build` first. Locally set `PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH` to a cached Chrome for Testing build instead of running `playwright install`; `SF_E2E_PORT` moves it off 4391. CI runs it as the `browser-smoke` job
+- `pnpm check:caddy` — serves `dist/` with the real `Caddyfile` under the Dockerfile's pinned Caddy image and checks routes, fallbacks, status codes, security headers (404s included) and cache classes over HTTP (`scripts/check-caddy.ts`; needs Docker and a finished `pnpm build`; `SF_CADDY_PORT` moves it off 4392). Run it after any `Caddyfile` edit; CI runs it in the `browser-smoke` job
 - Full check before a commit: `pnpm lint && pnpm typecheck && pnpm test && pnpm build:fixture && pnpm build`
 
 ## Layout
