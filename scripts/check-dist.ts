@@ -1,12 +1,14 @@
 #!/usr/bin/env node
 // Postbuild gate over dist/ (pnpm build runs it): the CSP meta tag is the
 // one csp-policy.ts computes and precedes every script, on the shell and on
-// every blog page copied from it; the retired résumé is not shipped; and no
-// world data was dropped from the copy.
-import { readFile, stat } from "node:fs/promises";
+// every blog page copied from it; the retired résumé is not shipped; no
+// world data was dropped from the copy; and every font family ships its
+// licence.
+import { readdir, readFile, stat } from "node:fs/promises";
 import { postUrl } from "@cabn/blog/build";
 import { loadEmbedOrigins, metaCsp } from "../csp-policy.ts";
 import { blog } from "../src/blog/posts.ts";
+import { FONT_FILE, fontFamily, licencePaths } from "./lib/fontLicences.ts";
 
 const dist = new URL("../dist/", import.meta.url);
 const errors: string[] = [];
@@ -56,6 +58,22 @@ for (const path of [
 	await stat(new URL(path, dist)).catch(() =>
 		errors.push(`dist/${path} missing`),
 	);
+}
+
+const fonts = (await readdir(new URL("assets", dist), { recursive: true }))
+	.filter((path) => FONT_FILE.test(path))
+	.sort();
+for (const family of new Set(fonts.map(fontFamily))) {
+	const found = await Promise.any(
+		licencePaths(family).map((path) => stat(new URL(path, dist))),
+	).then(
+		() => true,
+		() => false,
+	);
+	if (!found)
+		errors.push(
+			`dist ships ${family} fonts but no ${licencePaths(family).join(" or ")}`,
+		);
 }
 
 if (errors.length) {
