@@ -209,6 +209,9 @@ pnpmfileChecksum: sha256-PjCMafZgy9TVbLl1QCZu9KjUeyfdBMfw3iZ9xpboXUA=
 importers:
   .:
     dependencies:
+      "@cabn/blog":
+        specifier: 0.1.0
+        version: 0.1.0(react@19.3.1)
       "@cabn/engine":
         specifier: 0.3.1
         version: 0.3.1(@types/react@19.3.0)(react-dom@19.3.1(react@19.3.1))(react@19.3.1)
@@ -370,6 +373,14 @@ packages:
     engines: { node: ">=14.21.3" }
     cpu: [x64]
     os: [win32]
+
+  "@cabn/blog@0.1.0":
+    resolution:
+      {
+        integrity: sha512-GABagWZvSf9cOAGLfr6Y8AHgLzDi2LGkXRU9pY9kDQPYggtEIR+a+ajqXEM0iF0puE8WDJtWzqkEKK7HhebWFg==,
+      }
+    peerDependencies:
+      react: ">=18"
 
   "@cabn/cli@0.2.2":
     resolution:
@@ -2210,6 +2221,10 @@ snapshots:
 
   "@biomejs/cli-win32-x64@2.6.2":
     optional: true
+
+  "@cabn/blog@0.1.0(react@19.3.1)":
+    dependencies:
+      react: 19.3.1
 
   "@cabn/cli@0.2.2(@types/react@19.3.0)":
     dependencies:
