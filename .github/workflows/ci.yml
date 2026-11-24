@@ -32,3 +32,42 @@ jobs:
       - run: pnpm build:fixture
       - run: pnpm build
       - run: node scripts/render-caddyfile.ts Caddyfile Caddyfile.rendered
+
+  browser-smoke:
+    # What unit tests cannot show: the blog runs under the real CSP, and its
+    # pages never download the game engine (one spec, against `vite preview`
+    # of the production build); and the real Caddyfile, under the image's
+    # pinned Caddy, routes and sets headers as intended (Docker is on the
+    # runner).
+    runs-on: ubuntu-latest
+    needs: ci
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          persist-credentials: false
+      - uses: pnpm/action-setup@b906affcce14559ad1aafd4ab0e942779e9f58b1 # v4
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+        with:
+          node-version: 22
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm build:fixture
+      - run: pnpm build
+      - run: pnpm check:caddy
+      - name: Cache Playwright browsers
+        uses: actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830 # v4
+        with:
+          path: ~/.cache/ms-playwright
+          key: playwright-chromium-${{ hashFiles('pnpm-lock.yaml') }}
+      - run: pnpm exec playwright install --with-deps chromium
+      - run: pnpm e2e
+      - name: Upload Playwright report
+        if: failure()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: playwright-report
+          path: |
+            playwright-report
+            test-results
+          retention-days: 7

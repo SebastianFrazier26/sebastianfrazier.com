@@ -16,5 +16,15 @@
 	},
 	"formatter": {
 		"enabled": true
-	}
+	},
+	"overrides": [
+		{
+			"includes": ["scripts/**", "src/**", "tests/**"],
+			"linter": {
+				"domains": {
+					"playwright": "none"
+				}
+			}
+		}
+	]
 }

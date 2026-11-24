@@ -156,25 +156,6 @@
 				"status": "live"
 			},
 			"order": 70
-		},
-		{
-			"id": "blog",
-			"name": "Blog",
-			"repo": "SebastianFrazier26/blog",
-			"ref": "main",
-			"visibility": "public",
-			"enabled": true,
-			"description": "Posts, one file each. Walk up to one to read it.",
-			"links": [
-				{
-					"label": "Posts on GitHub",
-					"url": "https://github.com/SebastianFrazier26/blog"
-				}
-			],
-			"excludes": ["/README.md", "/CLAUDE.md", "/LICENSE"],
-			"history": false,
-			"hero": null,
-			"order": 80
 		}
 	]
 }

@@ -1,10 +1,12 @@
 import { useSyncExternalStore } from "react";
 import {
+	BLOG_PATH,
 	type DecorKind,
 	decorSlots,
 	layoutMarkers,
-	type MapProject,
+	type MapMarker,
 	type MapShape,
+	mapMarkers,
 	playPath,
 } from "./mapData.ts";
 import type { ShelfState } from "./useShelf.ts";
@@ -77,15 +79,15 @@ function Trail({
 }
 
 function MapBody({
-	projects,
+	markers,
 	onNavigate,
 }: {
-	projects: MapProject[];
+	markers: MapMarker[];
 	onNavigate: (path: string) => void;
 }): React.ReactElement {
 	const shape = useShape();
-	const layout = layoutMarkers(projects.length, shape);
-	const slots = decorSlots(projects.length, shape);
+	const layout = layoutMarkers(markers.length, shape);
+	const slots = decorSlots(markers.length, shape);
 	const counters: Record<DecorKind, number> = { edge: 0, gap: 0, side: 0 };
 
 	return (
@@ -116,13 +118,13 @@ function MapBody({
 				);
 			})}
 			<ul className="map-markers">
-				{projects.map((project, i) => {
+				{markers.map((marker, i) => {
 					const point = layout.points[i];
 					if (!point) return null;
-					const href = playPath(project.slug);
+					const { href } = marker;
 					return (
 						<li
-							key={project.slug}
+							key={marker.key}
 							style={{ left: `${point.x}%`, top: `${point.y}%` }}
 						>
 							<a
@@ -142,11 +144,9 @@ function MapBody({
 							>
 								<img className="map-cabin" src={CABIN} alt="" />
 								<span className="map-plate">
-									<span className="map-plate-name">{project.name}</span>
-									{project.description && (
-										<span className="map-plate-desc">
-											{project.description}
-										</span>
+									<span className="map-plate-name">{marker.name}</span>
+									{marker.description && (
+										<span className="map-plate-desc">{marker.description}</span>
 									)}
 								</span>
 							</a>
@@ -165,12 +165,19 @@ export function MapLanding({
 	shelf: ShelfState;
 	onNavigate: (path: string) => void;
 }): React.ReactElement {
-	const enter = (event: React.MouseEvent<HTMLAnchorElement>): void => {
-		if (event.metaKey || event.ctrlKey || event.shiftKey || event.button !== 0)
-			return;
-		event.preventDefault();
-		onNavigate(playPath());
-	};
+	const go =
+		(path: string) =>
+		(event: React.MouseEvent<HTMLAnchorElement>): void => {
+			if (
+				event.metaKey ||
+				event.ctrlKey ||
+				event.shiftKey ||
+				event.button !== 0
+			)
+				return;
+			event.preventDefault();
+			onNavigate(path);
+		};
 
 	return (
 		<main className="map-page">
@@ -180,13 +187,16 @@ export function MapLanding({
 					A map of the base world. Pick a place to walk into, or take the main
 					road.
 				</p>
-				<a className="map-enter" href={playPath()} onClick={enter}>
+				<a className="map-enter" href={playPath()} onClick={go(playPath())}>
 					Enter the worlds
 				</a>
 			</header>
 			<nav className="map-frame" aria-label="Projects">
 				{shelf.status === "ready" && shelf.projects.length > 0 ? (
-					<MapBody projects={shelf.projects} onNavigate={onNavigate} />
+					<MapBody
+						markers={mapMarkers(shelf.projects)}
+						onNavigate={onNavigate}
+					/>
 				) : (
 					<p className="map-note" role="status">
 						{shelf.status === "loading"
@@ -196,6 +206,11 @@ export function MapLanding({
 				)}
 			</nav>
 			<footer className="map-foot">
+				{/* Also here: the map, and so the Blog cabin, is absent while the shelf loads or fails. */}
+				<a href={BLOG_PATH} onClick={go(BLOG_PATH)}>
+					Blog
+				</a>
+				{" · "}
 				<a href="https://github.com/SebastianFrazier26">GitHub</a>
 			</footer>
 		</main>

@@ -1,5 +1,4 @@
 import { describe, expect, it } from "vitest";
-import { makeExcluder } from "../scripts/lib/excludes.ts";
 import {
 	enabledProjects,
 	loadProjects,
@@ -27,7 +26,7 @@ const file = (projects: unknown[]) => ({
 });
 
 describe("projects.json", () => {
-	it("parses the committed file with the eight worlds", async () => {
+	it("parses the committed file with the seven worlds", async () => {
 		const projects = await loadProjects();
 		expect(projects.projects.map((p) => p.id)).toEqual([
 			"savimae",
@@ -37,7 +36,6 @@ describe("projects.json", () => {
 			"safeascent",
 			"famgo",
 			"skid",
-			"blog",
 		]);
 		expect(projects.projects.every((p) => p.history === false)).toBe(true);
 		expect(projects.shelfName).toBe("Sebastian Frazier");
@@ -52,24 +50,6 @@ describe("projects.json", () => {
 		expect(
 			enabledProjects(await loadProjects()).map((p) => p.id),
 		).not.toContain("famgo");
-	});
-
-	it("builds the blog world from its posts only", async () => {
-		const blog = enabledProjects(await loadProjects()).find(
-			(p) => p.id === "blog",
-		);
-		expect(blog).toMatchObject({
-			name: "Blog",
-			repo: "SebastianFrazier26/blog",
-			visibility: "public",
-			hero: null,
-		});
-		const isExcluded = makeExcluder(blog?.excludes ?? []);
-		for (const path of ["README.md", "CLAUDE.md", "LICENSE"]) {
-			expect(isExcluded(path)).toBe(true);
-		}
-		expect(isExcluded("posts/2026-11-21-hello.md")).toBe(false);
-		expect(isExcluded("posts/README.md")).toBe(false);
 	});
 
 	it("previews cabn through its hosted demo, which allows this site to frame it", async () => {

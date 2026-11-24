@@ -7,11 +7,12 @@ a hosted instance. The front page is a pixel-art map of the base world with a
 marker per project; visitors enter the shelf or jump straight into one
 project's world (`/play?world=<project id>`).
 
-The blog is one of those worlds: posts are markdown files in
-[SebastianFrazier26/blog](https://github.com/SebastianFrazier26/blog), built
-like any project (id `blog`, at `/play?world=blog`). Its `excludes` drop the
-README, `CLAUDE.md` and `LICENSE`, so only posts appear; a push there goes live
-on the next scheduled deploy.
+The blog at `/blog/` is not a world. It is cabn's separate blog package,
+[`@cabn/blog`](https://github.com/SebastianFrazier26/cabn/tree/main/packages/blog):
+each post is a React component with its own styling, or a markdown file, listed
+in `src/blog/posts.ts`. The map has a "Blog" cabin that links to it. To add a
+post, add a folder under `src/blog/` and a `definePost` entry; it goes live with
+the next deploy of this repo.
 
 ## How it works
 

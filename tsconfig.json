@@ -20,6 +20,8 @@
 		"src",
 		"scripts",
 		"tests",
+		"e2e",
+		"playwright.config.ts",
 		"csp-policy.ts",
 		"vite.config.ts",
 		"vitest.config.ts"

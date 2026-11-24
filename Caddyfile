@@ -7,10 +7,9 @@
 	persist_config off
 }
 
-:{$PORT:8080} {
-	root * /srv
-	encode zstd gzip
-
+# Caddy drops headers the site block set when a handler errors, so the error
+# route imports the same set rather than keeping a second copy.
+(security_headers) {
 	header {
 		Content-Security-Policy "__SF_CSP__"
 		X-Content-Type-Options "nosniff"
@@ -20,6 +19,13 @@
 		Strict-Transport-Security "max-age=31536000"
 		-Server
 	}
+}
+
+:{$PORT:8080} {
+	root * /srv
+	encode zstd gzip
+
+	import security_headers
 
 	# Vite's content-hashed chunks sit directly in /assets/; the engine's
 	# sprites live in its subdirectories under fixed names and revalidate.
@@ -40,5 +46,37 @@
 	@spa path /play /play/
 	rewrite @spa /index.html
 
+	# The build writes blog/index.html and blog/<slug>/index.html, each with
+	# its own title and link-preview tags (scripts/build-blog.ts). feed.xml and
+	# sitemap.xml match {path} as plain files. A blog path with no file is left
+	# to 404, and handle_errors answers it with the SPA shell, which shows the
+	# blog's not-found view. try_files takes no matcher of its own (given one,
+	# it reads it as another file to try and applies to every request, which
+	# turned real 404s into the shell: caught by scripts/check-caddy.ts,
+	# 2026-11-23), hence the handle.
+	@blog path /blog /blog/*
+	handle @blog {
+		try_files {path} {path}/index.html
+	}
+
 	file_server
+
+	handle_errors {
+		import security_headers
+		header Cache-Control "no-cache"
+
+		@blog_missing {
+			path /blog /blog/*
+			expression {err.status_code} == 404
+		}
+		handle @blog_missing {
+			rewrite * /index.html
+			file_server {
+				status 404
+			}
+		}
+		handle {
+			respond {err.status_code}
+		}
+	}
 }

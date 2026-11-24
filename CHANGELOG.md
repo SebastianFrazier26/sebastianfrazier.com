@@ -1,5 +1,39 @@
 # Changelog
 
+## 2026-11-23 (error responses)
+
+- 404s and other error responses now carry the same security headers as
+  every other response (CSP, HSTS, X-Frame-Options, Referrer-Policy,
+  Permissions-Policy, nosniff) and no longer send `Server: Caddy`. Before,
+  Caddy dropped the whole header block on errors, on the live site too.
+- An unknown blog URL such as `/blog/no-such-post/` returns a real 404 while
+  still showing the blog's not-found page, instead of a 200 that search
+  engines could index.
+- `pnpm check:caddy` asserts both, and now runs in the `browser-smoke` CI job.
+
+## 2026-11-22 (blog is a page, not a world)
+
+- The blog moves from a cabn world to `/blog/`, built on the new `@cabn/blog`
+  package. Posts can be React components with their own styling and
+  interaction, or markdown files; each loads as its own chunk, and a blog page
+  downloads none of the game engine.
+- The `blog` world is gone from `projects.json`. The map keeps a "Blog" cabin,
+  now linking to `/blog/`, and the footer links there too.
+- Each post URL is served as its own HTML page with a title and link-preview
+  tags, and there is an Atom feed at `/blog/feed.xml` and a sitemap at
+  `/blog/sitemap.xml`. The CSP is unchanged.
+- One post so far, an unlisted draft placeholder for the fan-sentiment
+  write-up at `/blog/fan-sentiment/`.
+- New `browser-smoke` CI job: one Playwright spec walks map → blog → post on
+  the production build and fails on a CSP violation, a console error or an
+  engine chunk loading on a blog page.
+- New `pnpm check:caddy`: runs the real `Caddyfile` under the pinned Caddy
+  image against `dist/` and checks routing and headers. It caught the first
+  version of the blog rule turning every missing file into the app shell.
+- Needs `@cabn/blog` 0.1.0 on npm; until then `pnpm-lock.yaml` has no entry
+  for it and `pnpm install --frozen-lockfile` fails. Local work uses
+  `pnpm engine:link`, which now links `@cabn/blog` as well.
+
 ## 2026-11-22 (dependency policy cleanup)
 
 - `minimumReleaseAgeExclude` is gone: the cabn 0.3.1 packages are past pnpm's
